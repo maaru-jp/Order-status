@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAARU 出貨進度查詢</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "Noto Sans TC", "PingFang TC", sans-serif;
+      background: #f5f5f5;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 左側品牌區 */
+    .brand {
+      width: 260px;
+      background: #fdf6f0;
+      padding: 32px 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .brand img {
+      width: 140px;
+      margin-bottom: 16px;
+    }
+
+    .brand h2 {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* 右側查詢區 */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #2f80ed;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2568c9;
+    }
+
+    .result, .error {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .result {
+      background: #f1f5ff;
+    }
+
+    .error {
+      background: #ffecec;
+      color: #c0392b;
+    }
+
+    .item {
+      margin-bottom: 8px;
+    }
+
+    .status {
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 24px;
+    }
+
+    /* 手機版 */
+    @media (max-width: 768px) {
+      .app {
+        flex-direction: column;
+      }
+
+      .brand {
+        width: 100%;
+        padding: 16px;
+      }
+
+      .brand img {
+        width: 100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- 左側 MAARU 品牌區 -->
+  <aside class="brand">
+    <!-- 🔧 把這張圖換成你的 MAARU Logo -->
+    <img src="S__283426825.jpg">
+    <h2>MAARU 日本萌GO</h2>
+    <p>日本代購｜出貨進度查詢</p>
+  </aside>
+
+  <!-- 右側查詢功能 -->
+  <main class="main">
+    <div class="container">
+
+      <h1>📦 出貨進度查詢</h1>
+
+      <label>請輸入訂單編號</label>
+      <input type="text" id="orderId" placeholder="例如：JP20260202-001">
+
+      <button onclick="searchOrder()">查詢</button>
+
+      <div class="result" id="resultBox">
+        <div class="item">訂單編號：<span id="rOrderId"></span></div>
+        <div class="item">商品內容：<span id="rProduct"></span></div>
+        <div class="item status">目前狀態：<span id="rStatus"></span></div>
+        <div class="item">最後更新：<span id="rUpdated"></span></div>
+        <div class="item">備註：<span id="rNote"></span></div>
+      </div>
+
+      <div class="error" id="errorBox">
+        ⚠ 查無此訂單編號，請確認是否輸入正確
+      </div>
+
+      <div class="footer">
+        如有疑問請聯絡 MAARU LINE官方帳號
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
+
+  function searchOrder() {
+    const orderId = document.getElementById("orderId").value.trim();
+    const resultBox = document.getElementById("resultBox");
+    const errorBox = document.getElementById("errorBox");
+
+    resultBox.style.display = "none";
+    errorBox.style.display = "none";
+
+    if (!orderId) {
+      errorBox.style.display = "block";
+      return;
+    }
+
+    fetch(API_URL + "?orderId=" + encodeURIComponent(orderId))
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          errorBox.style.display = "block";
+        } else {
+          document.getElementById("rOrderId").innerText = data.orderId;
+          document.getElementById("rProduct").innerText = data.product;
+          document.getElementById("rStatus").innerText = data.status;
+          document.getElementById("rUpdated").innerText = data.updated;
+          document.getElementById("rNote").innerText = data.note;
+          resultBox.style.display = "block";
+        }
+      })
+      .catch(() => {
+        errorBox.style.display = "block";
+      });
+  }
+</script>
+
+</body>
+</html>
