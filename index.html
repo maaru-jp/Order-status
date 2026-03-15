@@ -74,11 +74,17 @@
       width: 100%;
       padding: 12px;
       margin-top: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 4px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
       box-sizing: border-box;
+    }
+
+    .input-hint {
+      margin: 0 0 16px 0;
+      font-size: 12px;
+      color: #888;
     }
 
     button {
@@ -168,6 +174,7 @@
 
       <label>請輸入訂單編號（英文+數字）</label>
       <input type="text" id="orderId" placeholder="例如：ORD00001" title="訂單編號為英文與數字組合，例如 ORD00001">
+      <p class="input-hint">訂單編號為英文與數字組合，例如 ORD00001</p>
 
       <button onclick="searchOrder()">查詢</button>
 
