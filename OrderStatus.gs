@@ -6,7 +6,7 @@ const ORDER_SHEET_NAME = '工作表1';
 const STATUS_SHEET_NAME = '狀態';
 const HISTORY_SHEET_NAME = '歷程';
 const SCRIPT_PROP_SYNC_TOKEN = 'ORDER_SYNC_TOKEN';
-const SCRIPT_PROP_FEED_URL = 'https://docs.google.com/spreadsheets/d/1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw/edit?usp=sharing';
+const SCRIPT_PROP_FEED_URL = 'ORDER_FEED_URL';
 
 const COL_ORDER_ID = 1; // A: 訂單編號
 const COL_PRODUCT = 2;  // B: 商品內容
