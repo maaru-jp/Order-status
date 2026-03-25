@@ -5,8 +5,8 @@
 const ORDER_SHEET_NAME = '工作表1';
 const STATUS_SHEET_NAME = '狀態';
 const HISTORY_SHEET_NAME = '歷程';
-const SCRIPT_PROP_SYNC_TOKEN = 'ORDER_SYNC_TOKEN';
-const SCRIPT_PROP_FEED_URL = 'ORDER_FEED_URL';
+const SCRIPT_PROP_SYNC_TOKEN = '-join ((33..126) | Get-Random -Count 48 | ForEach-Object {[char]$_})';
+const SCRIPT_PROP_FEED_URL = 'https://docs.google.com/spreadsheets/d/1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw/edit?usp=sharing';
 
 const COL_ORDER_ID = 1; // A: 訂單編號
 const COL_PRODUCT = 2;  // B: 商品內容
@@ -79,6 +79,7 @@ function doGet(e) {
     }
 
     var orderId = String(p.orderId || '').trim();
+    var orderKey = normalizeOrderKey_(orderId);
     if (!orderId) {
       return jsonOutput_({ error: 'missing orderId' });
     }
@@ -93,7 +94,7 @@ function doGet(e) {
     var foundRow = null;
     for (var i = 1; i < orderData.length; i++) {
       var rowOrderId = String(orderData[i][COL_ORDER_ID - 1] || '').trim();
-      if (rowOrderId === orderId) {
+      if (normalizeOrderKey_(rowOrderId) === orderKey) {
         foundRow = orderData[i];
         break;
       }
@@ -173,11 +174,12 @@ function getOrderHistory_(ss, orderId) {
   var values = sheet.getDataRange().getValues();
   if (values.length < 2) return [];
 
+  var targetKey = normalizeOrderKey_(orderId);
   var list = [];
   for (var i = 1; i < values.length; i++) {
     var row = values[i];
     var rowOrderId = String(row[0] || '').trim();
-    if (rowOrderId !== orderId) continue;
+    if (normalizeOrderKey_(rowOrderId) !== targetKey) continue;
 
     list.push({
       status: String(row[1] || '').trim(),
@@ -192,15 +194,8 @@ function getOrderHistory_(ss, orderId) {
     return parseDateSafe_(b.time) - parseDateSafe_(a.time);
   });
 
-  // 前端只需 time/status，其餘欄位可保留擴充
-  return list.map(function(item) {
-    var statusText = item.status;
-    if (item.note) statusText += '（' + item.note + '）';
-    return {
-      time: item.time,
-      status: statusText
-    };
-  });
+  // 回傳完整歷程資料，前端可自由決定顯示樣式
+  return list;
 }
 
 function getOrCreateHistorySheet_(ss) {
@@ -282,6 +277,7 @@ function upsertOrders_(orders, source) {
 
   orders.forEach(function(raw) {
     var orderId = normalizeOrderId_(raw.orderId || raw.order_no || raw.id);
+    var orderKey = normalizeOrderKey_(orderId);
     if (!orderId) {
       skipped++;
       return;
@@ -292,8 +288,8 @@ function upsertOrders_(orders, source) {
     var note = String(raw.note || raw.remark || '').trim();
     var updatedAt = toDateOrNow_(raw.updated || raw.updatedAt || raw.time, now);
 
-    if (map[orderId]) {
-      var row = map[orderId];
+    if (map[orderKey]) {
+      var row = map[orderKey];
       var oldStatus = String(orderSheet.getRange(row, COL_STATUS).getValue() || '').trim();
       var oldNote = String(orderSheet.getRange(row, COL_NOTE).getValue() || '').trim();
       var changed = false;
@@ -336,8 +332,9 @@ function buildOrderRowIndex_(sheet) {
   var map = {};
   for (var i = 1; i < values.length; i++) {
     var orderId = normalizeOrderId_(values[i][COL_ORDER_ID - 1]);
-    if (!orderId) continue;
-    map[orderId] = i + 1;
+    var orderKey = normalizeOrderKey_(orderId);
+    if (!orderKey) continue;
+    map[orderKey] = i + 1;
   }
   return map;
 }
@@ -345,6 +342,21 @@ function buildOrderRowIndex_(sheet) {
 function normalizeOrderId_(value) {
   var v = String(value || '').trim();
   return v;
+}
+
+/**
+ * 用於比對的訂單鍵：
+ * - 純數字編號會移除前導 0（00055 與 55 視為同一單）
+ * - 其他字串維持原樣去空白
+ */
+function normalizeOrderKey_(value) {
+  var raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d+$/.test(raw)) {
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? raw : String(n);
+  }
+  return raw;
 }
 
 function toDateOrNow_(value, fallbackNow) {
