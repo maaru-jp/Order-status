@@ -403,7 +403,6 @@
             <div class="card-title">訂單摘要</div>
             <div class="item">訂單編號：<span id="rOrderId"></span></div>
             <div class="item">商品內容：<span id="rProduct"></span></div>
-            <div class="item">最後更新：<span id="rUpdated"></span></div>
             <div class="item">備註：<span id="rNote"></span></div>
           </section>
 
@@ -460,8 +459,19 @@
   const PROGRESS_STEPS = ["訂單成立", "集運中", "已抵台", "已出貨📦"];
 
   function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
+    const toTimestamp = (value) => {
+      if (!value) return 0;
+      const normalized = String(value).replace(/\//g, "-");
+      const t = new Date(normalized).getTime();
+      return Number.isNaN(t) ? 0 : t;
+    };
+
+    const sortNewestFirst = (list) => {
+      return list.slice().sort((a, b) => toTimestamp(b.time) - toTimestamp(a.time));
+    };
+
     if (Array.isArray(historyData) && historyData.length > 0) {
-      return historyData
+      const list = historyData
         .map(item => ({
           status: item.status || item.state || "",
           time: item.time || item.updated || item.date || "",
@@ -469,10 +479,11 @@
           operator: item.operator || item.source || ""
         }))
         .filter(item => item.status || item.time);
+      return sortNewestFirst(list);
     }
 
     if (typeof historyData === "string" && historyData.trim()) {
-      return historyData
+      const list = historyData
         .split(/\n|；|;/)
         .map(raw => raw.trim())
         .filter(Boolean)
@@ -491,6 +502,7 @@
           }
           return { status: text, time: "", note: "", operator: "" };
         });
+      return sortNewestFirst(list);
     }
 
     if (fallbackStatus || fallbackUpdated) {
@@ -609,7 +621,6 @@
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
           document.getElementById("rProduct").innerText = data.product;
-          document.getElementById("rUpdated").innerText = data.updated;
           document.getElementById("rNote").innerText = data.note;
           const history = normalizeHistory(data.history, data.status, data.updated);
           renderHistory(history);
