@@ -181,7 +181,7 @@
 
     .progress-track {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -413,19 +413,23 @@
               <div class="progress-track" id="rProgressTrack">
                 <div class="progress-step" data-step="0">
                   <div class="progress-dot"></div>
-                  <div>待出貨</div>
+                  <div>訂單成立</div>
                 </div>
                 <div class="progress-step" data-step="1">
                   <div class="progress-dot"></div>
-                  <div>集運中</div>
+                  <div>日本出荷</div>
                 </div>
                 <div class="progress-step" data-step="2">
                   <div class="progress-dot"></div>
-                  <div>日本出荷</div>
+                  <div>集運中</div>
                 </div>
                 <div class="progress-step" data-step="3">
                   <div class="progress-dot"></div>
                   <div>已抵台</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                  <div class="progress-dot"></div>
+                  <div>已出貨📦</div>
                 </div>
               </div>
             </div>
@@ -457,7 +461,7 @@
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
-  const PROGRESS_STEPS = ["待出貨", "集運中", "日本出荷", "已抵台"];
+  const PROGRESS_STEPS = ["訂單成立", "日本出荷", "集運中", "已抵台", "已出貨📦"];
 
   function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
     if (Array.isArray(historyData) && historyData.length > 0) {
@@ -563,11 +567,11 @@
     const text = String(statusText || "");
     if (!text) return -1;
 
-    // 先判斷「待出貨階段」，避免像「待出荷」這類文字被誤判到後段流程。
-    if (/訂單成立|已採購|待採購|待出貨|待出荷|出荷準備|備貨/.test(text)) return 0;
+    if (/訂單成立|已採購|待採購|待出貨|備貨/.test(text)) return 0;
+    if (/日本出荷|待出荷|出荷準備|日本端出荷/.test(text)) return 1;
+    if (/集運中|轉運|物流中心|包裹配達|已收件/.test(text)) return 2;
     if (/已抵台|已抵達台灣|到台|到台灣|抵達台灣|清關完成/.test(text)) return 3;
-    if (/已出貨|發貨|已寄出|配送中|運送中/.test(text)) return 2;
-    if (/集運中|轉運|物流中心|包裹配達|已收件/.test(text)) return 1;
+    if (/已出貨|發貨|已寄出|配送中|運送中|賣貨便|7-11/.test(text)) return 4;
     return -1;
   }
 
@@ -577,7 +581,7 @@
     const statusText = String(latestStatus || "");
     const currentIndex = getProgressIndex(latestStatus);
     const steps = track.querySelectorAll(".progress-step");
-    const onlyCurrentForTransit = /集運中|轉運|物流中心|包裹配達|已收件|已出貨|發貨|已寄出|配送中|運送中/.test(statusText);
+    const onlyCurrentForTransit = /集運中|轉運|物流中心|包裹配達|已收件|已出貨|發貨|已寄出|配送中|運送中|賣貨便|7-11/.test(statusText);
 
     steps.forEach((stepEl, idx) => {
       stepEl.classList.remove("is-done", "is-current");
