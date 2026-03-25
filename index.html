@@ -140,6 +140,33 @@
       margin-bottom: 8px;
     }
 
+    .product-content {
+      display: inline-block;
+      vertical-align: top;
+      max-width: 100%;
+    }
+
+    .product-list {
+      margin: 4px 0 0;
+      padding-left: 18px;
+    }
+
+    .product-list li {
+      margin-bottom: 2px;
+      line-height: 1.4;
+    }
+
+    .product-toggle {
+      margin-top: 6px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: #2f80ed;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
     .history-wrap {
       margin-top: 0;
       padding-top: 0;
@@ -402,7 +429,7 @@
           <section class="summary-card">
             <div class="card-title">訂單摘要</div>
             <div class="item">訂單編號：<span id="rOrderId"></span></div>
-            <div class="item">商品內容：<span id="rProduct"></span></div>
+            <div class="item">商品內容：<div id="rProduct" class="product-content"></div></div>
             <div class="item">備註：<span id="rNote"></span></div>
           </section>
 
@@ -572,6 +599,63 @@
     renderProgress(history[0] ? history[0].status : "");
   }
 
+  function renderProduct(productText) {
+    const productBox = document.getElementById("rProduct");
+    const text = String(productText || "").trim();
+    productBox.innerHTML = "";
+
+    if (!text) {
+      productBox.innerText = "-";
+      return;
+    }
+
+    const parts = text
+      .split(/\n|；|;/)
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    if (parts.length <= 1) {
+      productBox.innerText = text;
+      return;
+    }
+
+    const ul = document.createElement("ul");
+    ul.className = "product-list";
+    const defaultVisibleCount = 2;
+    const isExpandable = parts.length > defaultVisibleCount;
+    let isExpanded = false;
+
+    const renderItems = () => {
+      ul.innerHTML = "";
+      const visibleParts = (isExpandable && !isExpanded)
+        ? parts.slice(0, defaultVisibleCount)
+        : parts;
+
+      visibleParts.forEach((part) => {
+        const li = document.createElement("li");
+        li.innerText = part;
+        ul.appendChild(li);
+      });
+    };
+
+    renderItems();
+    productBox.appendChild(ul);
+
+    if (!isExpandable) return;
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "product-toggle";
+    toggleBtn.innerText = "展開更多";
+    toggleBtn.onclick = () => {
+      isExpanded = !isExpanded;
+      toggleBtn.innerText = isExpanded ? "收合" : "展開更多";
+      renderItems();
+    };
+
+    productBox.appendChild(toggleBtn);
+  }
+
   function getProgressIndex(statusText) {
     const text = String(statusText || "");
     if (!text) return -1;
@@ -621,7 +705,7 @@
           errorBox.style.display = "block";
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
-          document.getElementById("rProduct").innerText = data.product;
+          renderProduct(data.product);
           document.getElementById("rNote").innerText = data.note;
           const history = normalizeHistory(data.history, data.status, data.updated);
           renderHistory(history);
