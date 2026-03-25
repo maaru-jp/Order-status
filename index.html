@@ -300,6 +300,19 @@
       line-height: 1.4;
     }
 
+    .timeline-note {
+      font-size: 13px;
+      color: #4e5d7a;
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .timeline-operator {
+      font-size: 12px;
+      color: #7a88a6;
+      margin-top: 2px;
+    }
+
     .timeline-item.is-latest::before {
       background: #ff6a00;
     }
@@ -312,77 +325,6 @@
     .history-empty {
       color: #666;
       font-size: 13px;
-    }
-
-    .full-history {
-      margin-top: 14px;
-      border-top: 1px dashed #d5dcef;
-      padding-top: 10px;
-    }
-
-    .full-history-title {
-      font-size: 13px;
-      color: #5c6a88;
-      font-weight: 600;
-    }
-
-    .full-history-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .history-sort-btn {
-      border: 1px solid #d4def7;
-      background: #ffffff;
-      color: #48608f;
-      border-radius: 999px;
-      padding: 3px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      line-height: 1.4;
-    }
-
-    .history-sort-btn:hover {
-      background: #f4f8ff;
-    }
-
-    .full-history-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .full-history-item {
-      border: 1px solid #e5ebfb;
-      border-radius: 8px;
-      padding: 8px 10px;
-      background: #fcfdff;
-    }
-
-    .full-history-time {
-      font-size: 12px;
-      color: #66728f;
-      margin-bottom: 2px;
-    }
-
-    .full-history-status {
-      font-size: 14px;
-      color: #2f3d59;
-      font-weight: 600;
-    }
-
-    .full-history-note {
-      font-size: 12px;
-      color: #5a6885;
-      margin-top: 2px;
-    }
-
-    .full-history-operator {
-      font-size: 11px;
-      color: #8a95af;
-      margin-top: 3px;
     }
 
     .status {
@@ -495,13 +437,6 @@
               </div>
               <ul class="timeline" id="rHistory"></ul>
               <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
-              <div class="full-history">
-                <div class="full-history-head">
-                  <div class="full-history-title">完整歷程記錄</div>
-                  <button type="button" class="history-sort-btn" id="rSortBtn" onclick="toggleHistorySort()">最新在前</button>
-                </div>
-                <div class="full-history-list" id="rFullHistory"></div>
-              </div>
             </div>
           </section>
         </div>
@@ -523,8 +458,6 @@
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
   const PROGRESS_STEPS = ["待出貨", "集運中", "已出貨", "已抵台"];
-  let latestHistoryData = [];
-  let isHistoryNewestFirst = true;
 
   function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
     if (Array.isArray(historyData) && historyData.length > 0) {
@@ -576,9 +509,7 @@
     const historyList = document.getElementById("rHistory");
     const historyEmpty = document.getElementById("rHistoryEmpty");
     const currentStep = document.getElementById("rCurrentStep");
-    const fullHistoryList = document.getElementById("rFullHistory");
     historyList.innerHTML = "";
-    fullHistoryList.innerHTML = "";
     currentStep.style.display = "none";
     currentStep.innerText = "";
 
@@ -607,62 +538,25 @@
 
       li.appendChild(main);
       li.appendChild(time);
-      historyList.appendChild(li);
-    });
-
-    renderFullHistory(history);
-    renderProgress(history[0] ? history[0].status : "");
-  }
-
-  function renderFullHistory(history) {
-    const fullHistoryList = document.getElementById("rFullHistory");
-    fullHistoryList.innerHTML = "";
-
-    history.forEach((step) => {
-      const item = document.createElement("div");
-      item.className = "full-history-item";
-
-      const time = document.createElement("div");
-      time.className = "full-history-time";
-      time.innerText = step.time || "時間待更新";
-
-      const status = document.createElement("div");
-      status.className = "full-history-status";
-      status.innerText = step.status || "狀態更新";
-
-      item.appendChild(time);
-      item.appendChild(status);
 
       if (step.note) {
         const note = document.createElement("div");
-        note.className = "full-history-note";
+        note.className = "timeline-note";
         note.innerText = "備註：" + step.note;
-        item.appendChild(note);
+        li.appendChild(note);
       }
 
       if (step.operator) {
         const operator = document.createElement("div");
-        operator.className = "full-history-operator";
+        operator.className = "timeline-operator";
         operator.innerText = "來源：" + step.operator;
-        item.appendChild(operator);
+        li.appendChild(operator);
       }
 
-      fullHistoryList.appendChild(item);
+      historyList.appendChild(li);
     });
-  }
 
-  function updateSortButtonText() {
-    const sortBtn = document.getElementById("rSortBtn");
-    if (!sortBtn) return;
-    sortBtn.innerText = isHistoryNewestFirst ? "最新在前" : "最舊在前";
-  }
-
-  function toggleHistorySort() {
-    if (!latestHistoryData.length) return;
-    isHistoryNewestFirst = !isHistoryNewestFirst;
-    updateSortButtonText();
-    const sorted = isHistoryNewestFirst ? latestHistoryData.slice() : latestHistoryData.slice().reverse();
-    renderFullHistory(sorted);
+    renderProgress(history[0] ? history[0].status : "");
   }
 
   function getProgressIndex(statusText) {
@@ -714,9 +608,6 @@
           document.getElementById("rUpdated").innerText = data.updated;
           document.getElementById("rNote").innerText = data.note;
           const history = normalizeHistory(data.history, data.status, data.updated);
-          latestHistoryData = history.slice();
-          isHistoryNewestFirst = true;
-          updateSortButtonText();
           renderHistory(history);
           resultBox.style.display = "block";
         }
