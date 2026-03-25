@@ -157,6 +157,67 @@
       letter-spacing: 1px;
     }
 
+    .current-step {
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #ff6a00;
+      background: #fff1e6;
+      border: 1px solid #ffd4b5;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .progress-wrap {
+      margin-bottom: 14px;
+      padding: 10px 10px 8px;
+      border: 1px solid #e6ecff;
+      border-radius: 8px;
+      background: #f9fbff;
+    }
+
+    .progress-track {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .progress-step {
+      text-align: center;
+      color: #8d97ad;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .progress-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      background: #d5dcec;
+      border: 1px solid #cad3e8;
+    }
+
+    .progress-step.is-done,
+    .progress-step.is-current {
+      color: #32415f;
+      font-weight: 600;
+    }
+
+    .progress-step.is-done .progress-dot {
+      background: #4f8df6;
+      border-color: #4f8df6;
+    }
+
+    .progress-step.is-current .progress-dot {
+      background: #ff6a00;
+      border-color: #ff6a00;
+      box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.16);
+    }
+
     .history-icon {
       width: 18px;
       height: 18px;
@@ -288,6 +349,14 @@
       .result-layout {
         grid-template-columns: 1fr;
       }
+
+      .progress-track {
+        gap: 6px;
+      }
+
+      .progress-step {
+        font-size: 11px;
+      }
     }
   </style>
 </head>
@@ -321,17 +390,37 @@
             <div class="card-title">訂單摘要</div>
             <div class="item">訂單編號：<span id="rOrderId"></span></div>
             <div class="item">商品內容：<span id="rProduct"></span></div>
-            <div class="item status">目前狀態：<span id="rStatus"></span></div>
             <div class="item">最後更新：<span id="rUpdated"></span></div>
             <div class="item">備註：<span id="rNote"></span></div>
           </section>
 
           <section class="timeline-card">
             <div class="card-title">配送歷程</div>
+            <div class="progress-wrap">
+              <div class="progress-track" id="rProgressTrack">
+                <div class="progress-step" data-step="0">
+                  <div class="progress-dot"></div>
+                  <div>待出貨</div>
+                </div>
+                <div class="progress-step" data-step="1">
+                  <div class="progress-dot"></div>
+                  <div>集運中</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                  <div class="progress-dot"></div>
+                  <div>已出貨</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                  <div class="progress-dot"></div>
+                  <div>已抵台</div>
+                </div>
+              </div>
+            </div>
             <div class="history-wrap">
               <div class="history-header">
                 <span class="history-icon" aria-hidden="true"></span>
                 <span>貨態追蹤</span>
+                <span class="current-step" id="rCurrentStep" style="display: none;"></span>
               </div>
               <ul class="timeline" id="rHistory"></ul>
               <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
@@ -355,6 +444,7 @@
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
+  const PROGRESS_STEPS = ["待出貨", "集運中", "已出貨", "已抵台"];
 
   function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
     if (Array.isArray(historyData) && historyData.length > 0) {
@@ -396,14 +486,20 @@
   function renderHistory(history) {
     const historyList = document.getElementById("rHistory");
     const historyEmpty = document.getElementById("rHistoryEmpty");
+    const currentStep = document.getElementById("rCurrentStep");
     historyList.innerHTML = "";
+    currentStep.style.display = "none";
+    currentStep.innerText = "";
 
     if (!history.length) {
       historyEmpty.style.display = "block";
+      renderProgress("");
       return;
     }
 
     historyEmpty.style.display = "none";
+    currentStep.innerText = "目前進度：" + (history[0].status || "狀態更新");
+    currentStep.style.display = "inline-block";
 
     history.forEach((step, index) => {
       const li = document.createElement("li");
@@ -421,6 +517,33 @@
       li.appendChild(main);
       li.appendChild(time);
       historyList.appendChild(li);
+    });
+
+    renderProgress(history[0] ? history[0].status : "");
+  }
+
+  function getProgressIndex(statusText) {
+    const text = String(statusText || "");
+    if (!text) return -1;
+
+    if (/已抵台|到台|抵達台灣|清關完成/.test(text)) return 3;
+    if (/已出貨|發貨|已寄出|配送中|運送中/.test(text)) return 2;
+    if (/集運中|轉運|物流中心|包裹配達|已收件/.test(text)) return 1;
+    if (/待出貨|已採購|待採購|訂單成立|備貨/.test(text)) return 0;
+    return -1;
+  }
+
+  function renderProgress(latestStatus) {
+    const track = document.getElementById("rProgressTrack");
+    if (!track) return;
+    const currentIndex = getProgressIndex(latestStatus);
+    const steps = track.querySelectorAll(".progress-step");
+
+    steps.forEach((stepEl, idx) => {
+      stepEl.classList.remove("is-done", "is-current");
+      if (currentIndex < 0) return;
+      if (idx < currentIndex) stepEl.classList.add("is-done");
+      if (idx === currentIndex) stepEl.classList.add("is-current");
     });
   }
 
@@ -445,7 +568,6 @@
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
           document.getElementById("rProduct").innerText = data.product;
-          document.getElementById("rStatus").innerText = data.status;
           document.getElementById("rUpdated").innerText = data.updated;
           document.getElementById("rNote").innerText = data.note;
           const history = normalizeHistory(data.history, data.status, data.updated);
