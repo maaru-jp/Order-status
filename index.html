@@ -117,6 +117,119 @@
       margin-bottom: 8px;
     }
 
+    .history-wrap {
+      margin-top: 16px;
+      padding-top: 10px;
+    }
+
+    .history-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #cfcfcf;
+      padding-bottom: 4px;
+      color: #505050;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .history-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #bfbfbf;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .history-icon::before {
+      content: "";
+      position: absolute;
+      width: 1px;
+      height: 5px;
+      background: #b0b0b0;
+      left: 7px;
+      top: 3px;
+    }
+
+    .history-icon::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 1px;
+      background: #b0b0b0;
+      left: 7px;
+      top: 8px;
+      transform-origin: left center;
+      transform: rotate(35deg);
+    }
+
+    .timeline {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0 6px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 18px;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 0px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #d3d3d3;
+    }
+
+    .timeline-item::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 17px;
+      width: 1px;
+      height: calc(100% + 8px);
+      background: #d9d9d9;
+    }
+
+    .timeline-item:last-child::after {
+      display: none;
+    }
+
+    .timeline-main {
+      font-size: 22px;
+      font-weight: 500;
+      color: #3e4a5d;
+      margin-bottom: 3px;
+      line-height: 1.2;
+    }
+
+    .timeline-time {
+      font-size: 16px;
+      color: #3e4a5d;
+      line-height: 1.4;
+    }
+
+    .timeline-item.is-latest::before {
+      background: #ff6a00;
+    }
+
+    .timeline-item.is-latest .timeline-main,
+    .timeline-item.is-latest .timeline-time {
+      color: #ff6a00;
+    }
+
+    .history-empty {
+      color: #666;
+      font-size: 13px;
+    }
+
     .status {
       font-weight: bold;
       font-size: 16px;
@@ -177,6 +290,14 @@
         <div class="item status">目前狀態：<span id="rStatus"></span></div>
         <div class="item">最後更新：<span id="rUpdated"></span></div>
         <div class="item">備註：<span id="rNote"></span></div>
+        <div class="history-wrap">
+          <div class="history-header">
+            <span class="history-icon" aria-hidden="true"></span>
+            <span>貨態追蹤</span>
+          </div>
+          <ul class="timeline" id="rHistory"></ul>
+          <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
+        </div>
       </div>
 
       <div class="error" id="errorBox">
@@ -194,6 +315,74 @@
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
+
+  function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
+    if (Array.isArray(historyData) && historyData.length > 0) {
+      return historyData
+        .map(item => ({
+          status: item.status || item.state || "",
+          time: item.time || item.updated || item.date || ""
+        }))
+        .filter(item => item.status || item.time);
+    }
+
+    if (typeof historyData === "string" && historyData.trim()) {
+      return historyData
+        .split(/\n|；|;/)
+        .map(raw => raw.trim())
+        .filter(Boolean)
+        .map(text => {
+          const firstColon = text.indexOf("：");
+          const normalColon = text.indexOf(":");
+          const idx = firstColon >= 0 ? firstColon : normalColon;
+
+          if (idx > -1) {
+            return {
+              time: text.slice(0, idx).trim(),
+              status: text.slice(idx + 1).trim()
+            };
+          }
+          return { status: text, time: "" };
+        });
+    }
+
+    if (fallbackStatus || fallbackUpdated) {
+      return [{ status: fallbackStatus || "狀態更新", time: fallbackUpdated || "" }];
+    }
+
+    return [];
+  }
+
+  function renderHistory(history) {
+    const historyList = document.getElementById("rHistory");
+    const historyEmpty = document.getElementById("rHistoryEmpty");
+    historyList.innerHTML = "";
+
+    if (!history.length) {
+      historyEmpty.style.display = "block";
+      return;
+    }
+
+    historyEmpty.style.display = "none";
+
+    history.forEach((step, index) => {
+      const li = document.createElement("li");
+      li.className = "timeline-item";
+      if (index === 0) li.classList.add("is-latest");
+
+      const main = document.createElement("div");
+      main.className = "timeline-main";
+      main.innerText = step.status || "狀態更新";
+
+      const time = document.createElement("div");
+      time.className = "timeline-time";
+      time.innerText = step.time || "時間待更新";
+
+      li.appendChild(main);
+      li.appendChild(time);
+      historyList.appendChild(li);
+    });
+  }
 
   function searchOrder() {
     const orderId = document.getElementById("orderId").value.trim();
@@ -219,6 +408,8 @@
           document.getElementById("rStatus").innerText = data.status;
           document.getElementById("rUpdated").innerText = data.updated;
           document.getElementById("rNote").innerText = data.note;
+          const history = normalizeHistory(data.history, data.status, data.updated);
+          renderHistory(history);
           resultBox.style.display = "block";
         }
       })
