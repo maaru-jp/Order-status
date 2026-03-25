@@ -2,6 +2,10 @@
 
 這份專案提供「手動更新 Google 試算表 -> 自動寫入歷程 -> 前端可查詢時間軸」的最小可用版本。
 
+另外已支援兩種「免手動改表」自動化：
+- 外部系統主動推送到 Apps Script（`doPost`）
+- Apps Script 定時向來源 API 拉資料（`autoSyncFromFeed`）
+
 ## 你需要的檔案
 
 - `index.html`：前端查詢頁（顧客輸入訂單編號查詢）
@@ -55,11 +59,53 @@ const API_URL = "你的 Web App URL";
 - 查詢訂單：
   - `你的WebAppURL?orderId=00055`
 
+## 自動寫入（不用手動更新）
+
+### 方式 A：外部系統推送（推薦）
+
+1. 在 Apps Script -> `專案設定` -> `Script properties` 新增：
+   - `ORDER_SYNC_TOKEN`：自訂一段長字串（當作驗證金鑰）
+2. 你的訂單系統在狀態變更時，對 Web App URL 發送 `POST`：
+
+```json
+{
+  "token": "你的 ORDER_SYNC_TOKEN",
+  "orders": [
+    {
+      "orderId": "00055",
+      "product": "三麗鷗港版奶瓶系列吊飾娃",
+      "status": "🚚 集運中",
+      "note": "已入北區物流中心",
+      "updated": "2026-03-25T10:30:00+08:00"
+    }
+  ]
+}
+```
+
+3. 成功後會自動：
+   - 新增或更新 `工作表1` 該筆訂單
+   - 寫入 `最後更新`
+   - 狀態/備註有變動時，新增一筆 `歷程`
+
+### 方式 B：定時拉資料（排程）
+
+1. 在 Script properties 新增：
+   - `ORDER_FEED_URL`：來源 API（回傳 `{"orders":[...]}` 或 `[...]`）
+2. Apps Script -> `觸發條件` -> 新增觸發器：
+   - 函式：`autoSyncFromFeed`
+   - 事件來源：時間驅動
+   - 週期：每 5 分鐘（或你要的頻率）
+3. 觸發後會自動同步進試算表與歷程。
+
 ## 觸發規則
 
 - 你在 `工作表1` 編輯 C（出貨狀態）或 D（備註）時：
   - 自動更新 E（最後更新）
   - 自動新增一筆到 `歷程`
+
+- 若用 `doPost` 或 `autoSyncFromFeed`：
+  - 系統自動新增/更新 `工作表1`
+  - 狀態或備註有變化才寫新歷程，避免重複灌水
 
 ## GitHub 上傳建議
 
