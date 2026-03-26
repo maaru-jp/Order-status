@@ -147,24 +147,51 @@
     }
 
     .product-list {
-      margin: 4px 0 0;
-      padding-left: 18px;
+      margin: 6px 0 0;
+      padding: 8px 10px 4px 24px;
+      background: #f8faff;
+      border: 1px solid #e4ebff;
+      border-radius: 10px;
     }
 
     .product-list li {
-      margin-bottom: 2px;
-      line-height: 1.4;
+      margin-bottom: 4px;
+      line-height: 1.45;
+      color: #344563;
     }
 
     .product-toggle {
-      margin-top: 6px;
-      padding: 0;
-      border: none;
-      background: none;
-      color: #2f80ed;
+      margin-top: 8px;
+      padding: 5px 12px;
+      border: 1px solid #cfdcff;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+      color: #2a66c9;
       font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      text-decoration: underline;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(47, 128, 237, 0.16);
+    }
+
+    .product-toggle::before {
+      content: "▾";
+      margin-right: 6px;
+      font-size: 11px;
+    }
+
+    .product-toggle.is-expanded::before {
+      content: "▴";
+    }
+
+    .product-toggle:hover {
+      background: #eaf2ff;
+      border-color: #b8cdff;
+      transform: translateY(-1px);
+    }
+
+    .product-toggle:active {
+      transform: translateY(0);
     }
 
     .history-wrap {
@@ -650,6 +677,7 @@
     toggleBtn.onclick = () => {
       isExpanded = !isExpanded;
       toggleBtn.innerText = isExpanded ? "收合" : "展開更多";
+      toggleBtn.classList.toggle("is-expanded", isExpanded);
       renderItems();
     };
 
