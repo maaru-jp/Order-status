@@ -550,6 +550,47 @@
   const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
   const PROGRESS_STEPS = ["訂單成立", "集運中", "已抵台", "已出貨📦"];
 
+  function isUrlLike(text) {
+    const v = String(text || "").trim();
+    return /^https?:\/\//i.test(v) || /res\.cloudinary\.com/i.test(v);
+  }
+
+  function isEmailLike(text) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(text || "").trim());
+  }
+
+  function looksLikeJsDate(text) {
+    return /GMT[+-]\d{4}/.test(String(text || "")) || /\(.*標準時間\)/.test(String(text || ""));
+  }
+
+  function sanitizeHistoryStep(step) {
+    let status = String(step.status || "").trim();
+    let note = String(step.note || "").trim();
+
+    if (isUrlLike(status) && note && !isUrlLike(note)) {
+      status = note;
+      note = "";
+    }
+    if (isUrlLike(status)) status = "狀態更新";
+    if (isUrlLike(note) || isEmailLike(note) || looksLikeJsDate(note)) note = "";
+
+    return {
+      status,
+      note,
+      time: String(step.time || "").trim()
+    };
+  }
+
+  function getDisplayStatus(step) {
+    return sanitizeHistoryStep(step).status || "狀態更新";
+  }
+
+  function formatOrderNote(noteText) {
+    const text = String(noteText || "").trim();
+    if (!text || isUrlLike(text) || isEmailLike(text) || looksLikeJsDate(text)) return "-";
+    return text;
+  }
+
   function normalizeHistory(historyData, fallbackStatus, fallbackUpdated) {
     const toTimestamp = (value) => {
       if (!value) return 0;
@@ -564,11 +605,10 @@
 
     if (Array.isArray(historyData) && historyData.length > 0) {
       const list = historyData
-        .map(item => ({
+        .map(item => sanitizeHistoryStep({
           status: item.status || item.state || "",
           time: item.time || item.updated || item.date || "",
-          note: item.note || item.remark || "",
-          operator: item.operator || item.source || ""
+          note: item.note || item.remark || ""
         }))
         .filter(item => item.status || item.time);
       return sortNewestFirst(list);
@@ -588,22 +628,20 @@
             return {
               time: text.slice(0, idx).trim(),
               status: text.slice(idx + 1).trim(),
-              note: "",
-              operator: ""
+              note: ""
             };
           }
-          return { status: text, time: "", note: "", operator: "" };
+          return sanitizeHistoryStep({ status: text, time: "", note: "" });
         });
       return sortNewestFirst(list);
     }
 
     if (fallbackStatus || fallbackUpdated) {
-      return [{
+      return [sanitizeHistoryStep({
         status: fallbackStatus || "狀態更新",
         time: fallbackUpdated || "",
-        note: "",
-        operator: ""
-      }];
+        note: ""
+      })];
     }
 
     return [];
@@ -624,10 +662,11 @@
     }
 
     historyEmpty.style.display = "none";
-    currentStep.innerText = "目前進度：" + (history[0].status || "狀態更新");
+    const latest = sanitizeHistoryStep(history[0]);
+    currentStep.innerText = "目前進度：" + (latest.status || "狀態更新");
     currentStep.style.display = "inline-block";
 
-    const displayHistory = [history[0]];
+    const displayHistory = [sanitizeHistoryStep(history[0])];
     displayHistory.forEach((step, index) => {
       const li = document.createElement("li");
       li.className = "timeline-item";
@@ -651,17 +690,10 @@
         li.appendChild(note);
       }
 
-      if (step.operator) {
-        const operator = document.createElement("div");
-        operator.className = "timeline-operator";
-        operator.innerText = "來源：" + step.operator;
-        li.appendChild(operator);
-      }
-
       historyList.appendChild(li);
     });
 
-    renderProgress(history[0] ? history[0].status : "");
+    renderProgress(getDisplayStatus(history[0]));
   }
 
   function cloudinaryThumb(url) {
@@ -675,10 +707,14 @@
   function normalizeProductItems(productText, items) {
     if (Array.isArray(items) && items.length > 0) {
       return items
-        .map(item => ({
-          name: String(item.name || item.product || "").trim(),
-          image: String(item.image || item.imageUrl || "").trim()
-        }))
+        .map(item => {
+          const rawName = String(item.name || item.product || "").trim();
+          const image = String(item.image || item.imageUrl || "").trim();
+          return {
+            name: isUrlLike(rawName) ? "商品" : rawName,
+            image: image || (isUrlLike(rawName) ? rawName : "")
+          };
+        })
         .filter(item => item.name);
     }
 
@@ -686,7 +722,13 @@
     if (!text) return [];
     return text
       .split(/\n|；|;/)
-      .map(name => ({ name: name.trim(), image: "" }))
+      .map(name => {
+        const raw = name.trim();
+        return {
+          name: isUrlLike(raw) ? "商品" : raw,
+          image: isUrlLike(raw) ? raw : ""
+        };
+      })
       .filter(item => item.name);
   }
 
@@ -815,7 +857,7 @@
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
           renderProduct(data.product, data.items);
-          document.getElementById("rNote").innerText = data.note;
+          document.getElementById("rNote").innerText = formatOrderNote(data.note);
           const history = normalizeHistory(data.history, data.status, data.updated);
           renderHistory(history);
           resultBox.style.display = "block";

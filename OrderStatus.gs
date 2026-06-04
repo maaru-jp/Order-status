@@ -9,16 +9,18 @@ const PRODUCT_IMAGE_SHEET_NAME = '商品圖';
 const SCRIPT_PROP_SYNC_TOKEN = 'ORDER_SYNC_TOKEN';
 const SCRIPT_PROP_FEED_URL = 'ORDER_FEED_URL';
 
+// 預設欄位（建議在 B 商品內容右側插入 C 商品圖）
 const COL_ORDER_ID = 1; // A: 訂單編號
 const COL_PRODUCT = 2;  // B: 商品內容
-const COL_STATUS = 3;   // C: 出貨狀態
-const COL_NOTE = 4;     // D: 備註
-const COL_UPDATED = 5;  // E: 最後更新
+const COL_PRODUCT_IMAGE = 3; // C: 商品圖（Cloudinary 網址，可選）
+const COL_STATUS = 4;   // D: 出貨狀態
+const COL_NOTE = 5;     // E: 備註
+const COL_UPDATED = 6;  // F: 最後更新
 
 /**
  * 手動編輯觸發：
- * - 當編輯「工作表1」的 C(出貨狀態) 或 D(備註)
- * - 自動更新 E(最後更新)
+ * - 當編輯「工作表1」的出貨狀態或備註欄
+ * - 自動更新最後更新欄
  * - 並新增一筆至「歷程」
  */
 function onEdit(e) {
@@ -32,27 +34,26 @@ function onEdit(e) {
     var row = range.getRow();
     var col = range.getColumn();
     if (row < 2) return; // 跳過標題列
-    if (col !== COL_STATUS && col !== COL_NOTE) return;
+    var cols = getOrderSheetColumns_(sheet);
+    if (col !== cols.status && col !== cols.note) return;
 
-    var orderId = String(sheet.getRange(row, COL_ORDER_ID).getValue() || '').trim();
+    var orderId = String(sheet.getRange(row, cols.orderId).getValue() || '').trim();
     if (!orderId) return;
 
-    var status = String(sheet.getRange(row, COL_STATUS).getValue() || '').trim();
-    var note = String(sheet.getRange(row, COL_NOTE).getValue() || '').trim();
+    var status = String(sheet.getRange(row, cols.status).getValue() || '').trim();
+    var note = String(sheet.getRange(row, cols.note).getValue() || '').trim();
     var now = new Date();
 
     // 寫入最後更新
-    sheet.getRange(row, COL_UPDATED).setValue(now);
+    sheet.getRange(row, cols.updated).setValue(now);
 
     // 沒有狀態則不寫歷程
     if (!status) return;
 
     var ss = sheet.getParent();
     var historySheet = getOrCreateHistorySheet_(ss);
-    var operatorEmail = Session.getActiveUser().getEmail() || '';
-
-    // 欄位：訂單編號 / 狀態 / 備註 / 更新時間 / 操作人
-    historySheet.appendRow([orderId, status, note, now, operatorEmail]);
+    // 欄位：訂單編號 / 狀態 / 備註 / 更新時間 / 操作人（不記錄信箱）
+    historySheet.appendRow([orderId, status, note, now, '系統']);
   } catch (err) {
     console.error('[onEdit] ' + err);
   }
@@ -90,12 +91,13 @@ function doGet(e) {
     var orderSheet = ss.getSheetByName(ORDER_SHEET_NAME);
     if (!orderSheet) return jsonOutput_({ error: '找不到工作表1' });
 
+    var cols = getOrderSheetColumns_(orderSheet);
     var orderData = orderSheet.getDataRange().getValues();
     if (orderData.length < 2) return jsonOutput_({ error: '查無此訂單編號' });
 
     var foundRow = null;
     for (var i = 1; i < orderData.length; i++) {
-      var rowOrderId = String(orderData[i][COL_ORDER_ID - 1] || '').trim();
+      var rowOrderId = String(orderData[i][cols.orderId - 1] || '').trim();
       if (normalizeOrderKey_(rowOrderId) === orderKey) {
         foundRow = orderData[i];
         break;
@@ -104,15 +106,18 @@ function doGet(e) {
     if (!foundRow) return jsonOutput_({ error: '查無此訂單編號' });
 
     var history = getOrderHistory_(ss, orderId);
-    var product = String(foundRow[COL_PRODUCT - 1] || '').trim();
+    var product = String(foundRow[cols.product - 1] || '').trim();
+    var productImages = cols.productImage
+      ? String(foundRow[cols.productImage - 1] || '').trim()
+      : '';
 
     var response = {
-      orderId: String(foundRow[COL_ORDER_ID - 1] || '').trim(),
+      orderId: String(foundRow[cols.orderId - 1] || '').trim(),
       product: product,
-      items: buildProductItems_(ss, product),
-      status: String(foundRow[COL_STATUS - 1] || '').trim(),
-      note: String(foundRow[COL_NOTE - 1] || '').trim(),
-      updated: formatDateTime_(foundRow[COL_UPDATED - 1]),
+      items: buildProductItems_(ss, product, productImages),
+      status: String(foundRow[cols.status - 1] || '').trim(),
+      note: sanitizeCustomerNote_(String(foundRow[cols.note - 1] || '').trim()),
+      updated: formatDateTime_(foundRow[cols.updated - 1]),
       history: history
     };
 
@@ -185,12 +190,11 @@ function getOrderHistory_(ss, orderId) {
     var rowOrderId = String(row[0] || '').trim();
     if (normalizeOrderKey_(rowOrderId) !== targetKey) continue;
 
-    list.push({
+    list.push(sanitizeHistoryItem_({
       status: String(row[1] || '').trim(),
       note: String(row[2] || '').trim(),
-      time: formatDateTime_(row[3]),
-      operator: String(row[4] || '').trim()
-    });
+      time: formatDateTime_(row[3])
+    }));
   }
 
   // 最新在前（前端可直接用）
@@ -198,25 +202,125 @@ function getOrderHistory_(ss, orderId) {
     return parseDateSafe_(b.time) - parseDateSafe_(a.time);
   });
 
-  // 回傳完整歷程資料，前端可自由決定顯示樣式
   return list;
 }
 
+function sanitizeHistoryItem_(item) {
+  var status = String(item.status || '').trim();
+  var note = String(item.note || '').trim();
+  var time = String(item.time || '').trim();
+
+  // 若狀態欄誤貼圖片網址，改以備註欄文字當狀態顯示
+  if (isUrlLike_(status) && note && !isUrlLike_(note)) {
+    status = note;
+    note = '';
+  }
+
+  if (isUrlLike_(status)) status = '狀態更新';
+  if (isUrlLike_(note) || isEmailLike_(note) || looksLikeJsDate_(note)) note = '';
+
+  return {
+    status: status,
+    note: note,
+    time: time
+  };
+}
+
+function sanitizeCustomerNote_(text) {
+  var v = String(text || '').trim();
+  if (!v) return '';
+  if (isUrlLike_(v) || isEmailLike_(v) || looksLikeJsDate_(v)) return '';
+  return v;
+}
+
+function isUrlLike_(text) {
+  var v = String(text || '').trim();
+  return /^https?:\/\//i.test(v) || /res\.cloudinary\.com/i.test(v);
+}
+
+function isEmailLike_(text) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(text || '').trim());
+}
+
+function looksLikeJsDate_(text) {
+  return /GMT[+-]\d{4}/.test(String(text || '')) || /\(.*標準時間\)/.test(String(text || ''));
+}
+
 /**
- * 將「工作表1」商品內容拆成品項，並從「商品圖」對照 Cloudinary 網址
- * 商品圖欄位：A 商品關鍵字 / B 圖片網址（Cloudinary URL）
+ * 商品圖來源優先順序：
+ * 1) 工作表1「商品圖」欄（建議放在商品內容右邊）
+ * 2) 獨立工作表「商品圖」關鍵字對照
  */
-function buildProductItems_(ss, productText) {
+function buildProductItems_(ss, productText, productImageText) {
   var names = parseProductNames_(productText);
   if (names.length === 0) return [];
 
+  var inlineImages = parseProductImages_(productImageText);
   var imageRows = getProductImageRows_(ss);
-  return names.map(function(name) {
+
+  return names.map(function(name, index) {
+    var displayName = sanitizeProductName_(name);
+    var image = inlineImages[index] || '';
+    if (!image && inlineImages.length === 1) image = inlineImages[0];
+    if (!image) image = findProductImage_(name, imageRows);
+    if (!image && isUrlLike_(name)) image = name;
     return {
-      name: name,
-      image: findProductImage_(name, imageRows)
+      name: displayName,
+      image: image
     };
   });
+}
+
+/**
+ * 依標題列自動判斷欄位位置（相容舊版未插入商品圖欄）
+ */
+function getOrderSheetColumns_(sheet) {
+  var lastCol = Math.max(sheet.getLastColumn(), 6);
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var cols = {
+    orderId: COL_ORDER_ID,
+    product: COL_PRODUCT,
+    productImage: 0,
+    status: COL_STATUS,
+    note: COL_NOTE,
+    updated: COL_UPDATED
+  };
+
+  for (var i = 0; i < headers.length; i++) {
+    var h = String(headers[i] || '').trim();
+    var col = i + 1;
+    if (/訂單編號|訂單/.test(h)) cols.orderId = col;
+    else if (/商品內容/.test(h)) cols.product = col;
+    else if (/商品圖|圖片網址|cloudinary/i.test(h)) cols.productImage = col;
+    else if (/出貨狀態|出貨/.test(h)) cols.status = col;
+    else if (/備註/.test(h)) cols.note = col;
+    else if (/最後更新|更新時間/.test(h)) cols.updated = col;
+  }
+
+  // 舊版：C=出貨狀態、D=備註、E=最後更新
+  if (!cols.productImage && cols.status === 3 && cols.note === 4) {
+    cols.status = 3;
+    cols.note = 4;
+    cols.updated = 5;
+  }
+
+  return cols;
+}
+
+function parseProductImages_(imageText) {
+  var text = String(imageText || '').trim();
+  if (!text) return [];
+  return text
+    .split(/\n|；|;/)
+    .map(function(part) { return String(part || '').trim(); })
+    .filter(function(part) { return isUrlLike_(part); });
+}
+
+function sanitizeProductName_(name) {
+  var v = String(name || '').trim();
+  if (!v) return '';
+  if (isUrlLike_(v)) return '商品';
+  return v;
 }
 
 function parseProductNames_(productText) {
@@ -224,7 +328,11 @@ function parseProductNames_(productText) {
   if (!text) return [];
   return text
     .split(/\n|；|;/)
-    .map(function(part) { return String(part || '').trim(); })
+    .map(function(part) {
+      return String(part || '')
+        .replace(/^\d+[、.．]\s*/, '')
+        .trim();
+    })
     .filter(Boolean);
 }
 
@@ -334,7 +442,8 @@ function upsertOrders_(orders, source) {
   if (!orderSheet) throw new Error('找不到工作表1');
 
   var historySheet = getOrCreateHistorySheet_(ss);
-  var map = buildOrderRowIndex_(orderSheet);
+  var cols = getOrderSheetColumns_(orderSheet);
+  var map = buildOrderRowIndex_(orderSheet, cols);
   var now = new Date();
   var inserted = 0;
   var updated = 0;
@@ -355,31 +464,31 @@ function upsertOrders_(orders, source) {
 
     if (map[orderKey]) {
       var row = map[orderKey];
-      var oldStatus = String(orderSheet.getRange(row, COL_STATUS).getValue() || '').trim();
-      var oldNote = String(orderSheet.getRange(row, COL_NOTE).getValue() || '').trim();
+      var oldStatus = String(orderSheet.getRange(row, cols.status).getValue() || '').trim();
+      var oldNote = String(orderSheet.getRange(row, cols.note).getValue() || '').trim();
       var changed = false;
 
-      if (product) orderSheet.getRange(row, COL_PRODUCT).setValue(product);
+      if (product) orderSheet.getRange(row, cols.product).setValue(product);
       if (status && status !== oldStatus) {
-        orderSheet.getRange(row, COL_STATUS).setValue(status);
+        orderSheet.getRange(row, cols.status).setValue(status);
         changed = true;
       }
       if (note !== oldNote) {
-        orderSheet.getRange(row, COL_NOTE).setValue(note);
+        orderSheet.getRange(row, cols.note).setValue(note);
         changed = true;
       }
-      orderSheet.getRange(row, COL_UPDATED).setValue(updatedAt);
+      orderSheet.getRange(row, cols.updated).setValue(updatedAt);
 
       if (changed && status) {
-        historySheet.appendRow([orderId, status, note, updatedAt, source || 'system']);
+        historySheet.appendRow([orderId, status, note, updatedAt, '系統']);
       }
       updated++;
       return;
     }
 
-    orderSheet.appendRow([orderId, product, status, note, updatedAt]);
+    appendOrderRow_(orderSheet, cols, orderId, product, status, note, updatedAt);
     if (status) {
-      historySheet.appendRow([orderId, status, note, updatedAt, source || 'system']);
+      historySheet.appendRow([orderId, status, note, updatedAt, '系統']);
     }
     inserted++;
   });
@@ -392,16 +501,29 @@ function upsertOrders_(orders, source) {
   };
 }
 
-function buildOrderRowIndex_(sheet) {
+function buildOrderRowIndex_(sheet, cols) {
+  var columns = cols || getOrderSheetColumns_(sheet);
   var values = sheet.getDataRange().getValues();
   var map = {};
   for (var i = 1; i < values.length; i++) {
-    var orderId = normalizeOrderId_(values[i][COL_ORDER_ID - 1]);
+    var orderId = normalizeOrderId_(values[i][columns.orderId - 1]);
     var orderKey = normalizeOrderKey_(orderId);
     if (!orderKey) continue;
     map[orderKey] = i + 1;
   }
   return map;
+}
+
+function appendOrderRow_(sheet, cols, orderId, product, status, note, updatedAt) {
+  var row = new Array(Math.max(cols.updated, cols.productImage || 0));
+  for (var i = 0; i < row.length; i++) row[i] = '';
+  row[cols.orderId - 1] = orderId;
+  row[cols.product - 1] = product;
+  if (cols.productImage) row[cols.productImage - 1] = '';
+  row[cols.status - 1] = status;
+  row[cols.note - 1] = note;
+  row[cols.updated - 1] = updatedAt;
+  sheet.appendRow(row);
 }
 
 function normalizeOrderId_(value) {
