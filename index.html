@@ -155,22 +155,85 @@
       list-style: none;
     }
 
+    .product-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 6px 0 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f3f8ff 0%, #eef4ff 100%);
+      border: 1px solid #dbe6ff;
+      font-size: 13px;
+      color: #3f4f73;
+    }
+
+    .product-summary strong {
+      color: #2f80ed;
+      font-size: 15px;
+    }
+
+    .product-summary-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .summary-pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .summary-pill.done {
+      color: #1f7a45;
+      background: #e8f8ef;
+      border-color: #b9e8cb;
+    }
+
+    .summary-pill.wait {
+      color: #b85c00;
+      background: #fff3e8;
+      border-color: #ffd7b0;
+    }
+
     .product-card {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 6px;
+      gap: 12px;
+      padding: 10px 8px;
       border-bottom: 1px solid #e8eeff;
+      border-left: 4px solid #d7e2ff;
+      background: #fff;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .product-card.is-shipped {
+      border-left-color: #3cb371;
+      background: linear-gradient(90deg, #f3fff8 0%, #ffffff 28%);
+    }
+
+    .product-card.is-pending {
+      border-left-color: #ff9f43;
+      background: linear-gradient(90deg, #fff8f1 0%, #ffffff 28%);
     }
 
     .product-card:last-child {
       border-bottom: none;
     }
 
+    .product-body {
+      flex: 1;
+      min-width: 0;
+    }
+
     .product-thumb {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
+      width: 84px;
+      height: 84px;
+      border-radius: 10px;
       object-fit: cover;
       border: 1px solid #dbe4ff;
       background: #fff;
@@ -178,13 +241,13 @@
     }
 
     .product-thumb-placeholder {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
+      width: 84px;
+      height: 84px;
+      border-radius: 10px;
       border: 1px dashed #c9d4ef;
       background: #f3f6ff;
       color: #7b8aab;
-      font-size: 22px;
+      font-size: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -196,6 +259,30 @@
       line-height: 1.45;
       font-size: 14px;
       word-break: break-word;
+      margin-bottom: 6px;
+    }
+
+    .item-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .item-status-badge.done {
+      color: #1f7a45;
+      background: #e8f8ef;
+      border: 1px solid #b9e8cb;
+    }
+
+    .item-status-badge.wait {
+      color: #b85c00;
+      background: #fff3e8;
+      border: 1px solid #ffd7b0;
     }
 
     .product-toggle {
@@ -701,7 +788,15 @@
     if (!imageUrl) return "";
     if (!/res\.cloudinary\.com/i.test(imageUrl)) return imageUrl;
     if (/\/upload\/(?:w_|h_|c_|q_|f_)/.test(imageUrl)) return imageUrl;
-    return imageUrl.replace("/upload/", "/upload/w_72,h_72,c_fill,q_auto,f_auto/");
+    return imageUrl.replace("/upload/", "/upload/w_168,h_168,c_fill,q_auto,f_auto/");
+  }
+
+  function normalizeItemStatusCode(code, label) {
+    const c = String(code || "").trim();
+    if (c === "shipped") return "shipped";
+    const text = String(label || "").trim();
+    if (/已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(text)) return "shipped";
+    return "pending";
   }
 
   function normalizeProductItems(productText, items) {
@@ -710,9 +805,13 @@
         .map(item => {
           const rawName = String(item.name || item.product || "").trim();
           const image = String(item.image || item.imageUrl || "").trim();
+          const label = String(item.itemStatus || item.status || "").trim() || "待到貨";
+          const code = normalizeItemStatusCode(item.itemStatusCode, label);
           return {
             name: isUrlLike(rawName) ? "商品" : rawName,
-            image: image || (isUrlLike(rawName) ? rawName : "")
+            image: image || (isUrlLike(rawName) ? rawName : ""),
+            itemStatus: code === "shipped" ? "已出貨" : (label || "待到貨"),
+            itemStatusCode: code
           };
         })
         .filter(item => item.name);
@@ -723,18 +822,57 @@
     return text
       .split(/\n|；|;/)
       .map(name => {
-        const raw = name.trim();
+        const raw = name.trim().replace(/^\d+[、.．]\s*/, "");
         return {
           name: isUrlLike(raw) ? "商品" : raw,
-          image: isUrlLike(raw) ? raw : ""
+          image: isUrlLike(raw) ? raw : "",
+          itemStatus: "待到貨",
+          itemStatusCode: "pending"
         };
       })
       .filter(item => item.name);
   }
 
+  function buildItemSummary(list) {
+    const total = list.length;
+    const shipped = list.filter(item => item.itemStatusCode === "shipped").length;
+    return { total, shipped, pending: Math.max(total - shipped, 0) };
+  }
+
+  function renderProductSummary(list, summaryData) {
+    const summary = summaryData && summaryData.total
+      ? summaryData
+      : buildItemSummary(list);
+    if (summary.total <= 1) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "product-summary";
+
+    const left = document.createElement("div");
+    left.innerHTML = "出貨進度 <strong>" + summary.shipped + " / " + summary.total + "</strong> 件";
+
+    const pills = document.createElement("div");
+    pills.className = "product-summary-pills";
+
+    const donePill = document.createElement("span");
+    donePill.className = "summary-pill done";
+    donePill.innerText = "已出貨 " + summary.shipped;
+
+    const waitPill = document.createElement("span");
+    waitPill.className = "summary-pill wait";
+    waitPill.innerText = "待到貨 " + summary.pending;
+
+    pills.appendChild(donePill);
+    pills.appendChild(waitPill);
+    wrap.appendChild(left);
+    wrap.appendChild(pills);
+    return wrap;
+  }
+
   function createProductCard(item) {
     const card = document.createElement("li");
-    card.className = "product-card";
+    const code = item.itemStatusCode === "shipped" ? "shipped" : "pending";
+    card.className = "product-card " + (code === "shipped" ? "is-shipped" : "is-pending");
 
     const thumbUrl = cloudinaryThumb(item.image);
     if (thumbUrl) {
@@ -758,14 +896,24 @@
       card.appendChild(placeholder);
     }
 
+    const body = document.createElement("div");
+    body.className = "product-body";
+
     const name = document.createElement("div");
     name.className = "product-name";
     name.innerText = item.name;
-    card.appendChild(name);
+    body.appendChild(name);
+
+    const badge = document.createElement("span");
+    badge.className = "item-status-badge " + (code === "shipped" ? "done" : "wait");
+    badge.innerText = (code === "shipped" ? "✓ " : "⏳ ") + (item.itemStatus || (code === "shipped" ? "已出貨" : "待到貨"));
+    body.appendChild(badge);
+
+    card.appendChild(body);
     return card;
   }
 
-  function renderProduct(productText, items) {
+  function renderProduct(productText, items, itemSummary) {
     const productBox = document.getElementById("rProduct");
     const list = normalizeProductItems(productText, items);
     productBox.innerHTML = "";
@@ -774,6 +922,9 @@
       productBox.innerText = "-";
       return;
     }
+
+    const summaryEl = renderProductSummary(list, itemSummary);
+    if (summaryEl) productBox.appendChild(summaryEl);
 
     const ul = document.createElement("ul");
     ul.className = "product-list";
@@ -856,7 +1007,7 @@
           errorBox.style.display = "block";
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
-          renderProduct(data.product, data.items);
+          renderProduct(data.product, data.items, data.itemSummary);
           document.getElementById("rNote").innerText = formatOrderNote(data.note);
           const history = normalizeHistory(data.history, data.status, data.updated);
           renderHistory(history);

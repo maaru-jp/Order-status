@@ -13,9 +13,10 @@ const SCRIPT_PROP_FEED_URL = 'ORDER_FEED_URL';
 const COL_ORDER_ID = 1; // A: 訂單編號
 const COL_PRODUCT = 2;  // B: 商品內容
 const COL_PRODUCT_IMAGE = 3; // C: 商品圖（Cloudinary 網址，可選）
-const COL_STATUS = 4;   // D: 出貨狀態
-const COL_NOTE = 5;     // E: 備註
-const COL_UPDATED = 6;  // F: 最後更新
+const COL_PRODUCT_ITEM_STATUS = 4; // D: 商品狀態（逐項，可選）
+const COL_STATUS = 5;   // E: 出貨狀態（整單）
+const COL_NOTE = 6;     // F: 備註
+const COL_UPDATED = 7;  // G: 最後更新
 
 /**
  * 手動編輯觸發：
@@ -110,12 +111,18 @@ function doGet(e) {
     var productImages = cols.productImage
       ? String(foundRow[cols.productImage - 1] || '').trim()
       : '';
+    var productItemStatus = cols.productItemStatus
+      ? String(foundRow[cols.productItemStatus - 1] || '').trim()
+      : '';
+    var orderStatus = String(foundRow[cols.status - 1] || '').trim();
+    var items = buildProductItems_(ss, product, productImages, productItemStatus, orderStatus);
 
     var response = {
       orderId: String(foundRow[cols.orderId - 1] || '').trim(),
       product: product,
-      items: buildProductItems_(ss, product, productImages),
-      status: String(foundRow[cols.status - 1] || '').trim(),
+      items: items,
+      itemSummary: buildItemSummary_(items),
+      status: orderStatus,
       note: sanitizeCustomerNote_(String(foundRow[cols.note - 1] || '').trim()),
       updated: formatDateTime_(foundRow[cols.updated - 1]),
       history: history
@@ -251,12 +258,14 @@ function looksLikeJsDate_(text) {
  * 1) 工作表1「商品圖」欄（建議放在商品內容右邊）
  * 2) 獨立工作表「商品圖」關鍵字對照
  */
-function buildProductItems_(ss, productText, productImageText) {
+function buildProductItems_(ss, productText, productImageText, productItemStatusText, orderStatusFallback) {
   var names = parseProductNames_(productText);
   if (names.length === 0) return [];
 
   var inlineImages = parseProductImages_(productImageText);
+  var inlineStatuses = parseProductItemStatuses_(productItemStatusText);
   var imageRows = getProductImageRows_(ss);
+  var fallback = String(orderStatusFallback || '').trim();
 
   return names.map(function(name, index) {
     var displayName = sanitizeProductName_(name);
@@ -264,11 +273,59 @@ function buildProductItems_(ss, productText, productImageText) {
     if (!image && inlineImages.length === 1) image = inlineImages[0];
     if (!image) image = findProductImage_(name, imageRows);
     if (!image && isUrlLike_(name)) image = name;
+
+    var statusRaw = inlineStatuses[index] || '';
+    if (!statusRaw && inlineStatuses.length === 1) statusRaw = inlineStatuses[0];
+    if (!statusRaw && names.length === 1) statusRaw = fallback;
+
+    var normalized = normalizeItemStatus_(statusRaw, fallback);
     return {
       name: displayName,
-      image: image
+      image: image,
+      itemStatus: normalized.label,
+      itemStatusCode: normalized.code
     };
   });
+}
+
+function buildItemSummary_(items) {
+  var total = items.length;
+  var shipped = 0;
+  items.forEach(function(item) {
+    if (item.itemStatusCode === 'shipped') shipped++;
+  });
+  return {
+    total: total,
+    shipped: shipped,
+    pending: Math.max(total - shipped, 0)
+  };
+}
+
+function normalizeItemStatus_(text, orderStatusFallback) {
+  var v = String(text || '').trim();
+  if (!v) v = String(orderStatusFallback || '').trim();
+
+  if (/已出貨|已寄出|已到貨|配送中|運送中|賣貨便|7-11|取件/.test(v)) {
+    return { code: 'shipped', label: '已出貨' };
+  }
+  if (/待到貨|待出貨|未到貨|待採購|已採購|採購中|備貨|集運|出荷|日本出荷|訂單成立/.test(v)) {
+    return { code: 'pending', label: '待到貨' };
+  }
+  if (!v) return { code: 'pending', label: '待到貨' };
+  return { code: 'pending', label: v };
+}
+
+function parseProductItemStatuses_(statusText) {
+  var text = String(statusText || '').trim();
+  if (!text) return [];
+  return text
+    .split(/\n|；|;/)
+    .map(function(part) {
+      return String(part || '')
+        .replace(/^\d+[、.．]\s*/, '')
+        .trim();
+    })
+    .filter(Boolean);
 }
 
 /**
@@ -281,6 +338,7 @@ function getOrderSheetColumns_(sheet) {
     orderId: COL_ORDER_ID,
     product: COL_PRODUCT,
     productImage: 0,
+    productItemStatus: 0,
     status: COL_STATUS,
     note: COL_NOTE,
     updated: COL_UPDATED
@@ -292,13 +350,14 @@ function getOrderSheetColumns_(sheet) {
     if (/訂單編號|訂單/.test(h)) cols.orderId = col;
     else if (/商品內容/.test(h)) cols.product = col;
     else if (/商品圖|圖片網址|cloudinary/i.test(h)) cols.productImage = col;
+    else if (/商品狀態|品項狀態/.test(h)) cols.productItemStatus = col;
     else if (/出貨狀態|出貨/.test(h)) cols.status = col;
     else if (/備註/.test(h)) cols.note = col;
     else if (/最後更新|更新時間/.test(h)) cols.updated = col;
   }
 
   // 舊版：C=出貨狀態、D=備註、E=最後更新
-  if (!cols.productImage && cols.status === 3 && cols.note === 4) {
+  if (!cols.productImage && !cols.productItemStatus && cols.status === 3 && cols.note === 4) {
     cols.status = 3;
     cols.note = 4;
     cols.updated = 5;
@@ -520,6 +579,7 @@ function appendOrderRow_(sheet, cols, orderId, product, status, note, updatedAt)
   row[cols.orderId - 1] = orderId;
   row[cols.product - 1] = product;
   if (cols.productImage) row[cols.productImage - 1] = '';
+  if (cols.productItemStatus) row[cols.productItemStatus - 1] = '';
   row[cols.status - 1] = status;
   row[cols.note - 1] = note;
   row[cols.updated - 1] = updatedAt;
