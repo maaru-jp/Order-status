@@ -50,7 +50,7 @@
       text-align: center;
       border-right: 1px solid var(--jp-border);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .brand::before {
@@ -93,15 +93,21 @@
     }
 
     .brand-badge {
-      display: inline-block;
-      margin-top: 14px;
-      padding: 5px 12px;
+      display: block;
+      position: relative;
+      z-index: 2;
+      width: fit-content;
+      max-width: 100%;
+      margin: 14px auto 0;
+      padding: 6px 14px;
       border-radius: 999px;
-      font-size: 11px;
-      color: var(--jp-sakura-deep);
+      font-size: 12px;
+      font-weight: 600;
+      color: #b85c5c;
       background: #fff;
-      border: 1px solid #f3d4d4;
-      letter-spacing: 0.12em;
+      border: 1px solid #e8b0b0;
+      letter-spacing: 0.06em;
+      line-height: 1.4;
     }
 
     /* 右側查詢區 */
@@ -209,8 +215,8 @@
 
     .result-layout {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.3fr);
-      gap: 22px;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
       align-items: start;
     }
 
@@ -239,25 +245,46 @@
       border: 1px solid #f2d0cb;
     }
 
-    .item {
+    .summary-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
       margin-bottom: 10px;
+    }
+
+    .item {
+      margin-bottom: 0;
       line-height: 1.55;
       color: var(--jp-ink);
+      font-size: 13px;
+    }
+
+    .item-products {
+      margin-top: 4px;
+    }
+
+    .item-products > .product-content {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
     }
 
     .product-content {
-      display: inline-block;
-      vertical-align: top;
+      display: block;
+      width: 100%;
       max-width: 100%;
     }
 
     .product-list {
-      margin: 6px 0 0;
-      padding: 8px;
+      margin: 0;
+      padding: 10px;
       background: #fff;
       border: 1px solid var(--jp-border);
       border-radius: 12px;
       list-style: none;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
 
     .product-summary {
@@ -265,13 +292,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin: 6px 0 8px;
+      margin: 0 0 8px;
       padding: 10px 12px;
       border-radius: 12px;
       background: linear-gradient(135deg, #f4faf6 0%, #fff8f4 100%);
       border: 1px solid #dce8e2;
       font-size: 13px;
       color: var(--jp-ink-soft);
+      grid-column: 1 / -1;
     }
 
     .product-summary strong {
@@ -307,37 +335,37 @@
 
     .product-card {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 12px;
+      text-align: center;
+      gap: 8px;
       padding: 10px 8px;
-      border-bottom: 1px solid #f1ebe4;
-      border-left: 4px solid #e8ddd4;
+      border: 1px solid #f1ebe4;
+      border-top: 3px solid #e8ddd4;
+      border-radius: 12px;
       background: #fff;
       transition: box-shadow 0.2s ease;
+      height: 100%;
     }
 
     .product-card.is-shipped {
-      border-left-color: var(--jp-matcha);
-      background: linear-gradient(90deg, #f3faf6 0%, #ffffff 30%);
+      border-top-color: var(--jp-matcha);
+      background: linear-gradient(180deg, #f3faf6 0%, #ffffff 45%);
     }
 
     .product-card.is-pending {
-      border-left-color: #e8b88a;
-      background: linear-gradient(90deg, #fff9f3 0%, #ffffff 30%);
-    }
-
-    .product-card:last-child {
-      border-bottom: none;
+      border-top-color: #e8b88a;
+      background: linear-gradient(180deg, #fff9f3 0%, #ffffff 45%);
     }
 
     .product-body {
-      flex: 1;
+      width: 100%;
       min-width: 0;
     }
 
     .product-thumb {
-      width: 84px;
-      height: 84px;
+      width: 96px;
+      height: 96px;
       border-radius: 12px;
       object-fit: cover;
       border: 1px solid var(--jp-border);
@@ -346,13 +374,13 @@
     }
 
     .product-thumb-placeholder {
-      width: 84px;
-      height: 84px;
+      width: 96px;
+      height: 96px;
       border-radius: 12px;
       border: 1px dashed #e0d2c8;
       background: #faf5f0;
       color: #b6a89d;
-      font-size: 28px;
+      font-size: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -361,10 +389,10 @@
 
     .product-name {
       color: var(--jp-ink);
-      line-height: 1.45;
-      font-size: 14px;
+      line-height: 1.4;
+      font-size: 12px;
       word-break: break-word;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .item-status-badge {
@@ -391,7 +419,9 @@
     }
 
     .product-toggle {
-      margin-top: 8px;
+      grid-column: 1 / -1;
+      width: 100%;
+      margin-top: 4px;
       padding: 8px 16px;
       border: 1px solid #efc9c9;
       border-radius: 999px;
@@ -702,6 +732,14 @@
         grid-template-columns: 1fr;
       }
 
+      .summary-top {
+        grid-template-columns: 1fr;
+      }
+
+      .product-list {
+        grid-template-columns: 1fr;
+      }
+
       .progress-track {
         gap: 6px;
       }
@@ -745,9 +783,11 @@
         <div class="result-layout">
           <section class="summary-card">
             <div class="card-title">訂單摘要</div>
-            <div class="item">訂單編號：<span id="rOrderId"></span></div>
-            <div class="item">商品內容：<div id="rProduct" class="product-content"></div></div>
-            <div class="item">備註：<span id="rNote"></span></div>
+            <div class="summary-top">
+              <div class="item">訂單編號：<span id="rOrderId"></span></div>
+              <div class="item">備註：<span id="rNote"></span></div>
+            </div>
+            <div class="item item-products">商品內容<div id="rProduct" class="product-content"></div></div>
           </section>
 
           <section class="timeline-card">
@@ -986,7 +1026,7 @@
     if (!imageUrl) return "";
     if (!/res\.cloudinary\.com/i.test(imageUrl)) return imageUrl;
     if (/\/upload\/(?:w_|h_|c_|q_|f_)/.test(imageUrl)) return imageUrl;
-    return imageUrl.replace("/upload/", "/upload/w_168,h_168,c_fill,q_auto,f_auto/");
+    return imageUrl.replace("/upload/", "/upload/w_220,h_220,c_fill,q_auto,f_auto/");
   }
 
   function normalizeItemStatusCode(code, label) {
