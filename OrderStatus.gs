@@ -309,9 +309,9 @@ function normalizeItemStatus_(text, orderStatusFallback) {
     return { code: 'shipped', label: '已出貨' };
   }
   if (/待到貨|待出貨|未到貨|待採購|已採購|採購中|備貨|集運|出荷|日本出荷|訂單成立/.test(v)) {
-    return { code: 'pending', label: '待到貨' };
+    return { code: 'pending', label: '待出貨' };
   }
-  if (!v) return { code: 'pending', label: '待到貨' };
+  if (!v) return { code: 'pending', label: '待出貨' };
   return { code: 'pending', label: v };
 }
 

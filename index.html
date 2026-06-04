@@ -1008,7 +1008,7 @@
       const hint = document.createElement("div");
       hint.className = "status-hero-hint";
       hint.innerText = "此訂單含 " + summary.total + " 項商品（已出貨 "
-        + summary.shipped + " / 待到貨 " + summary.pending + "），請至左側「訂單摘要」查看各商品圖片與狀態。";
+        + summary.shipped + " / 待出貨 " + summary.pending + "），請至左側「訂單摘要」查看各商品圖片與狀態。";
       statusHero.appendChild(hint);
     }
 
@@ -1038,12 +1038,12 @@
         .map(item => {
           const rawName = String(item.name || item.product || "").trim();
           const image = String(item.image || item.imageUrl || "").trim();
-          const label = String(item.itemStatus || item.status || "").trim() || "待到貨";
+          const label = String(item.itemStatus || item.status || "").trim() || "待出貨";
           const code = normalizeItemStatusCode(item.itemStatusCode, label);
           return {
             name: isUrlLike(rawName) ? "商品" : rawName,
             image: image || (isUrlLike(rawName) ? rawName : ""),
-            itemStatus: code === "shipped" ? "已出貨" : (label || "待到貨"),
+            itemStatus: code === "shipped" ? "已出貨" : (label || "待出貨"),
             itemStatusCode: code
           };
         })
@@ -1059,7 +1059,7 @@
         return {
           name: isUrlLike(raw) ? "商品" : raw,
           image: isUrlLike(raw) ? raw : "",
-          itemStatus: "待到貨",
+          itemStatus: "待出貨",
           itemStatusCode: "pending"
         };
       })
@@ -1093,7 +1093,7 @@
 
     const waitPill = document.createElement("span");
     waitPill.className = "summary-pill wait";
-    waitPill.innerText = "待到貨 " + summary.pending;
+    waitPill.innerText = "待出貨 " + summary.pending;
 
     pills.appendChild(donePill);
     pills.appendChild(waitPill);
@@ -1139,7 +1139,7 @@
 
     const badge = document.createElement("span");
     badge.className = "item-status-badge " + (code === "shipped" ? "done" : "wait");
-    badge.innerText = (code === "shipped" ? "✓ " : "⏳ ") + (item.itemStatus || (code === "shipped" ? "已出貨" : "待到貨"));
+    badge.innerText = (code === "shipped" ? "✓ " : "⏳ ") + (item.itemStatus || (code === "shipped" ? "已出貨" : "待出貨"));
     body.appendChild(badge);
 
     card.appendChild(body);
