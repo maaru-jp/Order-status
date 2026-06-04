@@ -148,16 +148,54 @@
 
     .product-list {
       margin: 6px 0 0;
-      padding: 8px 10px 4px 24px;
+      padding: 8px;
       background: #f8faff;
       border: 1px solid #e4ebff;
       border-radius: 10px;
+      list-style: none;
     }
 
-    .product-list li {
-      margin-bottom: 4px;
-      line-height: 1.45;
+    .product-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 6px;
+      border-bottom: 1px solid #e8eeff;
+    }
+
+    .product-card:last-child {
+      border-bottom: none;
+    }
+
+    .product-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid #dbe4ff;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .product-thumb-placeholder {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      border: 1px dashed #c9d4ef;
+      background: #f3f6ff;
+      color: #7b8aab;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .product-name {
       color: #344563;
+      line-height: 1.45;
+      font-size: 14px;
+      word-break: break-word;
     }
 
     .product-toggle {
@@ -626,43 +664,87 @@
     renderProgress(history[0] ? history[0].status : "");
   }
 
-  function renderProduct(productText) {
-    const productBox = document.getElementById("rProduct");
-    const text = String(productText || "").trim();
-    productBox.innerHTML = "";
+  function cloudinaryThumb(url) {
+    const imageUrl = String(url || "").trim();
+    if (!imageUrl) return "";
+    if (!/res\.cloudinary\.com/i.test(imageUrl)) return imageUrl;
+    if (/\/upload\/(?:w_|h_|c_|q_|f_)/.test(imageUrl)) return imageUrl;
+    return imageUrl.replace("/upload/", "/upload/w_72,h_72,c_fill,q_auto,f_auto/");
+  }
 
-    if (!text) {
-      productBox.innerText = "-";
-      return;
+  function normalizeProductItems(productText, items) {
+    if (Array.isArray(items) && items.length > 0) {
+      return items
+        .map(item => ({
+          name: String(item.name || item.product || "").trim(),
+          image: String(item.image || item.imageUrl || "").trim()
+        }))
+        .filter(item => item.name);
     }
 
-    const parts = text
+    const text = String(productText || "").trim();
+    if (!text) return [];
+    return text
       .split(/\n|；|;/)
-      .map(item => item.trim())
-      .filter(Boolean);
+      .map(name => ({ name: name.trim(), image: "" }))
+      .filter(item => item.name);
+  }
 
-    if (parts.length <= 1) {
-      productBox.innerText = text;
+  function createProductCard(item) {
+    const card = document.createElement("li");
+    card.className = "product-card";
+
+    const thumbUrl = cloudinaryThumb(item.image);
+    if (thumbUrl) {
+      const img = document.createElement("img");
+      img.className = "product-thumb";
+      img.src = thumbUrl;
+      img.alt = item.name;
+      img.loading = "lazy";
+      img.onerror = () => {
+        img.remove();
+        const placeholder = document.createElement("div");
+        placeholder.className = "product-thumb-placeholder";
+        placeholder.innerText = "📦";
+        card.insertBefore(placeholder, card.firstChild);
+      };
+      card.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "product-thumb-placeholder";
+      placeholder.innerText = "📦";
+      card.appendChild(placeholder);
+    }
+
+    const name = document.createElement("div");
+    name.className = "product-name";
+    name.innerText = item.name;
+    card.appendChild(name);
+    return card;
+  }
+
+  function renderProduct(productText, items) {
+    const productBox = document.getElementById("rProduct");
+    const list = normalizeProductItems(productText, items);
+    productBox.innerHTML = "";
+
+    if (!list.length) {
+      productBox.innerText = "-";
       return;
     }
 
     const ul = document.createElement("ul");
     ul.className = "product-list";
     const defaultVisibleCount = 2;
-    const isExpandable = parts.length > defaultVisibleCount;
+    const isExpandable = list.length > defaultVisibleCount;
     let isExpanded = false;
 
     const renderItems = () => {
       ul.innerHTML = "";
-      const visibleParts = (isExpandable && !isExpanded)
-        ? parts.slice(0, defaultVisibleCount)
-        : parts;
-
-      visibleParts.forEach((part) => {
-        const li = document.createElement("li");
-        li.innerText = part;
-        ul.appendChild(li);
-      });
+      const visibleItems = (isExpandable && !isExpanded)
+        ? list.slice(0, defaultVisibleCount)
+        : list;
+      visibleItems.forEach((item) => ul.appendChild(createProductCard(item)));
     };
 
     renderItems();
@@ -680,7 +762,6 @@
       toggleBtn.classList.toggle("is-expanded", isExpanded);
       renderItems();
     };
-
     productBox.appendChild(toggleBtn);
   }
 
@@ -733,7 +814,7 @@
           errorBox.style.display = "block";
         } else {
           document.getElementById("rOrderId").innerText = data.orderId;
-          renderProduct(data.product);
+          renderProduct(data.product, data.items);
           document.getElementById("rNote").innerText = data.note;
           const history = normalizeHistory(data.history, data.status, data.updated);
           renderHistory(history);
