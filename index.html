@@ -126,7 +126,18 @@
 
     .page-sub {
       font-size: 13px;
-      color: var(--jp-ink-soft);
+      line-height: 1.6;
+      letter-spacing: 0.03em;
+    }
+
+    .page-sub-key {
+      color: var(--jp-sakura-deep);
+      font-weight: 600;
+    }
+
+    .page-sub-desc {
+      color: var(--jp-matcha-deep);
+      font-weight: 500;
     }
 
     .search-panel {
@@ -751,7 +762,10 @@
 
       <div class="page-head">
         <h1>訂單進度查詢</h1>
-        <div class="page-sub">輸入訂單編號，查看配送進度與商品狀態</div>
+        <div class="page-sub">
+          <span class="page-sub-key">輸入訂單編號</span>
+          <span class="page-sub-desc"> 查看配送進度與商品狀態</span>
+        </div>
       </div>
 
       <div class="search-panel">
