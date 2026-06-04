@@ -5,8 +5,9 @@
 const ORDER_SHEET_NAME = '工作表1';
 const STATUS_SHEET_NAME = '狀態';
 const HISTORY_SHEET_NAME = '歷程';
-const SCRIPT_PROP_SYNC_TOKEN = '-join ((33..126) | Get-Random -Count 48 | ForEach-Object {[char]$_})';
-const SCRIPT_PROP_FEED_URL = 'https://docs.google.com/spreadsheets/d/1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw/edit?usp=sharing';
+const PRODUCT_IMAGE_SHEET_NAME = '商品圖';
+const SCRIPT_PROP_SYNC_TOKEN = 'ORDER_SYNC_TOKEN';
+const SCRIPT_PROP_FEED_URL = 'ORDER_FEED_URL';
 
 const COL_ORDER_ID = 1; // A: 訂單編號
 const COL_PRODUCT = 2;  // B: 商品內容
@@ -73,12 +74,14 @@ function doGet(e) {
         sheets: {
           order: ORDER_SHEET_NAME,
           status: STATUS_SHEET_NAME,
-          history: HISTORY_SHEET_NAME
+          history: HISTORY_SHEET_NAME,
+          productImages: PRODUCT_IMAGE_SHEET_NAME
         }
       });
     }
 
     var orderId = String(p.orderId || '').trim();
+    var orderKey = normalizeOrderKey_(orderId);
     if (!orderId) {
       return jsonOutput_({ error: 'missing orderId' });
     }
@@ -93,7 +96,7 @@ function doGet(e) {
     var foundRow = null;
     for (var i = 1; i < orderData.length; i++) {
       var rowOrderId = String(orderData[i][COL_ORDER_ID - 1] || '').trim();
-      if (rowOrderId === orderId) {
+      if (normalizeOrderKey_(rowOrderId) === orderKey) {
         foundRow = orderData[i];
         break;
       }
@@ -101,10 +104,12 @@ function doGet(e) {
     if (!foundRow) return jsonOutput_({ error: '查無此訂單編號' });
 
     var history = getOrderHistory_(ss, orderId);
+    var product = String(foundRow[COL_PRODUCT - 1] || '').trim();
 
     var response = {
       orderId: String(foundRow[COL_ORDER_ID - 1] || '').trim(),
-      product: String(foundRow[COL_PRODUCT - 1] || '').trim(),
+      product: product,
+      items: buildProductItems_(ss, product),
       status: String(foundRow[COL_STATUS - 1] || '').trim(),
       note: String(foundRow[COL_NOTE - 1] || '').trim(),
       updated: formatDateTime_(foundRow[COL_UPDATED - 1]),
@@ -173,11 +178,12 @@ function getOrderHistory_(ss, orderId) {
   var values = sheet.getDataRange().getValues();
   if (values.length < 2) return [];
 
+  var targetKey = normalizeOrderKey_(orderId);
   var list = [];
   for (var i = 1; i < values.length; i++) {
     var row = values[i];
     var rowOrderId = String(row[0] || '').trim();
-    if (rowOrderId !== orderId) continue;
+    if (normalizeOrderKey_(rowOrderId) !== targetKey) continue;
 
     list.push({
       status: String(row[1] || '').trim(),
@@ -192,15 +198,69 @@ function getOrderHistory_(ss, orderId) {
     return parseDateSafe_(b.time) - parseDateSafe_(a.time);
   });
 
-  // 前端只需 time/status，其餘欄位可保留擴充
-  return list.map(function(item) {
-    var statusText = item.status;
-    if (item.note) statusText += '（' + item.note + '）';
+  // 回傳完整歷程資料，前端可自由決定顯示樣式
+  return list;
+}
+
+/**
+ * 將「工作表1」商品內容拆成品項，並從「商品圖」對照 Cloudinary 網址
+ * 商品圖欄位：A 商品關鍵字 / B 圖片網址（Cloudinary URL）
+ */
+function buildProductItems_(ss, productText) {
+  var names = parseProductNames_(productText);
+  if (names.length === 0) return [];
+
+  var imageRows = getProductImageRows_(ss);
+  return names.map(function(name) {
     return {
-      time: item.time,
-      status: statusText
+      name: name,
+      image: findProductImage_(name, imageRows)
     };
   });
+}
+
+function parseProductNames_(productText) {
+  var text = String(productText || '').trim();
+  if (!text) return [];
+  return text
+    .split(/\n|；|;/)
+    .map(function(part) { return String(part || '').trim(); })
+    .filter(Boolean);
+}
+
+function getProductImageRows_(ss) {
+  var sheet = ss.getSheetByName(PRODUCT_IMAGE_SHEET_NAME);
+  if (!sheet) return [];
+
+  var values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    var keyword = String(values[i][0] || '').trim();
+    var url = String(values[i][1] || '').trim();
+    if (!keyword || !url) continue;
+    rows.push({ keyword: keyword, url: url });
+  }
+
+  // 關鍵字越長優先（避免短字誤配）
+  rows.sort(function(a, b) {
+    return b.keyword.length - a.keyword.length;
+  });
+  return rows;
+}
+
+function findProductImage_(productName, imageRows) {
+  var name = String(productName || '').trim();
+  if (!name || !imageRows.length) return '';
+
+  for (var i = 0; i < imageRows.length; i++) {
+    var keyword = imageRows[i].keyword;
+    if (name === keyword || name.indexOf(keyword) >= 0) {
+      return imageRows[i].url;
+    }
+  }
+  return '';
 }
 
 function getOrCreateHistorySheet_(ss) {
@@ -282,6 +342,7 @@ function upsertOrders_(orders, source) {
 
   orders.forEach(function(raw) {
     var orderId = normalizeOrderId_(raw.orderId || raw.order_no || raw.id);
+    var orderKey = normalizeOrderKey_(orderId);
     if (!orderId) {
       skipped++;
       return;
@@ -292,8 +353,8 @@ function upsertOrders_(orders, source) {
     var note = String(raw.note || raw.remark || '').trim();
     var updatedAt = toDateOrNow_(raw.updated || raw.updatedAt || raw.time, now);
 
-    if (map[orderId]) {
-      var row = map[orderId];
+    if (map[orderKey]) {
+      var row = map[orderKey];
       var oldStatus = String(orderSheet.getRange(row, COL_STATUS).getValue() || '').trim();
       var oldNote = String(orderSheet.getRange(row, COL_NOTE).getValue() || '').trim();
       var changed = false;
@@ -336,8 +397,9 @@ function buildOrderRowIndex_(sheet) {
   var map = {};
   for (var i = 1; i < values.length; i++) {
     var orderId = normalizeOrderId_(values[i][COL_ORDER_ID - 1]);
-    if (!orderId) continue;
-    map[orderId] = i + 1;
+    var orderKey = normalizeOrderKey_(orderId);
+    if (!orderKey) continue;
+    map[orderKey] = i + 1;
   }
   return map;
 }
@@ -345,6 +407,21 @@ function buildOrderRowIndex_(sheet) {
 function normalizeOrderId_(value) {
   var v = String(value || '').trim();
   return v;
+}
+
+/**
+ * 用於比對的訂單鍵：
+ * - 純數字編號會移除前導 0（00055 與 55 視為同一單）
+ * - 其他字串維持原樣去空白
+ */
+function normalizeOrderKey_(value) {
+  var raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d+$/.test(raw)) {
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? raw : String(n);
+  }
+  return raw;
 }
 
 function toDateOrNow_(value, fallbackNow) {
