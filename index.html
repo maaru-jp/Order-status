@@ -350,6 +350,51 @@
       white-space: nowrap;
     }
 
+    .status-hero {
+      padding: 14px 14px 12px;
+      border-radius: 12px;
+      border: 1px solid #ffe2cc;
+      background: linear-gradient(135deg, #fff9f3 0%, #fff4eb 100%);
+      border-left: 4px solid #ff6a00;
+    }
+
+    .status-hero-label {
+      font-size: 12px;
+      color: #8a6a4d;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .status-hero-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e85d00;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .status-hero-time {
+      font-size: 14px;
+      color: #5f6f8f;
+    }
+
+    .status-hero-note {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #4f5f87;
+      line-height: 1.4;
+    }
+
+    .status-hero-hint {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed #ffd9bf;
+      font-size: 12px;
+      color: #7a88a8;
+      line-height: 1.45;
+    }
+
     .progress-wrap {
       margin-bottom: 14px;
       padding: 10px 10px 8px;
@@ -613,7 +658,7 @@
                 <span>貨態追蹤</span>
                 <span class="current-step" id="rCurrentStep" style="display: none;"></span>
               </div>
-              <ul class="timeline" id="rHistory"></ul>
+              <div id="rStatusHero" class="status-hero" style="display: none;"></div>
               <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
             </div>
           </section>
@@ -669,7 +714,29 @@
   }
 
   function getDisplayStatus(step) {
-    return sanitizeHistoryStep(step).status || "狀態更新";
+    return extractPrimaryStatus(sanitizeHistoryStep(step).status) || "狀態更新";
+  }
+
+  /** 歷程若誤貼多行品項狀態，只取整單代表狀態顯示 */
+  function extractPrimaryStatus(statusText) {
+    const lines = String(statusText || "")
+      .split(/\n|；|;/)
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (lines.length <= 1) return lines[0] || String(statusText || "").trim();
+
+    const rules = [
+      /已出貨|已寄出|賣貨便|7-11/,
+      /已抵台|到台|抵達台灣/,
+      /集運中|轉運/,
+      /日本出荷|待出荷|出荷/,
+      /已採購|訂單成立|待到貨|待出貨/
+    ];
+    for (const rule of rules) {
+      const hit = lines.find(line => rule.test(line));
+      if (hit) return hit;
+    }
+    return lines[0];
   }
 
   function formatOrderNote(noteText) {
@@ -734,11 +801,12 @@
     return [];
   }
 
-  function renderHistory(history) {
-    const historyList = document.getElementById("rHistory");
+  function renderHistory(history, items, itemSummary) {
+    const statusHero = document.getElementById("rStatusHero");
     const historyEmpty = document.getElementById("rHistoryEmpty");
     const currentStep = document.getElementById("rCurrentStep");
-    historyList.innerHTML = "";
+    statusHero.innerHTML = "";
+    statusHero.style.display = "none";
     currentStep.style.display = "none";
     currentStep.innerText = "";
 
@@ -750,37 +818,47 @@
 
     historyEmpty.style.display = "none";
     const latest = sanitizeHistoryStep(history[0]);
-    currentStep.innerText = "目前進度：" + (latest.status || "狀態更新");
+    const primaryStatus = extractPrimaryStatus(latest.status) || "狀態更新";
+
+    currentStep.innerText = "目前進度：" + primaryStatus;
     currentStep.style.display = "inline-block";
 
-    const displayHistory = [sanitizeHistoryStep(history[0])];
-    displayHistory.forEach((step, index) => {
-      const li = document.createElement("li");
-      li.className = "timeline-item";
-      if (index === 0) li.classList.add("is-latest");
+    const label = document.createElement("div");
+    label.className = "status-hero-label";
+    label.innerText = "整單目前進度";
 
-      const main = document.createElement("div");
-      main.className = "timeline-main";
-      main.innerText = step.status || "狀態更新";
+    const title = document.createElement("div");
+    title.className = "status-hero-title";
+    title.innerText = primaryStatus;
 
-      const time = document.createElement("div");
-      time.className = "timeline-time";
-      time.innerText = step.time || "時間待更新";
+    const time = document.createElement("div");
+    time.className = "status-hero-time";
+    time.innerText = latest.time || "時間待更新";
 
-      li.appendChild(main);
-      li.appendChild(time);
+    statusHero.appendChild(label);
+    statusHero.appendChild(title);
+    statusHero.appendChild(time);
 
-      if (step.note) {
-        const note = document.createElement("div");
-        note.className = "timeline-note";
-        note.innerText = "備註：" + step.note;
-        li.appendChild(note);
-      }
+    if (latest.note) {
+      const note = document.createElement("div");
+      note.className = "status-hero-note";
+      note.innerText = "備註：" + latest.note;
+      statusHero.appendChild(note);
+    }
 
-      historyList.appendChild(li);
-    });
+    const summary = itemSummary && itemSummary.total
+      ? itemSummary
+      : (Array.isArray(items) ? buildItemSummary(normalizeProductItems("", items)) : null);
+    if (summary && summary.total > 1) {
+      const hint = document.createElement("div");
+      hint.className = "status-hero-hint";
+      hint.innerText = "此訂單含 " + summary.total + " 項商品（已出貨 "
+        + summary.shipped + " / 待到貨 " + summary.pending + "），請至左側「訂單摘要」查看各商品圖片與狀態。";
+      statusHero.appendChild(hint);
+    }
 
-    renderProgress(getDisplayStatus(history[0]));
+    statusHero.style.display = "block";
+    renderProgress(primaryStatus);
   }
 
   function cloudinaryThumb(url) {
@@ -1010,7 +1088,7 @@
           renderProduct(data.product, data.items, data.itemSummary);
           document.getElementById("rNote").innerText = formatOrderNote(data.note);
           const history = normalizeHistory(data.history, data.status, data.updated);
-          renderHistory(history);
+          renderHistory(history, data.items, data.itemSummary);
           resultBox.style.display = "block";
         }
       })
