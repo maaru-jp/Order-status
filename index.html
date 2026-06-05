@@ -2185,6 +2185,14 @@
     return "type-adjust";
   }
 
+  function formatPointHistoryNote(note) {
+    const text = String(note || "")
+      .replace(/（不含運費、訂金）/g, "（不含運費）")
+      .replace(/\(不含運費、訂金\)/g, "（不含運費）")
+      .trim();
+    return text || "—";
+  }
+
   function renderPointsHistory(history) {
     const tbody = document.getElementById("rPointsHistoryBody");
     const wrap = document.getElementById("pointsHistoryWrap");
@@ -2210,7 +2218,7 @@
       const tdOrder = document.createElement("td");
       tdOrder.innerText = rec.orderId || "—";
       const tdNote = document.createElement("td");
-      tdNote.innerText = rec.note || "—";
+      tdNote.innerText = formatPointHistoryNote(rec.note);
       tr.appendChild(tdDate);
       tr.appendChild(tdType);
       tr.appendChild(tdPts);
