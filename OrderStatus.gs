@@ -77,14 +77,28 @@ function getShopSpreadsheet_() {
 /** 僅讀後台試算表「訂單」分頁（不含工作表1） */
 function getShopOrderSheet_(ss) {
   ss = ss || getShopSpreadsheet_();
-  var name = (CONFIG.orderSheetName || "訂單").toString().trim();
-  var sheet = ss.getSheetByName(name);
-  if (sheet) return sheet;
+  var preferred = [
+    (CONFIG.orderSheetName || "訂單").toString().trim(),
+    "訂單",
+    "订单",
+    "Orders",
+    "orders"
+  ];
+  var seen = {};
+  for (var p = 0; p < preferred.length; p++) {
+    var pname = preferred[p];
+    if (!pname || seen[pname]) continue;
+    seen[pname] = true;
+    var hit = ss.getSheetByName(pname);
+    if (hit) return hit;
+  }
   var all = ss.getSheets();
   for (var i = 0; i < all.length; i++) {
     var headers = getOrderHeaders_(all[i]);
     for (var h = 0; h < headers.length; h++) {
-      if (headers[h] === "訂單編號") return all[i];
+      if (headers[h] === "訂單編號" || String(headers[h] || "").indexOf("訂單編號") >= 0) {
+        return all[i];
+      }
     }
   }
   return null;
@@ -133,8 +147,8 @@ function handleDoGet_(e) {
         routes: ["customer_orders", "order_status", "orderId_legacy", "sheet1_progress"]
       });
     }
-    if (action === "order_source_debug") {
-      return jsonOutput(getOrderSourceDebugPublic_());
+    if (action === "order_source_debug" || action === "card_debug") {
+      return jsonOutput(getOrderSourceDebugPublic_(params));
     }
     if (action === "customer_orders") {
       return jsonOutput(getCustomerOrdersPublic_(params));
@@ -214,10 +228,36 @@ function getOrderHeaders_(sheet) {
   return row1.map(function(h) { return (h || "").toString().trim(); });
 }
 
+function isOrderIdLike_(id) {
+  var s = String(id || "").trim();
+  if (!s) return false;
+  if (/^ORD\d+$/i.test(s)) return true;
+  var digits = s.replace(/\D/g, "");
+  return digits.length >= 1 && digits.length <= 6;
+}
+
+function isPointsLedgerRow_(obj) {
+  var t = String((obj && obj.ledgerType) || "").trim();
+  if (/^(發放|調整|使用|過期|扣除)$/.test(t)) return true;
+  var pts = obj && obj.points;
+  var rem = obj && obj.remaining;
+  if ((pts !== "" && pts != null && pts !== undefined) || (rem !== "" && rem != null && rem !== undefined)) {
+    if (!isOrderIdLike_(obj && obj.id)) return true;
+  }
+  return false;
+}
+
 function orderKeyMap_(headers) {
   var map = {};
+  // ProductManagement2「訂單」分頁實際標題（含前段紅利欄 + 後段訂單欄）
   var aliases = [
     ["訂單編號", "id", "ID"],
+    ["紀錄ID", "recordId"],
+    ["日期", "date"],
+    ["類型", "ledgerType"],
+    ["點數", "points"],
+    ["剩餘", "remaining"],
+    ["到期日", "expireDate"],
     ["狀態", "status"],
     ["出貨狀態", "status"],
     ["商品內容", "product"],
@@ -225,9 +265,9 @@ function orderKeyMap_(headers) {
     ["圖片網址", "productImage"],
     ["商品狀態", "productItemStatus"],
     ["最後更新", "updated", "updatedAt", "lastUpdated"],
-    ["日期", "date"],
-    ["客戶姓名", "customerName", "姓名", "name"],
-    ["會員卡號", "memberCardNo", "memberCard"],
+    ["客戶姓名", "customerName", "name"],
+    ["姓名", "customerName"],
+    ["會員卡號", "会员卡号", "memberCardNo", "memberCard", "Member Card"],
     ["電話", "phone"],
     ["Email", "email"],
     ["Line ID", "lineId", "LineID", "line id"],
@@ -303,9 +343,57 @@ function normalizeOrderId_(v) {
 function findMemberCardColumnIndex_(headers) {
   for (var c = 0; c < (headers || []).length; c++) {
     var h = String(headers[c] || "").trim();
-    if (h === "會員卡號" || /^membercard/i.test(h)) return c;
+    if (!h) continue;
+    if (
+      h === "會員卡號" ||
+      h === "会员卡号" ||
+      /會員.*卡/.test(h) ||
+      /member\s*card/i.test(h)
+    ) {
+      return c;
+    }
   }
   return -1;
+}
+
+/** 從整列掃描 13 碼卡號（欄位名稱不符時的保底） */
+/** 訂單編號可能在非 A 欄時的保底掃描 */
+function extractOrderIdFromRowCells_(row, displayRow) {
+  var len = Math.min(Math.max((row || []).length, (displayRow || []).length), 8);
+  for (var c = 0; c < len; c++) {
+    var vals = [];
+    if (displayRow && displayRow[c] != null && displayRow[c] !== "") vals.push(displayRow[c]);
+    if (row && row[c] != null && row[c] !== "") vals.push(row[c]);
+    for (var i = 0; i < vals.length; i++) {
+      var raw = String(vals[i] || "").trim();
+      if (isOrderIdLike_(raw)) return raw;
+      var norm = normalizeOrderId_(raw);
+      if (isOrderIdLike_(norm)) return norm;
+    }
+  }
+  return "";
+}
+
+function extractMemberCardFromRowCells_(row, displayRow) {
+  var len = Math.max((row || []).length, (displayRow || []).length);
+  for (var c = 0; c < len; c++) {
+    var vals = [];
+    if (displayRow && displayRow[c] != null && displayRow[c] !== "") vals.push(displayRow[c]);
+    if (row && row[c] != null && row[c] !== "") vals.push(row[c]);
+    for (var i = 0; i < vals.length; i++) {
+      var card = normalizeMemberCardNo_(vals[i]);
+      if (isValidMemberCardNo_(card)) return card;
+    }
+  }
+  return "";
+}
+
+function countOrdersWithMemberCard_(orders) {
+  var n = 0;
+  for (var i = 0; i < (orders || []).length; i++) {
+    if (isValidMemberCardNo_(orders[i] && orders[i].memberCardNo)) n++;
+  }
+  return n;
 }
 
 function getOrders(sheet) {
@@ -328,12 +416,23 @@ function getOrders(sheet) {
       if (key === "items") key = "itemsJson";
       obj[key] = val;
     }
-    if (cardCol >= 0 && display[r] && display[r][cardCol]) {
-      var dispCard = normalizeMemberCardNo_(display[r][cardCol]);
+    if (cardCol >= 0) {
+      var dispCard = normalizeMemberCardNo_(
+        (display[r] && display[r][cardCol]) || row[cardCol]
+      );
       if (dispCard) obj.memberCardNo = dispCard;
     }
+    if (!isValidMemberCardNo_(obj.memberCardNo)) {
+      var scanned = extractMemberCardFromRowCells_(row, display[r]);
+      if (scanned) obj.memberCardNo = scanned;
+    }
     var id = (obj.id != null) ? String(obj.id).trim() : "";
+    if (!id) {
+      id = extractOrderIdFromRowCells_(row, display[r]);
+      if (id) obj.id = id;
+    }
     if (!id) continue;
+    if (isPointsLedgerRow_(obj)) continue;
     // itemsJson → items
     if (obj.itemsJson != null && String(obj.itemsJson).trim() !== "") {
       try {
@@ -537,6 +636,12 @@ function getCustomerOrdersPublic_(params) {
     return { error: true, message: String(shopErr && shopErr.message ? shopErr.message : shopErr) };
   }
   var matched = findOrdersForMemberCard_(all, card);
+  if (!matched.length) {
+    var apiData = fetchShopCustomerOrdersByApi_(card);
+    if (apiData && apiData.orders && apiData.orders.length) {
+      return apiData;
+    }
+  }
   matched.sort(function(a, b) {
     var ma = String(a.id || "").match(/^ORD(\d+)$/i);
     var mb = String(b.id || "").match(/^ORD(\d+)$/i);
@@ -556,6 +661,20 @@ function getCustomerOrdersPublic_(params) {
     activeCount++;
     if (o.status !== "已完成") totalDue += o.amountDue;
   }
+  var withCard = countOrdersWithMemberCard_(all);
+  var sheet = getShopOrderSheet_(getShopSpreadsheet_());
+  var emptyMsg = "目前尚無訂單紀錄";
+  if (!publicOrders.length) {
+    if (!sheet) {
+      emptyMsg = "找不到後台試算表「訂單」分頁，請確認分頁名稱與標題列「訂單編號」";
+    } else if (!all.length) {
+      emptyMsg = "後台「訂單」分頁尚無資料列，請至後台訂單管理同步試算表";
+    } else if (!withCard) {
+      emptyMsg = "試算表有 " + all.length + " 筆訂單，但「會員卡號」欄皆空白，請補填 13 碼（建議 '1440...）";
+    } else {
+      emptyMsg = "試算表有 " + withCard + " 筆含會員卡號的訂單，但無此卡號 " + card;
+    }
+  }
   return {
     error: false,
     memberCardNo: card,
@@ -563,8 +682,33 @@ function getCustomerOrdersPublic_(params) {
     orderCount: publicOrders.length,
     activeCount: activeCount,
     totalDue: totalDue,
-    message: publicOrders.length ? "OK" : "目前尚無訂單紀錄"
+    debug: {
+      shopSpreadsheetId: resolveShopSpreadsheetId_(),
+      orderSheetRows: all.length,
+      ordersWithMemberCard: withCard
+    },
+    message: publicOrders.length ? "OK" : emptyMsg
   };
+}
+
+/** 後台 GAS API 備援（與 openById 讀同一份試算表時結果應一致） */
+function fetchShopCustomerOrdersByApi_(card) {
+  var base = (CONFIG.shopApiUrl || "").toString().trim();
+  if (!base || !isValidMemberCardNo_(card)) return null;
+  try {
+    var url = base + (base.indexOf("?") >= 0 ? "&" : "?")
+      + "action=customer_orders&card=" + encodeURIComponent(card);
+    var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+    var text = res.getContentText() || "";
+    if (text.indexOf("<!DOCTYPE") >= 0 || text.indexOf("<html") >= 0) return null;
+    var data = JSON.parse(text);
+    if (data && data.error === false && Array.isArray(data.orders) && data.orders.length) {
+      return data;
+    }
+  } catch (err) {
+    Logger.log("[fetchShopCustomerOrdersByApi_] " + err);
+  }
+  return null;
 }
 
 function resolvePublicOrderIdParam_(params) {
@@ -707,25 +851,37 @@ function getAllOrdersMergedAllSources_() {
   return order.map(function(id) { return byId[id]; });
 }
 
-function getOrderSourceDebugPublic_() {
+function getOrderSourceDebugPublic_(params) {
+  params = params || {};
   var ss = getProgressSpreadsheet_();
   var sheet1 = ss.getSheetByName((CONFIG.legacyProgressSheetName || "工作表1").toString().trim());
   var shopInfo = { configured: false };
+  var cardProbe = normalizeMemberCardNo_(params.card || params.memberCardNo || "");
   try {
     var shopSs = getShopSpreadsheet_();
     var shopSheet = getShopOrderSheet_(shopSs);
     var shopOrders = shopSheet ? getOrders(shopSheet) : [];
-    var shopWithCard = 0;
-    for (var i = 0; i < shopOrders.length; i++) {
-      if (isValidMemberCardNo_(shopOrders[i] && shopOrders[i].memberCardNo)) shopWithCard++;
+    var shopWithCard = countOrdersWithMemberCard_(shopOrders);
+    var sheetNames = shopSs.getSheets().map(function(s) { return s.getName(); });
+    var headers = shopSheet ? getOrderHeaders_(shopSheet) : [];
+    var cardCol = shopSheet ? findMemberCardColumnIndex_(headers) : -1;
+    var probeMatch = false;
+    if (isValidMemberCardNo_(cardProbe)) {
+      probeMatch = findOrdersForMemberCard_(shopOrders, cardProbe).length > 0;
     }
     shopInfo = {
       configured: true,
       spreadsheetId: resolveShopSpreadsheetId_(),
       spreadsheetName: shopSs.getName(),
+      sheetNames: sheetNames,
+      orderSheetName: shopSheet ? shopSheet.getName() : "",
+      orderSheetHeaders: headers,
+      memberCardColumnIndex: cardCol,
       orderSheetRows: shopSheet ? Math.max(0, shopSheet.getLastRow() - 1) : 0,
       orderCount: shopOrders.length,
-      ordersWithMemberCard: shopWithCard
+      ordersWithMemberCard: shopWithCard,
+      cardProbe: isValidMemberCardNo_(cardProbe) ? cardProbe : "",
+      cardProbeMatched: probeMatch
     };
   } catch (shopErr) {
     shopInfo.error = String(shopErr && shopErr.message ? shopErr.message : shopErr);
