@@ -1059,8 +1059,26 @@
       margin-top: 4px;
     }
 
-    .order-list {
+    .order-list-section-title {
       margin-top: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #3f3a36;
+    }
+
+    .order-list-product-preview {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--jp-ink);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .order-list {
+      margin-top: 8px;
       display: grid;
       gap: 10px;
     }
@@ -1254,6 +1272,44 @@
       text-align: right;
     }
 
+    .points-history-wrap {
+      margin-top: 14px;
+    }
+
+    .points-history-wrap .card-title {
+      margin-bottom: 8px;
+    }
+
+    .points-type-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .points-type-pill.type-earn { background: #e8f5ee; color: #3d6b55; }
+    .points-type-pill.type-use { background: #fff0e8; color: #a65c2a; }
+    .points-type-pill.type-expire { background: #f3f3f3; color: #666; }
+    .points-type-pill.type-adjust { background: #eef3ff; color: #4a5a8a; }
+
+    .points-history-table td.points-col-num {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .points-history-table td.points-col-num.positive { color: var(--jp-matcha-deep); }
+    .points-history-table td.points-col-num.negative { color: var(--jp-sakura-deep); }
+
+    .order-list-points {
+      font-size: 12px;
+      color: var(--jp-amber-deep);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
     .points-empty-lots {
       margin-top: 10px;
       padding: 12px;
@@ -1438,8 +1494,8 @@
 
       <div class="mode-tabs" role="tablist" aria-label="查詢方式">
         <button type="button" id="tabOrder" class="mode-tab is-active" role="tab" aria-selected="true">訂單編號查進度</button>
-        <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">會員卡號查訂單</button>
-        <button type="button" id="tabPoints" class="mode-tab" role="tab" aria-selected="false">紅利點數</button>
+        <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">歷史訂單</button>
+        <button type="button" id="tabPoints" class="mode-tab" role="tab" aria-selected="false">會員中心（紅利）</button>
       </div>
 
       <div id="panelOrder" class="mode-panel">
@@ -1516,9 +1572,9 @@
             <button type="button" class="btn-card-action btn-card-fill" data-fill-target="memberCardNo">填入</button>
             <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardCard">複製</button>
           </div>
-          <p class="card-hint">卡號於顧客完成第一筆訂單後提供；從 LINE 複製後點「貼上」即可；點選訂單可查看配送進度。</p>
-          <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a>。</p>
-          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢我的訂單</button>
+          <p class="card-hint">輸入 13 碼會員卡號，查詢 ProductManagement2「歷史訂單」中所有交易紀錄；每筆顯示獲得／折抵的紅利點數，點選可查看配送進度。</p>
+          <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a> · <a href="#" id="linkToPointsTabInline">查看紅利歷程 →</a></p>
+          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢歷史訂單</button>
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
@@ -1538,10 +1594,19 @@
               <div class="label">待結清合計</div>
               <div class="value" id="rTotalDue">NT$0</div>
             </div>
+            <div class="card-summary-item">
+              <div class="label">累計獲得點數</div>
+              <div class="value" id="rTotalPointsEarned">0</div>
+            </div>
+            <div class="card-summary-item">
+              <div class="label">累計折抵點數</div>
+              <div class="value" id="rTotalPointsUsed">0</div>
+            </div>
           </div>
+          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（含每筆紅利）</div>
           <div class="order-list" id="rOrderList"></div>
           <div class="card-links">
-            <a href="#" id="linkToPointsTab">查詢紅利點數 →</a>
+            <a href="#" id="linkToPointsTab">查看紅利異動歷程 →</a>
           </div>
         </div>
 
@@ -1563,9 +1628,9 @@
             <button type="button" class="btn-card-action btn-card-fill" data-fill-target="pointsMemberCardNo">填入</button>
             <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardPoints">複製</button>
           </div>
-          <p class="card-hint">卡號於顧客完成第一筆訂單後提供；從 LINE 複製後點「貼上」即可。訂單狀態「已確認」後才會入帳紅利。</p>
-          <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
-          <button type="button" class="btn-search btn-search-amber" id="btnSearchPoints">查詢紅利點數</button>
+          <p class="card-hint">會員中心：讀取 ProductManagement2「紅利點數」分頁，顯示可用餘額與完整異動歷程（發放、折抵、失效、調整）。訂單改「已確認」後才會入帳。</p>
+          <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的歷史訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
+          <button type="button" class="btn-search btn-search-amber" id="btnSearchPoints">查詢紅利歷程</button>
         </div>
 
         <div class="points-summary" id="pointsResultBox" style="display:none;">
@@ -1582,7 +1647,7 @@
             <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
           </div>
           <div class="points-lots-wrap" id="pointsLotsWrap" style="display:none;">
-            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">點數明細</div>
+            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">有效點數批次</div>
             <table class="points-lots-table">
               <thead>
                 <tr>
@@ -1594,15 +1659,30 @@
               <tbody id="rPointsLotsBody"></tbody>
             </table>
           </div>
+          <div class="points-history-wrap" id="pointsHistoryWrap" style="display:none;">
+            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">紅利異動歷程</div>
+            <table class="points-lots-table points-history-table">
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>類型</th>
+                  <th>點數</th>
+                  <th>訂單</th>
+                  <th>備註</th>
+                </tr>
+              </thead>
+              <tbody id="rPointsHistoryBody"></tbody>
+            </table>
+          </div>
           <div class="points-empty-lots" id="pointsEmptyLots" style="display:none;">
-            目前尚無有效點數。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
+            目前尚無紅利異動紀錄。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
           </div>
           <details class="points-rules">
             <summary>紅利規則說明</summary>
             <ul id="rPointsRules"></ul>
           </details>
           <div class="card-links">
-            <a href="#" id="linkToCardTabFromResult">查看此卡號的訂單 →</a>
+            <a href="#" id="linkToCardTabFromResult">查看此卡號的歷史訂單 →</a>
           </div>
         </div>
 
@@ -1621,8 +1701,9 @@
 </div>
 
 <script>
-  // 與官網／後台同一支 GAS（Code.gs）
-  const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
+  // 與官網／後台同一支 GAS（ProductManagement2 Code.gs）
+  const API_URL = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec";
+  const EXPECTED_SPREADSHEET_ID = "14dqpeCDpKRA8_Ca2b5Phinh00ydPiaBh3MHKrVYMVOI";
   const CORS_PROXY_PREFIX = "https://corsproxy.io/?";
   const MEMBER_CARD_KEY = "maarushop_member_card_v1";
   const PROGRESS_STEPS = ["訂單成立", "集運中", "已抵台", "已出貨📦"];
@@ -1875,8 +1956,24 @@
     };
   }
 
+  function parseProductLinesToItems(productText) {
+    return String(productText || "").split(/\n/).map(function(line) {
+      return line.trim();
+    }).filter(Boolean).map(function(line) {
+      return {
+        name: line,
+        image: "",
+        itemStatus: "—",
+        itemStatusCode: "pending"
+      };
+    });
+  }
+
   function buildOrderStatusFromCustomerOrder(ord) {
-    const items = Array.isArray(ord && ord.items) ? ord.items.map(mapCustomerOrderItem) : [];
+    let items = Array.isArray(ord && ord.items) ? ord.items.map(mapCustomerOrderItem) : [];
+    if (!items.length && ord && ord.product) {
+      items = parseProductLinesToItems(ord.product);
+    }
     const names = items.map(function(it) { return it.name; }).filter(Boolean);
     const statusRaw = String((ord && ord.status) || "").trim();
     let trackingStatus = statusRaw || "訂單成立";
@@ -1902,10 +1999,14 @@
       });
     }
 
+    const productText = names.length
+      ? names.join("\n")
+      : String((ord && ord.product) || "").trim();
+
     return {
       error: false,
       orderId: toOrderStatusQueryId(ord && ord.id),
-      product: names.join("\n"),
+      product: productText,
       items: items,
       itemSummary: buildItemSummary(items),
       note: "-",
@@ -2040,15 +2141,15 @@
     const container = document.querySelector(".container");
 
     if (isCard) {
-      pageTitle.innerText = "會員卡號查訂單";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 讀取後台試算表「訂單」歷史紀錄</span>';
+      pageTitle.innerText = "歷史訂單";
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢「歷史訂單」交易紀錄與每筆獲得／折抵點數</span>';
       container.classList.toggle(
         "has-wide-result",
         cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
       );
     } else if (isPoints) {
-      pageTitle.innerText = "查詢紅利點數";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 讀取試算表「紅利紀錄」可用餘額與到期日</span>';
+      pageTitle.innerText = "會員中心（紅利）";
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢「紅利點數」餘額與完整異動歷程</span>';
       const cardVal = resolveCardForPoints();
       if (isValidMemberCardNo(cardVal)) {
         syncPointsCardInputs(cardVal);
@@ -2098,15 +2199,58 @@
     const listEl = document.getElementById("rPointsRules");
     listEl.innerHTML = "";
     [
-      "消費滿 NT$" + spend + " 集 1 點",
+      "消費滿 NT$" + spend + " 集 1 點（不含運費）",
       "1 點可折 NT$" + value,
-      "商品淨額滿 NT$" + minNet + " 才可折抵（不含運費）",
+      "商品淨額滿 NT$" + minNet + " 才可折抵；未勾選折抵時點數持續累積",
       "點數自發放日起 " + days + " 天內有效",
-      "訂單狀態改為「已確認」後才會入帳"
+      "訂單狀態改為「已確認」後才會入帳（每筆訂單僅發放一次）"
     ].forEach(function(line) {
       const li = document.createElement("li");
       li.innerText = line;
       listEl.appendChild(li);
+    });
+  }
+
+  function pointsTypePillClass(type) {
+    const t = String(type || "").trim();
+    if (t === "發放") return "type-earn";
+    if (t === "折抵") return "type-use";
+    if (t === "失效") return "type-expire";
+    return "type-adjust";
+  }
+
+  function renderPointsHistory(history) {
+    const tbody = document.getElementById("rPointsHistoryBody");
+    const wrap = document.getElementById("pointsHistoryWrap");
+    if (!tbody || !wrap) return;
+    tbody.innerHTML = "";
+    if (!Array.isArray(history) || !history.length) {
+      wrap.style.display = "none";
+      return;
+    }
+    wrap.style.display = "block";
+    history.forEach(function(rec) {
+      const tr = document.createElement("tr");
+      const tdDate = document.createElement("td");
+      tdDate.innerText = rec.date || "—";
+      const tdType = document.createElement("td");
+      const pill = document.createElement("span");
+      pill.className = "points-type-pill " + pointsTypePillClass(rec.type);
+      pill.innerText = rec.type || "—";
+      tdType.appendChild(pill);
+      const tdPts = document.createElement("td");
+      tdPts.className = "points-col-num " + ((Number(rec.points) || 0) >= 0 ? "positive" : "negative");
+      tdPts.innerText = rec.pointsDisplay != null ? rec.pointsDisplay : String(rec.points != null ? rec.points : 0);
+      const tdOrder = document.createElement("td");
+      tdOrder.innerText = rec.orderId || "—";
+      const tdNote = document.createElement("td");
+      tdNote.innerText = rec.note || "—";
+      tr.appendChild(tdDate);
+      tr.appendChild(tdType);
+      tr.appendChild(tdPts);
+      tr.appendChild(tdOrder);
+      tr.appendChild(tdNote);
+      tbody.appendChild(tr);
     });
   }
 
@@ -2159,7 +2303,25 @@
     }
 
     renderPointsLots(data.lots);
+    renderPointsHistory(data.history);
     renderPointsRules(data.rules);
+
+    const emptyEl = document.getElementById("pointsEmptyLots");
+    const hasHistory = Array.isArray(data.history) && data.history.length > 0;
+    if (emptyEl && balance <= 0 && !hasHistory) {
+      const apiMsg = String(data.message || "").trim();
+      const dbg = data.debug || {};
+      let hint = apiMsg && apiMsg !== "OK" ? apiMsg : "目前尚無可用紅利點數";
+      if (dbg.pointsSheetName) {
+        hint += "（試算表「" + dbg.pointsSheetName + "」共 " + (dbg.ledgerRowCount || 0) + " 筆";
+        if (dbg.ledgerForCard != null) hint += "，與此卡號相關 " + dbg.ledgerForCard + " 筆";
+        hint += "）";
+      }
+      if (dbg.ledgerRowCount === 0) {
+        hint += "。請至後台「紅利點數」按「同步至試算表」。";
+      }
+      emptyEl.innerText = hint;
+    }
 
     document.getElementById("pointsResultBox").style.display = "block";
     document.getElementById("pointsErrorBox").style.display = "none";
@@ -2210,6 +2372,7 @@
     resultBox.style.display = "none";
     errorBox.style.display = "none";
     document.getElementById("pointsLotsWrap").style.display = "none";
+    document.getElementById("pointsHistoryWrap").style.display = "none";
     document.getElementById("pointsEmptyLots").style.display = "none";
 
     if (!isValidMemberCardNo(card)) {
@@ -2248,7 +2411,7 @@
       document.querySelector(".container").classList.remove("has-wide-result");
     } finally {
       btn.disabled = false;
-      btn.innerText = "查詢紅利點數";
+      btn.innerText = "查詢紅利歷程";
     }
   }
 
@@ -2303,15 +2466,19 @@
 
   function renderOrderList(orders) {
     const listEl = document.getElementById("rOrderList");
+    const titleEl = document.getElementById("rOrderListTitle");
     listEl.innerHTML = "";
 
     if (!orders.length) {
+      if (titleEl) titleEl.style.display = "none";
       const empty = document.createElement("div");
       empty.className = "card-empty";
       empty.innerText = "目前尚無訂單紀錄";
       listEl.appendChild(empty);
       return;
     }
+
+    if (titleEl) titleEl.style.display = "block";
 
     orders.forEach(function(ord) {
       const item = document.createElement("button");
@@ -2339,10 +2506,17 @@
       top.appendChild(left);
       top.appendChild(pill);
 
+      const earned = Math.max(0, Math.floor(Number(ord.pointsEarned) || 0));
+      const used = Math.max(0, Math.floor(Number(ord.pointsUsed) || 0));
+      let pointsParts = [];
+      if (earned > 0) pointsParts.push("獲得 " + earned + " 點");
+      if (used > 0) pointsParts.push("折抵 " + used + " 點");
+
       const meta = document.createElement("div");
       meta.className = "order-list-meta";
       const itemCount = Array.isArray(ord.items) ? ord.items.length : 0;
-      meta.innerHTML = "<span>" + (itemCount ? itemCount + " 項商品" : "訂單明細") + "</span>"
+      const productText = String(ord.product || "").trim();
+      meta.innerHTML = "<span>" + (itemCount ? itemCount + " 項商品" : (productText ? "商品摘要" : "訂單明細")) + "</span>"
         + (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0
           ? "<span>待結清 NT$" + ord.amountDue + "</span>"
           : (ord.status === "已完成" ? "<span>已完成</span>" : ""));
@@ -2368,6 +2542,17 @@
           preview.appendChild(more);
         }
         item.appendChild(preview);
+      } else if (productText) {
+        const preview = document.createElement("div");
+        preview.className = "order-list-product-preview";
+        preview.innerText = productText;
+        item.appendChild(preview);
+      }
+      if (pointsParts.length) {
+        const pointsEl = document.createElement("div");
+        pointsEl.className = "order-list-points";
+        pointsEl.innerText = "⭐ " + pointsParts.join(" · ");
+        item.appendChild(pointsEl);
       }
       item.appendChild(meta);
       item.appendChild(action);
@@ -2412,6 +2597,8 @@
       document.getElementById("rCardNo").innerText = formatMemberCardDisplay(cachedCardNo);
       document.getElementById("rOrderCount").innerText = String(data.orderCount || 0);
       document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
+      document.getElementById("rTotalPointsEarned").innerText = String(data.totalPointsEarned || 0);
+      document.getElementById("rTotalPointsUsed").innerText = String(data.totalPointsUsed || 0);
       renderOrderList(cachedCardOrders);
 
       if (!cachedCardOrders.length) {
@@ -2421,10 +2608,19 @@
           ? apiMsg
           : "此卡號在後台試算表尚無訂單紀錄";
         if (dbg.orderSheetRows != null) {
-          hint += "（試算表共 " + dbg.orderSheetRows + " 筆訂單，"
+          const sheetName = dbg.orderSheetName ? "「" + dbg.orderSheetName + "」" : "試算表";
+          hint += "（" + sheetName + "共 " + dbg.orderSheetRows + " 筆訂單，"
             + (dbg.ordersWithMemberCard || 0) + " 筆有填會員卡號）";
         }
-        errorBox.innerText = "⚠ " + hint + "。請確認後台已「同步試算表」，且 E 欄「會員卡號」為 13 碼（建議前加 '）。";
+        if (dbg.orderSheetName && dbg.orderSheetName.indexOf("紅利") >= 0) {
+          hint += "。API 讀到錯誤分頁，請確認 ProductManagement2 Code.gs 已重新部署";
+        } else if (Array.isArray(dbg.orderSourceSheets) && dbg.orderSourceSheets.indexOf("歷史訂單") < 0) {
+          hint += "。未找到「歷史訂單」分頁，請至後台按「同步試算表」";
+        }
+        const colHint = dbg.memberCardColumnLetter
+          ? dbg.memberCardColumnLetter + " 欄「會員卡號」"
+          : "「會員卡號」欄";
+        errorBox.innerText = "⚠ " + hint + "。請確認後台已「同步試算表」，且 " + colHint + " 為 13 碼（建議前加 '）。";
         errorBox.style.display = "block";
         resultBox.style.display = "none";
         document.querySelector(".container").classList.remove("has-wide-result");
@@ -2449,11 +2645,17 @@
       errorBox.style.display = "block";
     } finally {
       btn.disabled = false;
-      btn.innerText = "查詢我的訂單";
+      btn.innerText = "查詢歷史訂單";
     }
   }
 
   function initPage() {
+    fetchJsonWithCorsFallback(buildApiUrl("action=spreadsheet_info")).then(function(meta) {
+      if (meta && meta.spreadsheetId && meta.spreadsheetId !== EXPECTED_SPREADSHEET_ID) {
+        console.warn("API 綁定非 ProductManagement2 試算表", meta.spreadsheetId);
+      }
+    }).catch(function() {});
+
     document.getElementById("tabOrder").addEventListener("click", function() {
       setSearchMode("order");
     });
@@ -2467,6 +2669,13 @@
       e.preventDefault();
       goToPointsTab(cachedCardNo || document.getElementById("memberCardNo").value, true);
     });
+    var linkPointsInline = document.getElementById("linkToPointsTabInline");
+    if (linkPointsInline) {
+      linkPointsInline.addEventListener("click", function(e) {
+        e.preventDefault();
+        goToPointsTab(document.getElementById("memberCardNo").value, true);
+      });
+    }
     document.getElementById("linkToCardTabFromPoints").addEventListener("click", function(e) {
       e.preventDefault();
       goToCardTab(null, true);
