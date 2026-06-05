@@ -696,7 +696,7 @@
 
     .mode-tabs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       margin-bottom: 14px;
     }
@@ -1042,6 +1042,139 @@
     .card-links a {
       color: var(--jp-matcha-deep);
       text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .points-summary {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: var(--jp-radius);
+      border: 1px solid rgba(125, 157, 140, 0.35);
+      background: linear-gradient(180deg, rgba(125, 157, 140, 0.1) 0%, #fff 100%);
+    }
+
+    .points-hero {
+      text-align: center;
+      padding: 18px 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(125, 157, 140, 0.16) 0%, rgba(255, 255, 255, 0.9) 100%);
+      border: 1px solid rgba(125, 157, 140, 0.25);
+    }
+
+    .points-hero-label {
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+      letter-spacing: 0.06em;
+    }
+
+    .points-hero-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--jp-matcha-deep);
+      line-height: 1.1;
+      margin-top: 6px;
+    }
+
+    .points-hero-sub {
+      font-size: 13px;
+      color: var(--jp-ink);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .points-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      justify-content: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+    }
+
+    .points-expire-warn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #fff8eb;
+      border: 1px solid #f0d9a8;
+      color: #8a6a2a;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .points-lots-wrap {
+      margin-top: 14px;
+    }
+
+    .points-lots-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--jp-border);
+    }
+
+    .points-lots-table th,
+    .points-lots-table td {
+      padding: 9px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--jp-border);
+    }
+
+    .points-lots-table th {
+      background: rgba(125, 157, 140, 0.1);
+      color: var(--jp-ink-soft);
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .points-lots-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .points-lots-table td:last-child,
+    .points-lots-table th:last-child {
+      text-align: right;
+    }
+
+    .points-empty-lots {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--jp-border);
+      background: #fff;
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .points-rules {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+      border: 1px solid var(--jp-border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px 12px;
+    }
+
+    .points-rules summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--jp-matcha-deep);
+    }
+
+    .points-rules ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      line-height: 1.6;
     }
 
     .error-card {
@@ -1131,6 +1264,19 @@
       .card-summary-grid {
         grid-template-columns: 1fr;
       }
+
+      .mode-tabs {
+        gap: 6px;
+      }
+
+      .mode-tab {
+        font-size: 11px;
+        padding: 10px 6px;
+      }
+
+      .points-hero-value {
+        font-size: 34px;
+      }
     }
   </style>
 </head>
@@ -1160,7 +1306,7 @@
         </span>
         <span class="brand-nav-arrow" aria-hidden="true">→</span>
       </a>
-      <a class="brand-nav-btn brand-nav-btn--points" href="https://maaru-jp.github.io/ProductManagement2-main/index.html#/points" target="_blank" rel="noopener">
+      <a class="brand-nav-btn brand-nav-btn--points" href="#" id="navPoints">
         <span class="brand-nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -1190,6 +1336,7 @@
       <div class="mode-tabs" role="tablist" aria-label="查詢方式">
         <button type="button" id="tabOrder" class="mode-tab is-active" role="tab" aria-selected="true">訂單編號查進度</button>
         <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">會員卡號查訂單</button>
+        <button type="button" id="tabPoints" class="mode-tab" role="tab" aria-selected="false">紅利點數</button>
       </div>
 
       <div id="panelOrder" class="mode-panel">
@@ -1276,11 +1423,60 @@
           </div>
           <div class="order-list" id="rOrderList"></div>
           <div class="card-links">
-            <a href="https://maaru-jp.github.io/ProductManagement2-main/index.html#/points" target="_blank" rel="noopener">查詢紅利點數 →</a>
+            <a href="#" id="linkToPointsTab">查詢紅利點數 →</a>
           </div>
         </div>
 
         <div class="error error-card" id="cardErrorBox" style="display:none;">
+          ⚠ 查詢失敗，請確認卡號是否正確
+        </div>
+      </div>
+
+      <div id="panelPoints" class="mode-panel is-hidden">
+        <div class="search-panel">
+          <label for="pointsMemberCardNo">請輸入會員卡號（13 碼純數字）</label>
+          <input type="text" id="pointsMemberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
+          <p class="card-hint">卡號由闆闆於下單完成後提供。訂單狀態「已確認」後才會入帳紅利。</p>
+          <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
+          <button type="button" class="btn-search btn-search-matcha" id="btnSearchPoints">查詢紅利點數</button>
+        </div>
+
+        <div class="points-summary" id="pointsResultBox" style="display:none;">
+          <div class="points-hero">
+            <div class="points-hero-label">可用紅利點數</div>
+            <div class="points-hero-value" id="rPointsBalance">0</div>
+            <div class="points-hero-sub" id="rPointsDiscount">可折抵 NT$0</div>
+          </div>
+          <div class="points-meta">
+            <span>會員卡號 <span id="rPointsCardNo" class="order-list-id"></span></span>
+            <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
+          </div>
+          <div class="points-lots-wrap" id="pointsLotsWrap" style="display:none;">
+            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">點數明細</div>
+            <table class="points-lots-table">
+              <thead>
+                <tr>
+                  <th>發放日期</th>
+                  <th>剩餘點數</th>
+                  <th>到期日</th>
+                </tr>
+              </thead>
+              <tbody id="rPointsLotsBody"></tbody>
+            </table>
+          </div>
+          <div class="points-empty-lots" id="pointsEmptyLots" style="display:none;">
+            目前尚無有效點數。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
+          </div>
+          <details class="points-rules">
+            <summary>紅利規則說明</summary>
+            <ul id="rPointsRules"></ul>
+          </details>
+          <div class="card-links">
+            <a href="#" id="linkToCardTabFromResult">查看此卡號的訂單 →</a>
+          </div>
+        </div>
+
+        <div class="error error-card" id="pointsErrorBox" style="display:none;">
           ⚠ 查詢失敗，請確認卡號是否正確
         </div>
       </div>
@@ -1526,6 +1722,30 @@
     );
   }
 
+  function buildPointsBalanceUrl(memberCardNo) {
+    const card = normalizeMemberCardInput(memberCardNo);
+    return buildApiUrl(
+      "action=points_balance&card=" + encodeURIComponent(card)
+      + "&memberCardNo=" + encodeURIComponent(card)
+    );
+  }
+
+  function resolveCardForPoints() {
+    return normalizeMemberCardInput(
+      document.getElementById("pointsMemberCardNo").value
+      || document.getElementById("memberCardNo").value
+      || cachedCardNo
+      || getSavedMemberCard()
+    );
+  }
+
+  function syncPointsCardInputs(card) {
+    const c = normalizeMemberCardInput(card);
+    if (!c) return;
+    document.getElementById("pointsMemberCardNo").value = c;
+    document.getElementById("memberCardNo").value = c;
+  }
+
   async function fetchJsonWithCorsFallback(url) {
     const urlsToTry = [url, CORS_PROXY_PREFIX + encodeURIComponent(url)];
     let lastError = null;
@@ -1546,30 +1766,49 @@
   }
 
   function setSearchMode(mode) {
+    const isOrder = mode === "order";
     const isCard = mode === "card";
-    document.getElementById("tabOrder").classList.toggle("is-active", !isCard);
+    const isPoints = mode === "points";
+
+    document.getElementById("tabOrder").classList.toggle("is-active", isOrder);
     document.getElementById("tabCard").classList.toggle("is-active", isCard);
-    document.getElementById("tabOrder").setAttribute("aria-selected", isCard ? "false" : "true");
+    document.getElementById("tabPoints").classList.toggle("is-active", isPoints);
+    document.getElementById("tabOrder").setAttribute("aria-selected", isOrder ? "true" : "false");
     document.getElementById("tabCard").setAttribute("aria-selected", isCard ? "true" : "false");
-    document.getElementById("panelOrder").classList.toggle("is-hidden", isCard);
+    document.getElementById("tabPoints").setAttribute("aria-selected", isPoints ? "true" : "false");
+    document.getElementById("panelOrder").classList.toggle("is-hidden", !isOrder);
     document.getElementById("panelCard").classList.toggle("is-hidden", !isCard);
+    document.getElementById("panelPoints").classList.toggle("is-hidden", !isPoints);
 
     const pageTitle = document.getElementById("pageTitle");
     const pageSub = document.getElementById("pageSub");
+    const container = document.querySelector(".container");
+
     if (isCard) {
       pageTitle.innerText = "會員卡號查訂單";
       pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 讀取後台試算表「訂單」歷史紀錄</span>';
-      document.querySelector(".container").classList.toggle(
+      container.classList.toggle(
         "has-wide-result",
         cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
+      );
+    } else if (isPoints) {
+      pageTitle.innerText = "查詢紅利點數";
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 讀取試算表「紅利紀錄」可用餘額與到期日</span>';
+      const cardVal = resolveCardForPoints();
+      if (isValidMemberCardNo(cardVal)) {
+        syncPointsCardInputs(cardVal);
+      }
+      container.classList.toggle(
+        "has-wide-result",
+        document.getElementById("pointsResultBox").style.display !== "none"
       );
     } else {
       pageTitle.innerText = "訂單查詢";
       pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 讀取試算表「工作表1」配送進度與商品狀態</span>';
-      document.querySelector(".container").classList.remove("has-wide-result");
+      container.classList.remove("has-wide-result");
     }
 
-    if (isCard) {
+    if (isCard || isPoints) {
       openedFromCardList = false;
       document.getElementById("resultBackWrap").style.display = "none";
     }
@@ -1581,12 +1820,181 @@
       if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
       else params.delete("card");
       params.delete("orderId");
+    } else if (isPoints) {
+      params.set("mode", "points");
+      const cardVal = resolveCardForPoints();
+      if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
+      else params.delete("card");
+      params.delete("orderId");
     } else {
       params.delete("mode");
-      params.delete("card");
+      if (!params.get("orderId")) params.delete("card");
     }
     const qs = params.toString();
     history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
+  }
+
+  function renderPointsRules(rules) {
+    const r = rules || {};
+    const spend = r.spendPerPoint != null ? r.spendPerPoint : 100;
+    const value = r.pointValue != null ? r.pointValue : 1;
+    const minNet = r.minRedeemNet != null ? r.minRedeemNet : 199;
+    const days = r.expireDays != null ? r.expireDays : 365;
+    const listEl = document.getElementById("rPointsRules");
+    listEl.innerHTML = "";
+    [
+      "消費滿 NT$" + spend + " 集 1 點",
+      "1 點可折 NT$" + value,
+      "商品淨額滿 NT$" + minNet + " 才可折抵（不含運費）",
+      "點數自發放日起 " + days + " 天內有效",
+      "訂單狀態改為「已確認」後才會入帳"
+    ].forEach(function(line) {
+      const li = document.createElement("li");
+      li.innerText = line;
+      listEl.appendChild(li);
+    });
+  }
+
+  function renderPointsLots(lots) {
+    const tbody = document.getElementById("rPointsLotsBody");
+    const wrap = document.getElementById("pointsLotsWrap");
+    const empty = document.getElementById("pointsEmptyLots");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(lots) || !lots.length) {
+      wrap.style.display = "none";
+      empty.style.display = "block";
+      return;
+    }
+
+    empty.style.display = "none";
+    wrap.style.display = "block";
+    lots.forEach(function(lot) {
+      const tr = document.createElement("tr");
+      const tdDate = document.createElement("td");
+      tdDate.innerText = lot.date || "—";
+      const tdRemain = document.createElement("td");
+      tdRemain.innerText = String(lot.remaining != null ? lot.remaining : 0);
+      const tdExpire = document.createElement("td");
+      tdExpire.innerText = lot.expireDate || "—";
+      tr.appendChild(tdDate);
+      tr.appendChild(tdRemain);
+      tr.appendChild(tdExpire);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function showPointsResult(data) {
+    const balance = Math.max(0, Math.floor(Number(data.balance) || 0));
+    const discount = Math.max(0, Math.floor(Number(data.discountAmount != null ? data.discountAmount : balance) || 0));
+    const card = normalizeMemberCardInput(data.memberCardNo || resolveCardForPoints());
+
+    document.getElementById("rPointsBalance").innerText = String(balance);
+    document.getElementById("rPointsDiscount").innerText = "可折抵 NT$" + discount;
+    document.getElementById("rPointsCardNo").innerText = card ? formatMemberCardDisplay(card) : "—";
+
+    const expireEl = document.getElementById("rPointsExpire");
+    const nextDate = String(data.nextExpireDate || "").trim();
+    const nextPts = Math.floor(Number(data.nextExpirePoints) || 0);
+    if (nextDate && nextPts > 0 && balance > 0) {
+      expireEl.innerText = "最近到期：" + nextDate + "（" + nextPts + " 點）";
+      expireEl.style.display = "inline-flex";
+    } else {
+      expireEl.style.display = "none";
+    }
+
+    renderPointsLots(data.lots);
+    renderPointsRules(data.rules);
+
+    document.getElementById("pointsResultBox").style.display = "block";
+    document.getElementById("pointsErrorBox").style.display = "none";
+    document.querySelector(".container").classList.add("has-wide-result");
+  }
+
+  function goToPointsTab(prefillCard, autoSearch) {
+    const card = normalizeMemberCardInput(
+      prefillCard || cachedCardNo || document.getElementById("memberCardNo").value || getSavedMemberCard()
+    );
+    if (isValidMemberCardNo(card)) {
+      syncPointsCardInputs(card);
+      saveMemberCard(card);
+    }
+    setSearchMode("points");
+    if (autoSearch !== false && isValidMemberCardNo(card)) {
+      searchByPoints();
+    } else {
+      document.getElementById("pointsMemberCardNo").focus();
+    }
+  }
+
+  function goToCardTab(prefillCard, autoSearch) {
+    const card = normalizeMemberCardInput(
+      prefillCard || document.getElementById("pointsMemberCardNo").value || cachedCardNo || getSavedMemberCard()
+    );
+    if (isValidMemberCardNo(card)) {
+      syncPointsCardInputs(card);
+      saveMemberCard(card);
+    }
+    setSearchMode("card");
+    if (autoSearch !== false && isValidMemberCardNo(card)) {
+      searchByCard();
+    } else {
+      document.getElementById("memberCardNo").focus();
+    }
+  }
+
+  async function searchByPoints() {
+    const cardInput = document.getElementById("pointsMemberCardNo");
+    const card = normalizeMemberCardInput(cardInput.value);
+    cardInput.value = card;
+
+    const resultBox = document.getElementById("pointsResultBox");
+    const errorBox = document.getElementById("pointsErrorBox");
+    const btn = document.getElementById("btnSearchPoints");
+
+    resultBox.style.display = "none";
+    errorBox.style.display = "none";
+    document.getElementById("pointsLotsWrap").style.display = "none";
+    document.getElementById("pointsEmptyLots").style.display = "none";
+
+    if (!isValidMemberCardNo(card)) {
+      errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（純數字）";
+      errorBox.style.display = "block";
+      document.querySelector(".container").classList.remove("has-wide-result");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "查詢中…";
+
+    try {
+      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card));
+      if (data.error) {
+        throw new Error(data.message || "查詢失敗");
+      }
+
+      saveMemberCard(card);
+      syncPointsCardInputs(card);
+      showPointsResult(data);
+
+      const params = new URLSearchParams(window.location.search);
+      params.set("mode", "points");
+      params.set("card", card);
+      params.delete("orderId");
+      history.replaceState(null, "", "?" + params.toString());
+    } catch (err) {
+      const msg = err && err.message ? String(err.message) : "查詢失敗";
+      if (/points_balance|action=/.test(msg) || /請使用 action/.test(msg)) {
+        errorBox.innerText = "⚠ 紅利查詢 API 尚未部署，請聯絡店家更新 GAS 後再試";
+      } else {
+        errorBox.innerText = "⚠ " + msg;
+      }
+      errorBox.style.display = "block";
+      document.querySelector(".container").classList.remove("has-wide-result");
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "查詢紅利點數";
+    }
   }
 
   function showOrderResultFromData(data, options) {
@@ -1797,6 +2205,30 @@
     document.getElementById("tabCard").addEventListener("click", function() {
       setSearchMode("card");
     });
+    document.getElementById("tabPoints").addEventListener("click", function() {
+      setSearchMode("points");
+    });
+    document.getElementById("navPoints").addEventListener("click", function(e) {
+      e.preventDefault();
+      goToPointsTab(null, true);
+    });
+    document.getElementById("linkToPointsTab").addEventListener("click", function(e) {
+      e.preventDefault();
+      goToPointsTab(cachedCardNo || document.getElementById("memberCardNo").value, true);
+    });
+    document.getElementById("linkToCardTabFromPoints").addEventListener("click", function(e) {
+      e.preventDefault();
+      goToCardTab(null, true);
+    });
+    document.getElementById("linkToCardTabFromResult").addEventListener("click", function(e) {
+      e.preventDefault();
+      goToCardTab(document.getElementById("rPointsCardNo").innerText.replace(/\s/g, ""), true);
+    });
+    document.getElementById("linkToOrderTabFromPoints").addEventListener("click", function(e) {
+      e.preventDefault();
+      setSearchMode("order");
+      document.getElementById("orderId").focus();
+    });
     document.getElementById("linkToOrderTab").addEventListener("click", function(e) {
       e.preventDefault();
       setSearchMode("order");
@@ -1804,6 +2236,7 @@
     });
     document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
+    document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
     });
@@ -1811,6 +2244,15 @@
       if (e.key === "Enter") {
         e.preventDefault();
         searchByCard();
+      }
+    });
+    document.getElementById("pointsMemberCardNo").addEventListener("input", function(e) {
+      e.target.value = normalizeMemberCardInput(e.target.value);
+    });
+    document.getElementById("pointsMemberCardNo").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        searchByPoints();
       }
     });
     document.getElementById("orderId").addEventListener("input", function(e) {
@@ -1829,7 +2271,7 @@
     const cardToUse = isValidMemberCardNo(cardParam) ? cardParam : saved;
 
     if (cardToUse) {
-      document.getElementById("memberCardNo").value = cardToUse;
+      syncPointsCardInputs(cardToUse);
       if (isValidMemberCardNo(cardToUse)) {
         saveMemberCard(cardToUse);
       }
@@ -1842,6 +2284,11 @@
       setSearchMode("order");
       document.getElementById("orderId").value = toOrderStatusQueryId(orderIdParam);
       openOrderDetail(orderIdParam);
+    } else if (mode === "points") {
+      setSearchMode("points");
+      if (isValidMemberCardNo(cardToUse)) {
+        searchByPoints();
+      }
     } else if (mode === "card") {
       setSearchMode("card");
       if (isValidMemberCardNo(cardToUse)) {
