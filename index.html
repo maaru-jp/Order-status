@@ -1038,6 +1038,8 @@
         <label for="orderId">請輸入訂單編號（共五碼數字）</label>
         <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off" inputmode="numeric">
         <p class="panel-hint">不知道編號？可改用 <a href="#" id="linkToCardTab">會員卡號查全部訂單</a>，點選訂單後自動帶入進度。</p>
+        <label for="orderLookupCard" style="margin-top:4px;">會員卡號（選填，協助查詢）</label>
+        <input type="text" id="orderLookupCard" class="card-input" maxlength="13" inputmode="numeric" placeholder="若單用編號查不到，可填 13 碼卡號" autocomplete="off">
         <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
       </div>
 
@@ -1224,13 +1226,30 @@
     return /13\s*碼|會員卡號|memberCard/i.test(String(message || ""));
   }
 
-  function formatOrderSearchError(message) {
+  function getOrderLookupCard() {
+    const inline = normalizeMemberCardInput(
+      (document.getElementById("orderLookupCard") || {}).value || ""
+    );
+    if (isValidMemberCardNo(inline)) return inline;
+    return getSavedMemberCard();
+  }
+
+  function isProductsApiResponse(data) {
+    return !!(data && Array.isArray(data.products));
+  }
+
+  function formatOrderSearchError(message, context) {
     const msg = String(message || "").trim();
+    const ctx = context || {};
+    if (ctx.apiNotDeployed) {
+      return "⚠ 後端尚未啟用「訂單編號查詢」API。請店家至 Apps Script 貼上最新 Code.gs 並重新部署；"
+        + "或於上方填寫會員卡號後再查，亦可改用「會員卡號查訂單」。";
+    }
     if (!msg || isMisleadingOrderLookupError(msg)) {
-      return "⚠ 查無此訂單編號，請確認是否輸入正確";
+      return "⚠ 查無此訂單編號。請確認五碼編號、試算表「訂單」或「工作表1」是否有資料，或填寫會員卡號再試。";
     }
     if (/查無|找不到/.test(msg)) {
-      return "⚠ 查無此訂單編號，請確認是否輸入正確";
+      return "⚠ 查無此訂單編號。請確認五碼編號是否正確，或填寫會員卡號後再查。";
     }
     return "⚠ " + msg;
   }
@@ -1318,14 +1337,50 @@
     return data;
   }
 
+  function findOrderInListById(orders, queryId) {
+    return (orders || []).find(function(o) {
+      const oid = String(o.id || "").trim();
+      const digitsA = oid.replace(/\D/g, "");
+      const digitsB = queryId.replace(/\D/g, "");
+      if (digitsA && digitsB && digitsA === digitsB) return true;
+      return toOrderStatusQueryId(oid) === queryId;
+    }) || null;
+  }
+
   async function fetchOrderStatusData(orderId) {
     const queryId = toOrderStatusQueryId(orderId);
     let lastError = null;
+    let apiNotDeployed = false;
+
+    const cached = findOrderInCardCache(queryId);
+    if (cached) {
+      return buildOrderStatusFromCustomerOrder(cached);
+    }
+
+    const card = getOrderLookupCard();
+    if (isValidMemberCardNo(card)) {
+      try {
+        const listData = await fetchOrdersByCard(card);
+        const ord = findOrderInListById(listData.orders, queryId);
+        if (ord) {
+          return buildOrderStatusFromCustomerOrder(ord);
+        }
+        lastError = new Error("查無此訂單編號");
+      } catch (err) {
+        if (!isMisleadingOrderLookupError(err && err.message)) {
+          lastError = err;
+        }
+      }
+    }
 
     const urls = buildOrderStatusFetchUrls(queryId);
     for (let i = 0; i < urls.length; i++) {
       try {
         const data = await fetchJsonWithCorsFallback(urls[i]);
+        if (isProductsApiResponse(data)) {
+          apiNotDeployed = true;
+          continue;
+        }
         if (data && data.error) {
           const apiMsg = data.message || "查無此訂單編號";
           if (!isMisleadingOrderLookupError(apiMsg)) {
@@ -1343,30 +1398,9 @@
       }
     }
 
-    const cached = findOrderInCardCache(queryId);
-    if (cached) {
-      return buildOrderStatusFromCustomerOrder(cached);
-    }
-
-    const card = getSavedMemberCard();
-    if (isValidMemberCardNo(card)) {
-      try {
-        const listData = await fetchOrdersByCard(card);
-        const ord = (listData.orders || []).find(function(o) {
-          return toOrderStatusQueryId(o.id) === queryId;
-        });
-        if (ord) {
-          return buildOrderStatusFromCustomerOrder(ord);
-        }
-        lastError = new Error("查無此訂單編號");
-      } catch (err) {
-        if (!isMisleadingOrderLookupError(err && err.message)) {
-          lastError = err;
-        }
-      }
-    }
-
-    throw lastError || new Error("查無此訂單編號");
+    const err = lastError || new Error("查無此訂單編號");
+    err.apiNotDeployed = apiNotDeployed;
+    throw err;
   }
 
   function buildCustomerOrdersUrl(memberCardNo) {
@@ -1655,6 +1689,13 @@
     document.getElementById("orderId").addEventListener("input", function(e) {
       e.target.value = String(e.target.value || "").replace(/\D/g, "").slice(0, 5);
     });
+    document.getElementById("orderLookupCard").addEventListener("input", function(e) {
+      e.target.value = normalizeMemberCardInput(e.target.value);
+    });
+    const savedCard = getSavedMemberCard();
+    if (savedCard) {
+      document.getElementById("orderLookupCard").value = savedCard;
+    }
     document.getElementById("orderId").addEventListener("keydown", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -2093,6 +2134,10 @@
 
     const queryId = toOrderStatusQueryId(orderId);
     document.getElementById("orderId").value = queryId;
+    const lookupCard = getOrderLookupCard();
+    if (isValidMemberCardNo(lookupCard)) {
+      saveMemberCard(lookupCard);
+    }
 
     const params = new URLSearchParams(window.location.search);
     params.delete("mode");
@@ -2110,7 +2155,9 @@
       showOrderResultFromData(data, { showBack: openedFromCardList });
       resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
-      errorBox.innerText = formatOrderSearchError(err && err.message);
+      errorBox.innerText = formatOrderSearchError(err && err.message, {
+        apiNotDeployed: !!(err && err.apiNotDeployed)
+      });
       errorBox.style.display = "block";
       document.getElementById("cardErrorBox").style.display = "none";
     } finally {
