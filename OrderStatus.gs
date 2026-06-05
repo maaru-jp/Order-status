@@ -4,6 +4,7 @@
  * 資料來源試算表：MAARU 日本萌物GO訂單進度資料表
  * https://docs.google.com/spreadsheets/d/1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw/edit
  *
+ * 網頁應用程式部署 ID：AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ
  * 函式庫 Script ID：12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc
  * 函式庫網址：https://script.google.com/macros/library/d/12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc/15
  *
