@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAARU 訂單查詢</title>
+  <title>MAARU 訂單進度查詢</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -694,197 +694,6 @@
       letter-spacing: 0.04em;
     }
 
-    .mode-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .mode-tab {
-      padding: 11px 10px;
-      border-radius: 12px;
-      border: 1px solid var(--jp-border);
-      background: #fff;
-      color: var(--jp-ink-soft);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .mode-tab.is-active {
-      color: #fff;
-      border-color: transparent;
-      background: linear-gradient(135deg, var(--jp-matcha) 0%, var(--jp-matcha-deep) 100%);
-      box-shadow: 0 4px 12px rgba(95, 133, 116, 0.25);
-    }
-
-    .mode-tab:first-child.is-active {
-      background: linear-gradient(135deg, var(--jp-sakura) 0%, var(--jp-sakura-deep) 100%);
-      box-shadow: 0 4px 12px rgba(214, 123, 123, 0.25);
-    }
-
-    .mode-panel { display: block; }
-    .mode-panel.is-hidden { display: none; }
-
-    .btn-search-matcha {
-      background: linear-gradient(135deg, var(--jp-matcha) 0%, var(--jp-matcha-deep) 100%);
-      box-shadow: 0 6px 14px rgba(95, 133, 116, 0.28);
-    }
-
-    .btn-search-matcha:hover {
-      box-shadow: 0 8px 18px rgba(95, 133, 116, 0.34);
-    }
-
-    input.card-input {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      letter-spacing: 0.12em;
-    }
-
-    .card-hint {
-      font-size: 11px;
-      color: var(--jp-ink-soft);
-      margin: -6px 0 12px;
-      line-height: 1.5;
-    }
-
-    .card-summary {
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: var(--jp-radius);
-      border: 1px solid rgba(125, 157, 140, 0.35);
-      background: linear-gradient(180deg, rgba(125, 157, 140, 0.08) 0%, #fff 100%);
-    }
-
-    .card-summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .card-summary-item {
-      background: #fff;
-      border: 1px solid var(--jp-border);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-
-    .card-summary-item .label {
-      font-size: 11px;
-      color: var(--jp-ink-soft);
-    }
-
-    .card-summary-item .value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #3f3a36;
-      margin-top: 4px;
-    }
-
-    .order-list {
-      margin-top: 14px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .order-list-item {
-      border: 1px solid var(--jp-border);
-      border-radius: 14px;
-      background: #fff;
-      padding: 14px;
-      cursor: pointer;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-    }
-
-    .order-list-item:hover {
-      border-color: var(--jp-sakura);
-      box-shadow: 0 6px 16px rgba(90, 72, 60, 0.08);
-      transform: translateY(-1px);
-    }
-
-    .order-list-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .order-list-id {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: #3f3a36;
-    }
-
-    .order-list-date {
-      font-size: 11px;
-      color: var(--jp-ink-soft);
-      margin-top: 2px;
-    }
-
-    .order-status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      border: 1px solid var(--jp-border);
-      background: #fff;
-      white-space: nowrap;
-    }
-
-    .order-status-pill.done { color: var(--jp-matcha-deep); border-color: rgba(125, 157, 140, 0.45); background: rgba(125, 157, 140, 0.08); }
-    .order-status-pill.cancel { color: #9a6b6b; border-color: #e8caca; background: #fff5f5; }
-    .order-status-pill.active { color: #8a6d3b; border-color: #ead9b0; background: #fffaf0; }
-
-    .order-list-meta {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--jp-ink-soft);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .order-list-action {
-      margin-top: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--jp-sakura-deep);
-    }
-
-    .card-empty {
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px dashed var(--jp-border);
-      background: #fff;
-      font-size: 13px;
-      color: var(--jp-ink-soft);
-      text-align: center;
-    }
-
-    .card-links {
-      margin-top: 12px;
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .card-links a {
-      color: var(--jp-matcha-deep);
-      text-decoration: underline;
-    }
-
-    .error-card {
-      border-color: #e8caca;
-      background: #fff7f7;
-      color: #9a4f4f;
-    }
-
     /* 手機版 */
     @media (max-width: 768px) {
       .app {
@@ -931,10 +740,6 @@
       .progress-step {
         font-size: 11px;
       }
-
-      .card-summary-grid {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -948,7 +753,7 @@
     <!-- 🔧 把這張圖換成你的 MAARU Logo -->
     <img src="S__283426825.jpg">
     <h2>MAARU 日本萌GO</h2>
-    <p>日本代購｜訂單查詢</p>
+    <p>日本代購｜訂單進度查詢</p>
   </aside>
 
   <!-- 右側查詢功能 -->
@@ -956,23 +761,17 @@
     <div class="container">
 
       <div class="page-head">
-        <h1 id="pageTitle">訂單查詢</h1>
-        <div class="page-sub" id="pageSub">
+        <h1>訂單進度查詢</h1>
+        <div class="page-sub">
           <span class="page-sub-key">輸入訂單編號</span>
           <span class="page-sub-desc"> 查看配送進度與商品狀態</span>
         </div>
       </div>
 
-      <div class="mode-tabs" role="tablist" aria-label="查詢方式">
-        <button type="button" id="tabOrder" class="mode-tab is-active" role="tab" aria-selected="true">訂單編號查進度</button>
-        <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">會員卡號查訂單</button>
-      </div>
-
-      <div id="panelOrder" class="mode-panel">
       <div class="search-panel">
-        <label for="orderId">請輸入訂單編號（共五碼數字）</label>
-        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off">
-        <button type="button" class="btn-search" onclick="searchOrder()">查詢訂單</button>
+        <label>請輸入訂單編號（共五碼數字）</label>
+        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001">
+        <button class="btn-search" onclick="searchOrder()">查詢訂單</button>
       </div>
 
       <div class="result" id="resultBox">
@@ -1024,38 +823,6 @@
       <div class="error" id="errorBox">
         ⚠ 查無此訂單編號，請確認是否輸入正確
       </div>
-      </div>
-
-      <div id="panelCard" class="mode-panel is-hidden">
-        <div class="search-panel">
-          <label for="memberCardNo">請輸入會員卡號（13 碼純數字）</label>
-          <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-          <p class="card-hint">卡號由店家於下單後提供。查詢全部歷史訂單後，點選任一筆可查看配送進度。</p>
-          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢我的訂單</button>
-        </div>
-
-        <div class="card-summary" id="cardResultBox" style="display:none;">
-          <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">會員卡號 <span id="rCardNo" class="order-list-id"></span></div>
-          <div class="card-summary-grid">
-            <div class="card-summary-item">
-              <div class="label">訂單筆數</div>
-              <div class="value" id="rOrderCount">0</div>
-            </div>
-            <div class="card-summary-item">
-              <div class="label">待結清合計</div>
-              <div class="value" id="rTotalDue">NT$0</div>
-            </div>
-          </div>
-          <div class="order-list" id="rOrderList"></div>
-          <div class="card-links">
-            <a href="https://maaru-jp.github.io/ProductManagement2-main/index.html#/points" target="_blank" rel="noopener">查詢紅利點數 →</a>
-          </div>
-        </div>
-
-        <div class="error error-card" id="cardErrorBox" style="display:none;">
-          ⚠ 查詢失敗，請確認卡號是否正確
-        </div>
-      </div>
 
       <div class="footer">
         如有疑問請聯絡 MAARU LINE官方帳號
@@ -1067,296 +834,8 @@
 </div>
 
 <script>
-  // 與官網／後台同一支 GAS（Code.gs）
-  const API_URL = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec";
-  const CORS_PROXY_PREFIX = "https://corsproxy.io/?";
-  const MEMBER_CARD_KEY = "maarushop_member_card_v1";
+  const API_URL = "https://script.google.com/macros/s/AKfycby69CThnF5mE-ILJGhHr0iSCkBaqJKjY8tCpF69BNlW6FohHXXbMrTYvh9j4nj9jATJ/exec";
   const PROGRESS_STEPS = ["訂單成立", "集運中", "已抵台", "已出貨📦"];
-
-  function normalizeMemberCardInput(value) {
-    return String(value || "").replace(/\D/g, "").slice(0, 13);
-  }
-
-  function isValidMemberCardNo(card) {
-    return /^\d{13}$/.test(normalizeMemberCardInput(card));
-  }
-
-  function formatMemberCardDisplay(card) {
-    const c = normalizeMemberCardInput(card);
-    if (c.length !== 13) return c;
-    return c.slice(0, 4) + " " + c.slice(4, 8) + " " + c.slice(8);
-  }
-
-  function getSavedMemberCard() {
-    try {
-      return normalizeMemberCardInput(localStorage.getItem(MEMBER_CARD_KEY) || "");
-    } catch {
-      return "";
-    }
-  }
-
-  function saveMemberCard(card) {
-    try {
-      localStorage.setItem(MEMBER_CARD_KEY, normalizeMemberCardInput(card));
-    } catch {
-      // ignore
-    }
-  }
-
-  function toOrderStatusQueryId(id) {
-    const raw = String(id || "").trim();
-    const m = raw.match(/^ORD(\d+)$/i);
-    if (m) return String(parseInt(m[1], 10)).padStart(5, "0");
-    const digits = raw.replace(/\D/g, "");
-    if (digits) return digits.slice(-5).padStart(5, "0");
-    return raw;
-  }
-
-  function formatCustomerOrderDate(dateStr) {
-    if (!dateStr) return "—";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return String(dateStr).slice(0, 10);
-    return d.toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit" });
-  }
-
-  function orderStatusPillClass(status) {
-    const s = String(status || "").trim();
-    if (s === "已完成") return "done";
-    if (s === "已取消") return "cancel";
-    return "active";
-  }
-
-  function buildApiUrl(query) {
-    return API_URL + "?" + query + "&_t=" + Date.now();
-  }
-
-  function buildOrderStatusUrl(orderId) {
-    const queryId = toOrderStatusQueryId(orderId);
-    return buildApiUrl(
-      "action=order_status&orderId=" + encodeURIComponent(queryId)
-    );
-  }
-
-  function buildCustomerOrdersUrl(memberCardNo) {
-    const card = normalizeMemberCardInput(memberCardNo);
-    return buildApiUrl(
-      "action=customer_orders&card=" + encodeURIComponent(card)
-      + "&memberCardNo=" + encodeURIComponent(card)
-    );
-  }
-
-  async function fetchJsonWithCorsFallback(url) {
-    const urlsToTry = [url, CORS_PROXY_PREFIX + encodeURIComponent(url)];
-    let lastError = null;
-    for (const tryUrl of urlsToTry) {
-      try {
-        const res = await fetch(tryUrl, { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const text = await res.text();
-        if (text.trimStart().startsWith("<")) {
-          throw new Error("API 回傳 HTML，請確認 Code.gs 已重新部署");
-        }
-        return JSON.parse(text);
-      } catch (err) {
-        lastError = err;
-      }
-    }
-    throw lastError || new Error("無法連線");
-  }
-
-  function setSearchMode(mode) {
-    const isCard = mode === "card";
-    document.getElementById("tabOrder").classList.toggle("is-active", !isCard);
-    document.getElementById("tabCard").classList.toggle("is-active", isCard);
-    document.getElementById("tabOrder").setAttribute("aria-selected", isCard ? "false" : "true");
-    document.getElementById("tabCard").setAttribute("aria-selected", isCard ? "true" : "false");
-    document.getElementById("panelOrder").classList.toggle("is-hidden", isCard);
-    document.getElementById("panelCard").classList.toggle("is-hidden", !isCard);
-
-    const pageTitle = document.getElementById("pageTitle");
-    const pageSub = document.getElementById("pageSub");
-    if (isCard) {
-      pageTitle.innerText = "會員卡號查訂單";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查看全部歷史訂單</span>';
-    } else {
-      pageTitle.innerText = "訂單查詢";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 查看配送進度與商品狀態</span>';
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    if (isCard) params.set("mode", "card");
-    else params.delete("mode");
-    const qs = params.toString();
-    history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
-  }
-
-  function openOrderDetail(orderId) {
-    const queryId = toOrderStatusQueryId(orderId);
-    setSearchMode("order");
-    const input = document.getElementById("orderId");
-    input.value = queryId;
-
-    const params = new URLSearchParams(window.location.search);
-    params.delete("mode");
-    params.set("orderId", queryId);
-    history.replaceState(null, "", "?" + params.toString());
-
-    searchOrder();
-    input.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  function renderOrderList(orders) {
-    const listEl = document.getElementById("rOrderList");
-    listEl.innerHTML = "";
-
-    if (!orders.length) {
-      const empty = document.createElement("div");
-      empty.className = "card-empty";
-      empty.innerText = "目前尚無訂單紀錄";
-      listEl.appendChild(empty);
-      return;
-    }
-
-    orders.forEach(function(ord) {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "order-list-item";
-      item.setAttribute("aria-label", "查看訂單 " + ord.id + " 配送進度");
-
-      const top = document.createElement("div");
-      top.className = "order-list-top";
-
-      const left = document.createElement("div");
-      const idEl = document.createElement("div");
-      idEl.className = "order-list-id";
-      idEl.innerText = ord.id || "—";
-      const dateEl = document.createElement("div");
-      dateEl.className = "order-list-date";
-      dateEl.innerText = formatCustomerOrderDate(ord.date);
-      left.appendChild(idEl);
-      left.appendChild(dateEl);
-
-      const pill = document.createElement("span");
-      pill.className = "order-status-pill " + orderStatusPillClass(ord.status);
-      pill.innerText = ord.status || "待處理";
-
-      top.appendChild(left);
-      top.appendChild(pill);
-
-      const meta = document.createElement("div");
-      meta.className = "order-list-meta";
-      const itemCount = Array.isArray(ord.items) ? ord.items.length : 0;
-      meta.innerHTML = "<span>" + (itemCount ? itemCount + " 項商品" : "訂單明細") + "</span>"
-        + (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0
-          ? "<span>待結清 NT$" + ord.amountDue + "</span>"
-          : (ord.status === "已完成" ? "<span>已完成</span>" : ""));
-
-      const action = document.createElement("div");
-      action.className = "order-list-action";
-      action.innerText = "點擊查看配送進度 →";
-
-      item.appendChild(top);
-      item.appendChild(meta);
-      item.appendChild(action);
-      item.addEventListener("click", function() {
-        openOrderDetail(ord.id);
-      });
-
-      listEl.appendChild(item);
-    });
-  }
-
-  async function searchByCard() {
-    const cardInput = document.getElementById("memberCardNo");
-    const card = normalizeMemberCardInput(cardInput.value);
-    cardInput.value = card;
-
-    const resultBox = document.getElementById("cardResultBox");
-    const errorBox = document.getElementById("cardErrorBox");
-    const btn = document.getElementById("btnSearchCard");
-
-    resultBox.style.display = "none";
-    errorBox.style.display = "none";
-
-    if (!isValidMemberCardNo(card)) {
-      errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（純數字）";
-      errorBox.style.display = "block";
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = "查詢中…";
-
-    try {
-      const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card));
-      if (data.error) {
-        throw new Error(data.message || "查詢失敗");
-      }
-
-      saveMemberCard(card);
-      document.getElementById("rCardNo").innerText = formatMemberCardDisplay(data.memberCardNo || card);
-      document.getElementById("rOrderCount").innerText = String(data.orderCount || 0);
-      document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
-      renderOrderList(Array.isArray(data.orders) ? data.orders : []);
-      resultBox.style.display = "block";
-    } catch (err) {
-      const msg = err && err.message ? String(err.message) : "查詢失敗";
-      if (/至少.*姓名|客戶姓名/.test(msg)) {
-        errorBox.innerText = "⚠ 查詢服務尚未更新為會員卡號模式，請聯絡店家重新部署 API";
-      } else {
-        errorBox.innerText = "⚠ " + msg;
-      }
-      errorBox.style.display = "block";
-    } finally {
-      btn.disabled = false;
-      btn.innerText = "查詢我的訂單";
-    }
-  }
-
-  function initPage() {
-    document.getElementById("tabOrder").addEventListener("click", function() {
-      setSearchMode("order");
-    });
-    document.getElementById("tabCard").addEventListener("click", function() {
-      setSearchMode("card");
-    });
-    document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
-    document.getElementById("memberCardNo").addEventListener("input", function(e) {
-      e.target.value = normalizeMemberCardInput(e.target.value);
-    });
-    document.getElementById("memberCardNo").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        searchByCard();
-      }
-    });
-    document.getElementById("orderId").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        searchOrder();
-      }
-    });
-
-    const saved = getSavedMemberCard();
-    if (saved) {
-      document.getElementById("memberCardNo").value = saved;
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const mode = (params.get("mode") || "").toLowerCase();
-    const orderIdParam = params.get("orderId") || "";
-
-    if (mode === "card") {
-      setSearchMode("card");
-      if (isValidMemberCardNo(saved)) {
-        searchByCard();
-      }
-    } else if (orderIdParam) {
-      openOrderDetail(orderIdParam);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", initPage);
 
   function isUrlLike(text) {
     const v = String(text || "").trim();
@@ -1741,58 +1220,36 @@
     });
   }
 
-  async function searchOrder() {
+  function searchOrder() {
     const orderId = document.getElementById("orderId").value.trim();
     const resultBox = document.getElementById("resultBox");
     const errorBox = document.getElementById("errorBox");
-    const btn = document.querySelector("#panelOrder .btn-search");
 
     resultBox.style.display = "none";
     errorBox.style.display = "none";
 
     if (!orderId) {
-      errorBox.innerText = "⚠ 請輸入訂單編號";
       errorBox.style.display = "block";
       return;
     }
 
-    const queryId = toOrderStatusQueryId(orderId);
-    document.getElementById("orderId").value = queryId;
-
-    const params = new URLSearchParams(window.location.search);
-    params.delete("mode");
-    params.set("orderId", queryId);
-    history.replaceState(null, "", "?" + params.toString());
-
-    if (btn) {
-      btn.disabled = true;
-      btn.dataset.prevLabel = btn.innerText;
-      btn.innerText = "查詢中…";
-    }
-
-    try {
-      const data = await fetchJsonWithCorsFallback(buildOrderStatusUrl(queryId));
-      if (data.error) {
-        throw new Error(data.message || "查無此訂單編號");
-      }
-      document.getElementById("rOrderId").innerText = data.orderId || queryId;
-      renderProduct(data.product, data.items, data.itemSummary);
-      document.getElementById("rNote").innerText = formatOrderNote(data.note);
-      const history = normalizeHistory(data.history, data.status, data.updated);
-      renderHistory(history, data.items, data.itemSummary);
-      resultBox.style.display = "block";
-    } catch (err) {
-      const msg = err && err.message ? String(err.message) : "查詢失敗";
-      errorBox.innerText = /查無|找不到/.test(msg)
-        ? "⚠ 查無此訂單編號，請確認是否輸入正確"
-        : "⚠ " + msg;
-      errorBox.style.display = "block";
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = btn.dataset.prevLabel || "查詢訂單";
-      }
-    }
+    fetch(API_URL + "?orderId=" + encodeURIComponent(orderId))
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          errorBox.style.display = "block";
+        } else {
+          document.getElementById("rOrderId").innerText = data.orderId;
+          renderProduct(data.product, data.items, data.itemSummary);
+          document.getElementById("rNote").innerText = formatOrderNote(data.note);
+          const history = normalizeHistory(data.history, data.status, data.updated);
+          renderHistory(history, data.items, data.itemSummary);
+          resultBox.style.display = "block";
+        }
+      })
+      .catch(() => {
+        errorBox.style.display = "block";
+      });
   }
 </script>
 
