@@ -775,6 +775,102 @@
       letter-spacing: 0.12em;
     }
 
+    .card-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card-input-row .card-input {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      width: auto;
+    }
+
+    .btn-card-action {
+      flex-shrink: 0;
+      align-self: stretch;
+      padding: 0 14px;
+      min-width: 52px;
+      border-radius: 12px;
+      border: 1px solid var(--jp-border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--jp-ink);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-card-action:hover {
+      border-color: var(--jp-sakura);
+      background: #fff9f7;
+    }
+
+    .btn-card-action.is-done {
+      border-color: rgba(95, 133, 116, 0.5);
+      color: var(--jp-matcha-deep);
+      background: rgba(125, 157, 140, 0.1);
+    }
+
+    #panelCard .btn-card-paste:hover,
+    #panelCard .btn-card-fill:hover,
+    #panelCard .btn-card-copy-inline:hover {
+      border-color: var(--jp-matcha);
+      background: rgba(125, 157, 140, 0.08);
+    }
+
+    #panelPoints .btn-card-paste:hover,
+    #panelPoints .btn-card-fill:hover,
+    #panelPoints .btn-card-copy-inline:hover {
+      border-color: var(--jp-amber);
+      background: var(--jp-amber-soft);
+    }
+
+    .card-quick-bar {
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-bottom: 10px;
+      padding: 9px 11px;
+      border-radius: 11px;
+      border: 1px dashed var(--jp-border);
+      background: #fff;
+      font-size: 11px;
+      color: var(--jp-ink-soft);
+    }
+
+    .card-quick-bar.is-visible {
+      display: flex;
+    }
+
+    .card-quick-bar .card-saved-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--jp-ink);
+      letter-spacing: 0.08em;
+    }
+
+    .card-no-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-card-copy-inline {
+      padding: 3px 10px;
+      min-width: 0;
+      font-size: 11px;
+      border-radius: 999px;
+    }
+
     .card-hint,
     .panel-hint {
       font-size: 11px;
@@ -1410,14 +1506,29 @@
       <div id="panelCard" class="mode-panel is-hidden">
         <div class="search-panel">
           <label for="memberCardNo">請輸入會員卡號（13 碼純數字）</label>
-          <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-          <p class="card-hint">卡號由闆闆於下單完成後提供。；點選訂單可查看配送進度。</p>
+          <div class="card-input-row">
+            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
+            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
+          </div>
+          <div class="card-quick-bar" id="cardQuickBarCard" aria-live="polite">
+            <span>已記憶卡號</span>
+            <span class="card-saved-value" id="cardSavedDisplayCard"></span>
+            <button type="button" class="btn-card-action btn-card-fill" data-fill-target="memberCardNo">填入</button>
+            <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardCard">複製</button>
+          </div>
+          <p class="card-hint">卡號於顧客完成第一筆訂單後提供；從 LINE 複製後點「貼上」即可；點選訂單可查看配送進度。</p>
           <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a>。</p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢我的訂單</button>
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
-          <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">會員卡號 <span id="rCardNo" class="order-list-id"></span></div>
+          <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">
+            會員卡號
+            <span class="card-no-row">
+              <span id="rCardNo" class="order-list-id"></span>
+              <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
+            </span>
+          </div>
           <div class="card-summary-grid">
             <div class="card-summary-item">
               <div class="label">訂單筆數</div>
@@ -1442,8 +1553,17 @@
       <div id="panelPoints" class="mode-panel is-hidden">
         <div class="search-panel">
           <label for="pointsMemberCardNo">請輸入會員卡號（13 碼純數字）</label>
-          <input type="text" id="pointsMemberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-          <p class="card-hint">卡號由闆闆於下單完成後提供。訂單狀態「已確認」後才會入帳紅利。</p>
+          <div class="card-input-row">
+            <input type="text" id="pointsMemberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
+            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="pointsMemberCardNo" title="從剪貼簿貼上卡號">貼上</button>
+          </div>
+          <div class="card-quick-bar" id="cardQuickBarPoints" aria-live="polite">
+            <span>已記憶卡號</span>
+            <span class="card-saved-value" id="cardSavedDisplayPoints"></span>
+            <button type="button" class="btn-card-action btn-card-fill" data-fill-target="pointsMemberCardNo">填入</button>
+            <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardPoints">複製</button>
+          </div>
+          <p class="card-hint">卡號於顧客完成第一筆訂單後提供；從 LINE 複製後點「貼上」即可。訂單狀態「已確認」後才會入帳紅利。</p>
           <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
           <button type="button" class="btn-search btn-search-amber" id="btnSearchPoints">查詢紅利點數</button>
         </div>
@@ -1455,7 +1575,10 @@
             <div class="points-hero-sub" id="rPointsDiscount">可折抵 NT$0</div>
           </div>
           <div class="points-meta">
-            <span>會員卡號 <span id="rPointsCardNo" class="order-list-id"></span></span>
+            <span class="card-no-row">
+              會員卡號 <span id="rPointsCardNo" class="order-list-id"></span>
+              <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultPoints" title="複製 13 碼卡號">複製</button>
+            </span>
             <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
           </div>
           <div class="points-lots-wrap" id="pointsLotsWrap" style="display:none;">
@@ -1535,6 +1658,131 @@
     } catch {
       // ignore
     }
+    updateSavedCardBars();
+  }
+
+  function flashActionButton(btn, doneText, resetText) {
+    if (!btn) return;
+    const original = resetText || btn.innerText;
+    btn.innerText = doneText || "完成";
+    btn.classList.add("is-done");
+    window.setTimeout(function() {
+      btn.innerText = original;
+      btn.classList.remove("is-done");
+    }, 1600);
+  }
+
+  async function copyTextToClipboard(text) {
+    const value = String(text || "").trim();
+    if (!value) throw new Error("沒有可複製的內容");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+    const ta = document.createElement("textarea");
+    ta.value = value;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    if (!ok) throw new Error("瀏覽器不支援複製");
+  }
+
+  async function copyMemberCardNumber(card, btn) {
+    const raw = normalizeMemberCardInput(card);
+    if (!isValidMemberCardNo(raw)) {
+      alert("尚無有效的 13 碼卡號可複製");
+      return;
+    }
+    try {
+      await copyTextToClipboard(raw);
+      flashActionButton(btn, "已複製", "複製");
+    } catch (err) {
+      alert("複製失敗，請長按卡號手動複製");
+    }
+  }
+
+  async function pasteMemberCardToInput(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    try {
+      let text = "";
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        text = await navigator.clipboard.readText();
+      } else {
+        alert("此瀏覽器不支援一鍵貼上，請在輸入框長按貼上");
+        return;
+      }
+      const card = normalizeMemberCardInput(text);
+      if (!card) {
+        alert("剪貼簿內沒有數字卡號，請先從 LINE 複製 13 碼卡號");
+        return;
+      }
+      input.value = card;
+      syncPointsCardInputs(card);
+      if (isValidMemberCardNo(card)) {
+        flashActionButton(btn, "已貼上", "貼上");
+      } else {
+        flashActionButton(btn, "請確認", "貼上");
+      }
+    } catch (err) {
+      alert("無法讀取剪貼簿，請在輸入框長按貼上（需允許剪貼簿權限）");
+    }
+  }
+
+  function fillMemberCardToInput(inputId) {
+    const saved = getSavedMemberCard();
+    if (!isValidMemberCardNo(saved)) return;
+    syncPointsCardInputs(saved);
+    const input = document.getElementById(inputId);
+    if (input) input.focus();
+  }
+
+  function updateSavedCardBars() {
+    const saved = getSavedMemberCard();
+    const visible = isValidMemberCardNo(saved);
+    const display = visible ? formatMemberCardDisplay(saved) : "";
+    ["cardQuickBarCard", "cardQuickBarPoints"].forEach(function(id) {
+      const bar = document.getElementById(id);
+      if (!bar) return;
+      bar.classList.toggle("is-visible", visible);
+    });
+    const cardDisp = document.getElementById("cardSavedDisplayCard");
+    const pointsDisp = document.getElementById("cardSavedDisplayPoints");
+    if (cardDisp) cardDisp.innerText = display;
+    if (pointsDisp) pointsDisp.innerText = display;
+  }
+
+  function bindCardClipboardActions() {
+    document.querySelectorAll(".btn-card-paste").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        pasteMemberCardToInput(btn.getAttribute("data-paste-target"), btn);
+      });
+    });
+    document.querySelectorAll(".btn-card-fill").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        fillMemberCardToInput(btn.getAttribute("data-fill-target"));
+      });
+    });
+    const saved = getSavedMemberCard();
+    document.getElementById("btnCopySavedCardCard").addEventListener("click", function() {
+      copyMemberCardNumber(saved, this);
+    });
+    document.getElementById("btnCopySavedCardPoints").addEventListener("click", function() {
+      copyMemberCardNumber(saved, this);
+    });
+    document.getElementById("btnCopyResultCard").addEventListener("click", function() {
+      copyMemberCardNumber(cachedCardNo, this);
+    });
+    document.getElementById("btnCopyResultPoints").addEventListener("click", function() {
+      copyMemberCardNumber(
+        normalizeMemberCardInput(document.getElementById("rPointsCardNo").innerText),
+        this
+      );
+    });
   }
 
   function toOrderStatusQueryId(id) {
@@ -2240,6 +2488,8 @@
     document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
+    bindCardClipboardActions();
+    updateSavedCardBars();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
     });
