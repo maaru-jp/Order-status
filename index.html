@@ -1137,6 +1137,18 @@
     );
   }
 
+  function isValidOrderStatusResponse(data) {
+    if (!data || data.error) return false;
+    if (Array.isArray(data.products)) return false;
+    return !!(
+      data.orderId ||
+      data.status ||
+      Array.isArray(data.history) ||
+      Array.isArray(data.items) ||
+      data.product
+    );
+  }
+
   function buildCustomerOrdersUrl(memberCardNo) {
     const card = normalizeMemberCardInput(memberCardNo);
     return buildApiUrl(
@@ -1780,6 +1792,11 @@
       const data = await fetchJsonWithCorsFallback(buildOrderStatusUrl(queryId));
       if (data.error) {
         throw new Error(data.message || "查無此訂單編號");
+      }
+      if (!isValidOrderStatusResponse(data)) {
+        throw new Error(
+          "訂單進度 API 尚未更新（回傳了商品資料）。請至 Apps Script 貼上最新 Code.gs 並重新部署網頁應用程式。"
+        );
       }
       document.getElementById("rOrderId").innerText = data.orderId || queryId;
       renderProduct(data.product, data.items, data.itemSummary);

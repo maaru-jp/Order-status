@@ -64,20 +64,25 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOI
 
 ---
 
-## Phase 3（待做）
+## Phase 3（已完成）
 
-- 官網 `/orders` redirect 到本頁
-- LINE／後台文案改為單一「訂單查詢」連結
+- 官網 Header「訂單查詢」改為外連本頁（`https://maaru-jp.github.io/Order-status/`）
+- 官網 `#/orders` 自動 redirect 至本頁（帶 `?mode=card`，若有記憶卡號則附 `card=`）
+- 官網 `#/points` 維持原紅利查詢頁
+- 後台文案改為「訂單查詢中心」單一連結
 
 ---
 
 ## 部署 checklist
 
-### 1. 後端（ProductManagement2）
+### 1. 後端（ProductManagement2）— 必做
 
-1. 確認 `Code.gs` 含 `order_status` action
-2. Apps Script → **重新部署**網頁應用程式（新版本）
-3. 後台同步訂單至試算表、補齊會員卡號
+1. 開啟試算表 → **擴充功能 → Apps Script**，確認 `Code.gs` 含 `order_status`（約第 45 行 `if (action === "order_status")`）
+2. **部署 → 管理部署 → 編輯 → 版本選「新版本」→ 部署**（只儲存不會更新線上 URL）
+3. 驗證：瀏覽器開  
+   `你的GAS_URL?action=order_status&orderId=00001`  
+   應回傳 `orderId`、`history` 等，**不可**回傳 `products` 陣列
+4. 後台同步訂單至試算表、補齊會員卡號
 
 ### 2. 前端（本 repo）
 
