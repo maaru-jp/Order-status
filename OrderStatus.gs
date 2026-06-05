@@ -26,7 +26,7 @@ var CONFIG = {
   spreadsheetId: "1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw",
   spreadsheetName: "MAARU 日本萌物GO訂單進度資料表",
   // 會員卡號查詢：ProductManagement2 後台試算表「訂單」分頁（留空則自動向 shopApiUrl 取得 ID）
-  shopSpreadsheetId: "",
+  shopSpreadsheetId: "14dqpeCDpKRA8_Ca2b5Phinh00ydPiaBh3MHKrVYMVOI",
   shopSpreadsheetName: "ProductManagement2（後台訂單試算表）",
   shopApiUrl: "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec",
   orderSheetName: "訂單",
