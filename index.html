@@ -1337,18 +1337,24 @@
       }
     });
 
+    const params = new URLSearchParams(window.location.search);
+    const cardParam = normalizeMemberCardInput(params.get("card") || "");
     const saved = getSavedMemberCard();
-    if (saved) {
-      document.getElementById("memberCardNo").value = saved;
+    const cardToUse = isValidMemberCardNo(cardParam) ? cardParam : saved;
+
+    if (cardToUse) {
+      document.getElementById("memberCardNo").value = cardToUse;
+      if (isValidMemberCardNo(cardToUse)) {
+        saveMemberCard(cardToUse);
+      }
     }
 
-    const params = new URLSearchParams(window.location.search);
     const mode = (params.get("mode") || "").toLowerCase();
     const orderIdParam = params.get("orderId") || "";
 
     if (mode === "card") {
       setSearchMode("card");
-      if (isValidMemberCardNo(saved)) {
+      if (isValidMemberCardNo(cardToUse)) {
         searchByCard();
       }
     } else if (orderIdParam) {
