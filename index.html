@@ -1257,7 +1257,7 @@
         <div class="search-panel">
           <label for="memberCardNo">請輸入會員卡號（13 碼純數字）</label>
           <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-          <p class="card-hint">卡號由店家於下單後提供。查詢全部歷史訂單後，點選任一筆可查看配送進度。</p>
+          <p class="card-hint">卡號由店家於下單後提供。資料來源為後台 ProductManagement2 試算表「訂單」分頁；點選訂單可查看配送進度。</p>
           <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a>。</p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢我的訂單</button>
         </div>
@@ -1558,7 +1558,7 @@
     const pageSub = document.getElementById("pageSub");
     if (isCard) {
       pageTitle.innerText = "會員卡號查訂單";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查看全部歷史訂單</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 讀取後台試算表「訂單」歷史紀錄</span>';
       document.querySelector(".container").classList.toggle(
         "has-wide-result",
         cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
@@ -1752,7 +1752,7 @@
       renderOrderList(cachedCardOrders);
 
       if (!cachedCardOrders.length) {
-        errorBox.innerText = "⚠ 此卡號在試算表尚無訂單紀錄。請確認後台該筆訂單已同步至「MAARU 日本萌物GO訂單進度資料表」的「訂單」分頁，且「會員卡號」欄已填寫 13 碼（建議前加 ' 強制文字）。";
+        errorBox.innerText = "⚠ 此卡號在後台試算表尚無訂單紀錄。請確認 ProductManagement2「訂單」分頁已同步該筆資料，且「會員卡號」欄已填寫 13 碼（建議前加 ' 強制文字）。";
         errorBox.style.display = "block";
         resultBox.style.display = "none";
         document.querySelector(".container").classList.remove("has-wide-result");

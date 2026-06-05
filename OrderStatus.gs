@@ -15,21 +15,88 @@
  * GET（輸入訂單編號僅讀「工作表1」+「歷程」）：
  * - action=order_status&orderId=00083
  * - ?orderId=00083（相容舊版）
- * - action=customer_orders&card=13碼會員卡號
+ * - action=customer_orders&card=13碼（讀 ProductManagement2 試算表「訂單」）
  * - action=api_meta
  *
  * 函式庫對外入口：handleDoGet_(e)、handleOnEdit_(e)、lookupOrderById_(orderId)
  */
 
 var CONFIG = {
+  // 五碼訂單編號查詢：工作表1 + 歷程
   spreadsheetId: "1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw",
   spreadsheetName: "MAARU 日本萌物GO訂單進度資料表",
-  // 若後台訂單在另一份試算表，填該試算表 ID（留空則只讀 spreadsheetId）
+  // 會員卡號查詢：ProductManagement2 後台試算表「訂單」分頁（留空則自動向 shopApiUrl 取得 ID）
   shopSpreadsheetId: "",
+  shopSpreadsheetName: "ProductManagement2（後台訂單試算表）",
+  shopApiUrl: "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec",
   orderSheetName: "訂單",
   legacyProgressSheetName: "工作表1",
   legacyHistorySheetName: "歷程"
 };
+
+/** 解析 ProductManagement2 試算表 ID（CONFIG → Script Properties → shopApiUrl 自動查詢） */
+function resolveShopSpreadsheetId_() {
+  var id = (CONFIG.shopSpreadsheetId || "").toString().trim();
+  if (id) return id;
+  try {
+    var prop = PropertiesService.getScriptProperties().getProperty("SHOP_SPREADSHEET_ID");
+    if (prop) return String(prop).trim();
+  } catch (propErr) {
+    Logger.log("[resolveShopSpreadsheetId_] " + propErr);
+  }
+  var base = (CONFIG.shopApiUrl || "").toString().trim();
+  if (!base) return "";
+  try {
+    var url = base + (base.indexOf("?") >= 0 ? "&" : "?") + "action=spreadsheet_info";
+    var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+    var data = JSON.parse(res.getContentText() || "{}");
+    if (data && data.spreadsheetId) {
+      id = String(data.spreadsheetId).trim();
+      try {
+        PropertiesService.getScriptProperties().setProperty("SHOP_SPREADSHEET_ID", id);
+      } catch (setErr) {
+        Logger.log("[resolveShopSpreadsheetId_] cache " + setErr);
+      }
+      return id;
+    }
+  } catch (fetchErr) {
+    Logger.log("[resolveShopSpreadsheetId_] fetch " + fetchErr);
+  }
+  return "";
+}
+
+/** 開啟 ProductManagement2 後台試算表 */
+function getShopSpreadsheet_() {
+  var id = resolveShopSpreadsheetId_();
+  if (!id) {
+    throw new Error("未設定 ProductManagement2 試算表 ID（請填 CONFIG.shopSpreadsheetId 或部署後台 Code.gs 以支援 spreadsheet_info）");
+  }
+  return SpreadsheetApp.openById(id);
+}
+
+/** 僅讀後台試算表「訂單」分頁（不含工作表1） */
+function getShopOrderSheet_(ss) {
+  ss = ss || getShopSpreadsheet_();
+  var name = (CONFIG.orderSheetName || "訂單").toString().trim();
+  var sheet = ss.getSheetByName(name);
+  if (sheet) return sheet;
+  var all = ss.getSheets();
+  for (var i = 0; i < all.length; i++) {
+    var headers = getOrderHeaders_(all[i]);
+    for (var h = 0; h < headers.length; h++) {
+      if (headers[h] === "訂單編號") return all[i];
+    }
+  }
+  return null;
+}
+
+/** 會員卡查詢資料來源：ProductManagement2「訂單」工作表 */
+function getCustomerOrdersFromShopSheet_() {
+  var ss = getShopSpreadsheet_();
+  var sheet = getShopOrderSheet_(ss);
+  if (!sheet) return [];
+  return getOrders(sheet);
+}
 
 /** 固定開啟「MAARU 日本萌物GO訂單進度資料表」（函式庫未綁定試算表時也能讀） */
 function getProgressSpreadsheet_() {
@@ -462,7 +529,13 @@ function getCustomerOrdersPublic_(params) {
   if (!isValidMemberCardNo_(card)) {
     return { error: true, message: "請輸入 13 碼會員卡號" };
   }
-  var all = getAllOrdersMergedAllSources_();
+  var all = [];
+  try {
+    all = getCustomerOrdersFromShopSheet_();
+  } catch (shopErr) {
+    Logger.log("[getCustomerOrdersPublic_] " + shopErr);
+    return { error: true, message: String(shopErr && shopErr.message ? shopErr.message : shopErr) };
+  }
   var matched = findOrdersForMemberCard_(all, card);
   matched.sort(function(a, b) {
     var ma = String(a.id || "").match(/^ORD(\d+)$/i);
@@ -636,22 +709,35 @@ function getAllOrdersMergedAllSources_() {
 
 function getOrderSourceDebugPublic_() {
   var ss = getProgressSpreadsheet_();
-  var all = getAllOrdersMergedAllSources_();
-  var withCard = 0;
-  for (var i = 0; i < all.length; i++) {
-    if (isValidMemberCardNo_(all[i] && all[i].memberCardNo)) withCard++;
-  }
-  var orderSheet = ss.getSheetByName((CONFIG.orderSheetName || "訂單").toString().trim());
   var sheet1 = ss.getSheetByName((CONFIG.legacyProgressSheetName || "工作表1").toString().trim());
+  var shopInfo = { configured: false };
+  try {
+    var shopSs = getShopSpreadsheet_();
+    var shopSheet = getShopOrderSheet_(shopSs);
+    var shopOrders = shopSheet ? getOrders(shopSheet) : [];
+    var shopWithCard = 0;
+    for (var i = 0; i < shopOrders.length; i++) {
+      if (isValidMemberCardNo_(shopOrders[i] && shopOrders[i].memberCardNo)) shopWithCard++;
+    }
+    shopInfo = {
+      configured: true,
+      spreadsheetId: resolveShopSpreadsheetId_(),
+      spreadsheetName: shopSs.getName(),
+      orderSheetRows: shopSheet ? Math.max(0, shopSheet.getLastRow() - 1) : 0,
+      orderCount: shopOrders.length,
+      ordersWithMemberCard: shopWithCard
+    };
+  } catch (shopErr) {
+    shopInfo.error = String(shopErr && shopErr.message ? shopErr.message : shopErr);
+  }
   return {
     ok: true,
-    spreadsheetId: CONFIG.spreadsheetId,
-    spreadsheetName: ss.getName(),
-    orderSheetRows: orderSheet ? Math.max(0, orderSheet.getLastRow() - 1) : 0,
+    progressSpreadsheetId: CONFIG.spreadsheetId,
+    progressSpreadsheetName: ss.getName(),
     sheet1Rows: sheet1 ? Math.max(0, sheet1.getLastRow() - 1) : 0,
-    mergedOrderCount: all.length,
-    ordersWithMemberCard: withCard,
-    shopSpreadsheetConfigured: !!(CONFIG.shopSpreadsheetId || "").toString().trim()
+    orderIdQuerySource: CONFIG.legacyProgressSheetName || "工作表1",
+    memberCardQuerySource: "ProductManagement2 / " + (CONFIG.orderSheetName || "訂單"),
+    shop: shopInfo
   };
 }
 
