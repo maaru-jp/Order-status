@@ -1566,12 +1566,6 @@
             <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
             <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
-          <div class="card-quick-bar" id="cardQuickBarCard" aria-live="polite">
-            <span>已記憶卡號</span>
-            <span class="card-saved-value" id="cardSavedDisplayCard"></span>
-            <button type="button" class="btn-card-action btn-card-fill" data-fill-target="memberCardNo">填入</button>
-            <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardCard">複製</button>
-          </div>
           <p class="card-hint">輸入 13 碼會員卡號，查詢 ProductManagement2「歷史訂單」中所有交易紀錄；每筆顯示獲得／折抵的紅利點數，點選可查看配送進度。</p>
           <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a> · <a href="#" id="linkToPointsTabInline">查看紅利歷程 →</a></p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢歷史訂單</button>
@@ -1620,13 +1614,6 @@
           <label for="pointsMemberCardNo">請輸入會員卡號（13 碼純數字）</label>
           <div class="card-input-row">
             <input type="text" id="pointsMemberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="pointsMemberCardNo" title="從剪貼簿貼上卡號">貼上</button>
-          </div>
-          <div class="card-quick-bar" id="cardQuickBarPoints" aria-live="polite">
-            <span>已記憶卡號</span>
-            <span class="card-saved-value" id="cardSavedDisplayPoints"></span>
-            <button type="button" class="btn-card-action btn-card-fill" data-fill-target="pointsMemberCardNo">填入</button>
-            <button type="button" class="btn-card-action btn-card-copy" id="btnCopySavedCardPoints">複製</button>
           </div>
           <p class="card-hint">會員中心：讀取 ProductManagement2「紅利點數」分頁，顯示可用餘額與完整異動歷程（發放、折抵、失效、調整）。訂單改「已確認」後才會入帳。</p>
           <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的歷史訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
@@ -1739,7 +1726,6 @@
     } catch {
       // ignore
     }
-    updateSavedCardBars();
   }
 
   function flashActionButton(btn, doneText, resetText) {
@@ -1814,56 +1800,27 @@
     }
   }
 
-  function fillMemberCardToInput(inputId) {
-    const saved = getSavedMemberCard();
-    if (!isValidMemberCardNo(saved)) return;
-    syncPointsCardInputs(saved);
-    const input = document.getElementById(inputId);
-    if (input) input.focus();
-  }
-
-  function updateSavedCardBars() {
-    const saved = getSavedMemberCard();
-    const visible = isValidMemberCardNo(saved);
-    const display = visible ? formatMemberCardDisplay(saved) : "";
-    ["cardQuickBarCard", "cardQuickBarPoints"].forEach(function(id) {
-      const bar = document.getElementById(id);
-      if (!bar) return;
-      bar.classList.toggle("is-visible", visible);
-    });
-    const cardDisp = document.getElementById("cardSavedDisplayCard");
-    const pointsDisp = document.getElementById("cardSavedDisplayPoints");
-    if (cardDisp) cardDisp.innerText = display;
-    if (pointsDisp) pointsDisp.innerText = display;
-  }
-
   function bindCardClipboardActions() {
     document.querySelectorAll(".btn-card-paste").forEach(function(btn) {
       btn.addEventListener("click", function() {
         pasteMemberCardToInput(btn.getAttribute("data-paste-target"), btn);
       });
     });
-    document.querySelectorAll(".btn-card-fill").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        fillMemberCardToInput(btn.getAttribute("data-fill-target"));
+    const btnCopyResultCard = document.getElementById("btnCopyResultCard");
+    if (btnCopyResultCard) {
+      btnCopyResultCard.addEventListener("click", function() {
+        copyMemberCardNumber(cachedCardNo, this);
       });
-    });
-    const saved = getSavedMemberCard();
-    document.getElementById("btnCopySavedCardCard").addEventListener("click", function() {
-      copyMemberCardNumber(saved, this);
-    });
-    document.getElementById("btnCopySavedCardPoints").addEventListener("click", function() {
-      copyMemberCardNumber(saved, this);
-    });
-    document.getElementById("btnCopyResultCard").addEventListener("click", function() {
-      copyMemberCardNumber(cachedCardNo, this);
-    });
-    document.getElementById("btnCopyResultPoints").addEventListener("click", function() {
-      copyMemberCardNumber(
-        normalizeMemberCardInput(document.getElementById("rPointsCardNo").innerText),
-        this
-      );
-    });
+    }
+    const btnCopyResultPoints = document.getElementById("btnCopyResultPoints");
+    if (btnCopyResultPoints) {
+      btnCopyResultPoints.addEventListener("click", function() {
+        copyMemberCardNumber(
+          normalizeMemberCardInput(document.getElementById("rPointsCardNo").innerText),
+          this
+        );
+      });
+    }
   }
 
   function toOrderStatusQueryId(id) {
@@ -2025,7 +1982,7 @@
   }
 
   async function fetchOrdersByCard(card) {
-    const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card));
+    const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card), { skipProxy: true });
     if (data && data.error) {
       throw new Error(data.message || "查詢失敗");
     }
@@ -2102,12 +2059,18 @@
     document.getElementById("memberCardNo").value = c;
   }
 
-  async function fetchJsonWithCorsFallback(url) {
-    const urlsToTry = [url, CORS_PROXY_PREFIX + encodeURIComponent(url)];
+  async function fetchJsonWithCorsFallback(url, options) {
+    options = options || {};
+    const timeoutMs = options.timeoutMs || 28000;
+    const urlsToTry = options.skipProxy
+      ? [url]
+      : [url, CORS_PROXY_PREFIX + encodeURIComponent(url)];
     let lastError = null;
     for (const tryUrl of urlsToTry) {
+      const controller = new AbortController();
+      const timer = setTimeout(function() { controller.abort(); }, timeoutMs);
       try {
-        const res = await fetch(tryUrl, { cache: "no-store" });
+        const res = await fetch(tryUrl, { cache: "no-store", signal: controller.signal });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
         if (text.trimStart().startsWith("<")) {
@@ -2116,6 +2079,9 @@
         return JSON.parse(text);
       } catch (err) {
         lastError = err;
+        if (options.skipProxy) break;
+      } finally {
+        clearTimeout(timer);
       }
     }
     throw lastError || new Error("無法連線");
@@ -2386,7 +2352,7 @@
     btn.innerText = "查詢中…";
 
     try {
-      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card));
+      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card), { skipProxy: true });
       if (data.error) {
         throw new Error(data.message || "查詢失敗");
       }
@@ -2586,7 +2552,7 @@
     btn.innerText = "查詢中…";
 
     try {
-      const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card));
+      const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card), { skipProxy: true });
       if (data.error) {
         throw new Error(data.message || "查詢失敗");
       }
@@ -2698,7 +2664,6 @@
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
     bindCardClipboardActions();
-    updateSavedCardBars();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
     });
