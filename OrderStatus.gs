@@ -15,7 +15,7 @@
  * GET（輸入訂單編號僅讀「工作表1」+「歷程」）：
  * - action=order_status&orderId=00083
  * - ?orderId=00083（相容舊版）
- * - action=customer_orders&card=13碼（讀 ProductManagement2 試算表「訂單」）
+ * - action=customer_orders&card=13碼（讀 ProductManagement2 試算表「歷史訂單」）
  * - action=points_balance&card=13碼（讀 ProductManagement2 試算表「紅利紀錄」）
  * - action=api_meta
  *
@@ -26,11 +26,12 @@ var CONFIG = {
   // 五碼訂單編號查詢：工作表1 + 歷程
   spreadsheetId: "1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw",
   spreadsheetName: "MAARU 日本萌物GO訂單進度資料表",
-  // 會員卡號查詢：ProductManagement2 後台試算表「訂單」分頁（留空則自動向 shopApiUrl 取得 ID）
+  // 會員卡號查詢：ProductManagement2 試算表「歷史訂單」分頁（備援「訂單」）
   shopSpreadsheetId: "14dqpeCDpKRA8_Ca2b5Phinh00ydPiaBh3MHKrVYMVOI",
-  shopSpreadsheetName: "ProductManagement2（後台訂單試算表）",
+  shopSpreadsheetName: "ProductManagement2",
   shopApiUrl: "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec",
-  orderSheetName: "訂單",
+  orderSheetName: "歷史訂單",
+  orderSheetFallbackNames: ["訂單", "订单"],
   pointsSheetName: "紅利紀錄",
   legacyProgressSheetName: "工作表1",
   legacyHistorySheetName: "歷程"
@@ -76,42 +77,103 @@ function getShopSpreadsheet_() {
   return SpreadsheetApp.openById(id);
 }
 
-/** 僅讀後台試算表「訂單」分頁（不含工作表1） */
+function isPointsLedgerSheetName_(name) {
+  var n = String(name || "").trim();
+  return n.indexOf("紅利") >= 0;
+}
+
+function isPointsLedgerHeaders_(headers) {
+  var h0 = String((headers && headers[0]) || "").trim();
+  return h0 === "紀錄ID" || (h0.indexOf("紀錄") >= 0 && h0.indexOf("訂單") < 0);
+}
+
+function isLikelyOrderSheetHeaders_(headers) {
+  headers = headers || [];
+  var h0 = String(headers[0] || "").trim();
+  if (h0 === "訂單編號") return true;
+  for (var i = 0; i < headers.length; i++) {
+    var h = String(headers[i] || "").trim();
+    if (h.indexOf("品項") >= 0 || h === "小計" || h === "客戶姓名" || h === "待結清總金額") return true;
+  }
+  return false;
+}
+
+function sheetHasOrderIdHeader_(headers) {
+  for (var h = 0; h < (headers || []).length; h++) {
+    var t = String(headers[h] || "").trim();
+    if (t === "訂單編號" || t.indexOf("訂單編號") >= 0) return true;
+  }
+  return false;
+}
+
+function columnIndexToLetter_(col) {
+  var n = col + 1;
+  var s = "";
+  while (n > 0) {
+    var m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
+function scoreShopOrderSheetCandidate_(sheet) {
+  if (!sheet) return -1;
+  var sname = String(sheet.getName() || "").trim();
+  if (isPointsLedgerSheetName_(sname)) return -1;
+  var headers = getOrderHeaders_(sheet);
+  if (isPointsLedgerHeaders_(headers)) return -1;
+  if (!sheetHasOrderIdHeader_(headers) && !isLikelyOrderSheetHeaders_(headers)) return -1;
+  var score = 0;
+  if (String(headers[0] || "").trim() === "訂單編號") score += 20;
+  if (isLikelyOrderSheetHeaders_(headers)) score += 10;
+  if (sname.indexOf("歷史") >= 0 && sname.indexOf("訂單") >= 0) score += 12;
+  if (sname === (CONFIG.orderSheetName || "歷史訂單")) score += 15;
+  if (sname.indexOf("訂單") >= 0 && sname.indexOf("紅利") < 0) score += 8;
+  var rows = Math.max(0, sheet.getLastRow() - 1);
+  score += Math.min(rows, 200);
+  return score;
+}
+
+/** 僅讀 ProductManagement2 試算表「歷史訂單」（排除「紅利紀錄」；備援「訂單」） */
 function getShopOrderSheet_(ss) {
   ss = ss || getShopSpreadsheet_();
   var preferred = [
-    (CONFIG.orderSheetName || "訂單").toString().trim(),
-    "訂單",
-    "订单",
-    "Orders",
-    "orders"
+    (CONFIG.orderSheetName || "歷史訂單").toString().trim(),
+    "歷史訂單",
+    "历史订单"
   ];
+  var fallbacks = CONFIG.orderSheetFallbackNames || ["訂單", "订单"];
+  for (var f = 0; f < fallbacks.length; f++) {
+    preferred.push(String(fallbacks[f] || "").trim());
+  }
+  preferred.push("Orders", "orders");
   var seen = {};
   for (var p = 0; p < preferred.length; p++) {
     var pname = preferred[p];
     if (!pname || seen[pname]) continue;
     seen[pname] = true;
     var hit = ss.getSheetByName(pname);
-    if (hit) return hit;
+    if (hit && scoreShopOrderSheetCandidate_(hit) >= 0) return hit;
   }
   var all = ss.getSheets();
+  var best = null;
+  var bestScore = -1;
   for (var i = 0; i < all.length; i++) {
-    var headers = getOrderHeaders_(all[i]);
-    for (var h = 0; h < headers.length; h++) {
-      if (headers[h] === "訂單編號" || String(headers[h] || "").indexOf("訂單編號") >= 0) {
-        return all[i];
-      }
+    var cand = all[i];
+    var score = scoreShopOrderSheetCandidate_(cand);
+    if (score > bestScore) {
+      bestScore = score;
+      best = cand;
     }
   }
-  return null;
+  return best;
 }
 
-/** 會員卡查詢資料來源：ProductManagement2「訂單」工作表 */
+/** 會員卡查詢資料來源：ProductManagement2「歷史訂單」等訂單分頁（排除紅利紀錄） */
 function getCustomerOrdersFromShopSheet_() {
   var ss = getShopSpreadsheet_();
-  var sheet = getShopOrderSheet_(ss);
-  if (!sheet) return [];
-  return getOrders(sheet);
+  return getAllOrdersMerged_(ss);
 }
 
 /** 固定開啟「MAARU 日本萌物GO訂單進度資料表」（函式庫未綁定試算表時也能讀） */
@@ -142,7 +204,7 @@ function handleDoGet_(e) {
     if (action === "api_meta") {
       return jsonOutput({
         ok: true,
-        apiVersion: "2026-06-04-sheet1",
+        apiVersion: "2026-06-04-history-orders",
         spreadsheetId: CONFIG.spreadsheetId,
         spreadsheetName: CONFIG.spreadsheetName,
         libraryScriptId: "12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc",
@@ -254,7 +316,7 @@ function isPointsLedgerRow_(obj) {
 
 function orderKeyMap_(headers) {
   var map = {};
-  // ProductManagement2「訂單」分頁實際標題（含前段紅利欄 + 後段訂單欄）
+  // ProductManagement2「歷史訂單」分頁實際標題（含前段紅利欄 + 後段訂單欄）
   var aliases = [
     ["訂單編號", "id", "ID"],
     ["紀錄ID", "recordId"],
@@ -607,6 +669,7 @@ function sanitizePublicOrder_(ord) {
     id: String(ord && ord.id != null ? ord.id : "").trim(),
     status: String(ord && ord.status != null ? ord.status : "").trim() || "待處理",
     date: ord && ord.date != null ? String(ord.date) : "",
+    product: String(ord && ord.product != null ? ord.product : "").trim(),
     subtotal: Number(ord && ord.subtotal) || 0,
     discount: Number(ord && ord.discount) || 0,
     pointsUsed: Math.floor(Number(ord && ord.pointsUsed) || 0),
@@ -667,17 +730,22 @@ function getCustomerOrdersPublic_(params) {
     if (o.status !== "已完成") totalDue += o.amountDue;
   }
   var withCard = countOrdersWithMemberCard_(all);
-  var sheet = getShopOrderSheet_(getShopSpreadsheet_());
+  var shopSs = getShopSpreadsheet_();
+  var sheet = getShopOrderSheet_(shopSs);
+  var sourceSheets = listOrderSourceSheets_(shopSs);
+  var headers = sheet ? getOrderHeaders_(sheet) : [];
+  var cardCol = sheet ? findMemberCardColumnIndex_(headers) : -1;
+  var sheetLabel = sheet ? sheet.getName() : "";
   var emptyMsg = "目前尚無訂單紀錄";
   if (!publicOrders.length) {
     if (!sheet) {
-      emptyMsg = "找不到後台試算表「訂單」分頁，請確認分頁名稱與標題列「訂單編號」";
+      emptyMsg = "找不到 ProductManagement2 試算表「歷史訂單」分頁（請確認分頁存在且第一列含「訂單編號」）";
     } else if (!all.length) {
-      emptyMsg = "後台「訂單」分頁尚無資料列，請至後台訂單管理同步試算表";
+      emptyMsg = "後台「" + sheetLabel + "」分頁尚無資料列，請至後台訂單管理按「同步試算表」";
     } else if (!withCard) {
-      emptyMsg = "試算表有 " + all.length + " 筆訂單，但「會員卡號」欄皆空白，請補填 13 碼（建議 '1440...）";
+      emptyMsg = "「" + sheetLabel + "」有 " + all.length + " 筆訂單，但「會員卡號」欄皆空白，請補填 13 碼（建議 '1440...）";
     } else {
-      emptyMsg = "試算表有 " + withCard + " 筆含會員卡號的訂單，但無此卡號 " + card;
+      emptyMsg = "「" + sheetLabel + "」有 " + withCard + " 筆含會員卡號的訂單，但無此卡號 " + card;
     }
   }
   return {
@@ -689,8 +757,12 @@ function getCustomerOrdersPublic_(params) {
     totalDue: totalDue,
     debug: {
       shopSpreadsheetId: resolveShopSpreadsheetId_(),
+      orderSheetName: sheetLabel,
+      orderSourceSheets: sourceSheets.map(function(s) { return s.getName(); }),
       orderSheetRows: all.length,
-      ordersWithMemberCard: withCard
+      ordersWithMemberCard: withCard,
+      memberCardColumnIndex: cardCol,
+      memberCardColumnLetter: cardCol >= 0 ? columnIndexToLetter_(cardCol) : ""
     },
     message: publicOrders.length ? "OK" : emptyMsg
   };
@@ -743,15 +815,31 @@ function findOrderById_(orders, id) {
 function listOrderSourceSheets_(ss) {
   var result = [];
   var seen = {};
-  var preferred = ["訂單", "工作表1"];
+  var preferred = [
+    (CONFIG.orderSheetName || "歷史訂單").toString().trim(),
+    "歷史訂單",
+    "历史订单",
+    "訂單",
+    "工作表1"
+  ];
+  var fallbacks = CONFIG.orderSheetFallbackNames || ["訂單", "订单"];
+  for (var f = 0; f < fallbacks.length; f++) {
+    preferred.push(String(fallbacks[f] || "").trim());
+  }
   for (var i = 0; i < preferred.length; i++) {
-    var s = ss.getSheetByName(preferred[i]);
-    if (s) {
-      var sid = s.getSheetId();
-      if (!seen[sid]) {
-        seen[sid] = true;
-        result.push(s);
-      }
+    var pname = preferred[i];
+    if (!pname) continue;
+    var s = ss.getSheetByName(pname);
+    if (!s) continue;
+    var sname = String(s.getName() || "").trim();
+    if (isPointsLedgerSheetName_(sname)) continue;
+    var headers = getOrderHeaders_(s);
+    if (isPointsLedgerHeaders_(headers)) continue;
+    if (!sheetHasOrderIdHeader_(headers) && !isLikelyOrderSheetHeaders_(headers)) continue;
+    var sid = s.getSheetId();
+    if (!seen[sid]) {
+      seen[sid] = true;
+      result.push(s);
     }
   }
   var all = ss.getSheets();
@@ -759,18 +847,13 @@ function listOrderSourceSheets_(ss) {
     var cand = all[j];
     var sid2 = cand.getSheetId();
     if (seen[sid2]) continue;
-    var headers = getOrderHeaders_(cand);
-    var hasOrderId = false;
-    for (var h = 0; h < headers.length; h++) {
-      if (headers[h] === "訂單編號") {
-        hasOrderId = true;
-        break;
-      }
-    }
-    if (hasOrderId) {
-      seen[sid2] = true;
-      result.push(cand);
-    }
+    var cname = String(cand.getName() || "").trim();
+    if (isPointsLedgerSheetName_(cname)) continue;
+    var headers2 = getOrderHeaders_(cand);
+    if (isPointsLedgerHeaders_(headers2)) continue;
+    if (!sheetHasOrderIdHeader_(headers2) && !isLikelyOrderSheetHeaders_(headers2)) continue;
+    seen[sid2] = true;
+    result.push(cand);
   }
   return result;
 }
@@ -897,7 +980,7 @@ function getOrderSourceDebugPublic_(params) {
     progressSpreadsheetName: ss.getName(),
     sheet1Rows: sheet1 ? Math.max(0, sheet1.getLastRow() - 1) : 0,
     orderIdQuerySource: CONFIG.legacyProgressSheetName || "工作表1",
-    memberCardQuerySource: "ProductManagement2 / " + (CONFIG.orderSheetName || "訂單"),
+    memberCardQuerySource: "ProductManagement2 / " + (CONFIG.orderSheetName || "歷史訂單"),
     shop: shopInfo
   };
 }
