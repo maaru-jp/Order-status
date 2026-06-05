@@ -1183,7 +1183,7 @@
         <h1 id="pageTitle">訂單查詢</h1>
         <div class="page-sub" id="pageSub">
           <span class="page-sub-key">輸入訂單編號</span>
-          <span class="page-sub-desc"> 查看配送進度與商品狀態</span>
+          <span class="page-sub-desc"> 讀取試算表「工作表1」配送進度與商品狀態</span>
         </div>
       </div>
 
@@ -1373,8 +1373,7 @@
     const enc = encodeURIComponent(queryId);
     return [
       buildApiUrl("action=order_status&orderId=" + enc),
-      buildApiUrl("orderId=" + enc),
-      buildApiUrl("action=customer_orders&orderId=" + enc)
+      buildApiUrl("orderId=" + enc)
     ];
   }
 
@@ -1393,10 +1392,10 @@
       return "⚠ 後端尚未啟用「訂單編號查詢」API。請店家至 Apps Script 貼上最新 Code.gs 並重新部署網頁應用程式。";
     }
     if (!msg || isMisleadingOrderLookupError(msg)) {
-      return "⚠ 查無此訂單編號，請確認五碼編號是否正確。";
+      return "⚠ 查無此訂單編號，請確認五碼編號是否正確（資料來源：試算表「工作表1」）。";
     }
     if (/查無|找不到/.test(msg)) {
-      return "⚠ 查無此訂單編號，請確認是否輸入正確";
+      return "⚠ 查無此訂單編號，請確認「工作表1」A 欄是否有該筆資料";
     }
     return "⚠ " + msg;
   }
@@ -1566,7 +1565,7 @@
       );
     } else {
       pageTitle.innerText = "訂單查詢";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 查看配送進度與商品狀態</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 讀取試算表「工作表1」配送進度與商品狀態</span>';
       document.querySelector(".container").classList.remove("has-wide-result");
     }
 
@@ -1751,6 +1750,14 @@
       document.getElementById("rOrderCount").innerText = String(data.orderCount || 0);
       document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
       renderOrderList(cachedCardOrders);
+
+      if (!cachedCardOrders.length) {
+        errorBox.innerText = "⚠ 此卡號在試算表尚無訂單紀錄。請確認後台該筆訂單已同步至「MAARU 日本萌物GO訂單進度資料表」的「訂單」分頁，且「會員卡號」欄已填寫 13 碼（建議前加 ' 強制文字）。";
+        errorBox.style.display = "block";
+        resultBox.style.display = "none";
+        document.querySelector(".container").classList.remove("has-wide-result");
+        return;
+      }
 
       const params = new URLSearchParams(window.location.search);
       params.set("mode", "card");

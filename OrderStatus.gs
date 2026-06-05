@@ -12,7 +12,7 @@
  * 用法 B（試算表綁定）：試算表 Apps Script 只貼 SpreadsheetBinding.gs，並加入上述函式庫
  * 用法 C（單檔）：試算表 Apps Script 直接貼本檔全文 → 部署網頁應用程式
  *
- * GET（輸入訂單編號讀試算表）：
+ * GET（輸入訂單編號僅讀「工作表1」+「歷程」）：
  * - action=order_status&orderId=00083
  * - ?orderId=00083（相容舊版）
  * - action=customer_orders&card=13碼會員卡號
@@ -24,6 +24,8 @@
 var CONFIG = {
   spreadsheetId: "1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw",
   spreadsheetName: "MAARU 日本萌物GO訂單進度資料表",
+  // 若後台訂單在另一份試算表，填該試算表 ID（留空則只讀 spreadsheetId）
+  shopSpreadsheetId: "",
   orderSheetName: "訂單",
   legacyProgressSheetName: "工作表1",
   legacyHistorySheetName: "歷程"
@@ -63,6 +65,9 @@ function handleDoGet_(e) {
         libraryScriptId: "12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc",
         routes: ["customer_orders", "order_status", "orderId_legacy", "sheet1_progress"]
       });
+    }
+    if (action === "order_source_debug") {
+      return jsonOutput(getOrderSourceDebugPublic_());
     }
     if (action === "customer_orders") {
       return jsonOutput(getCustomerOrdersPublic_(params));
@@ -228,12 +233,22 @@ function normalizeOrderId_(v) {
   return s;
 }
 
+function findMemberCardColumnIndex_(headers) {
+  for (var c = 0; c < (headers || []).length; c++) {
+    var h = String(headers[c] || "").trim();
+    if (h === "會員卡號" || /^membercard/i.test(h)) return c;
+  }
+  return -1;
+}
+
 function getOrders(sheet) {
   if (!sheet) return [];
   var data = sheet.getDataRange().getValues();
   if (!data || data.length < 2) return [];
+  var display = sheet.getDataRange().getDisplayValues();
   var headers = data[0].map(function(h) { return (h || "").toString().trim(); });
   var keyMap = orderKeyMap_(headers);
+  var cardCol = findMemberCardColumnIndex_(headers);
   var list = [];
   for (var r = 1; r < data.length; r++) {
     var row = data[r];
@@ -245,6 +260,10 @@ function getOrders(sheet) {
       if (val === "" || val === null || val === undefined) continue;
       if (key === "items") key = "itemsJson";
       obj[key] = val;
+    }
+    if (cardCol >= 0 && display[r] && display[r][cardCol]) {
+      var dispCard = normalizeMemberCardNo_(display[r][cardCol]);
+      if (dispCard) obj.memberCardNo = dispCard;
     }
     var id = (obj.id != null) ? String(obj.id).trim() : "";
     if (!id) continue;
@@ -294,7 +313,16 @@ function normalizeSheetDateValue_(val) {
 }
 
 function normalizeMemberCardNo_(card) {
-  return String(card || "").replace(/^'/, "").replace(/\D/g, "").slice(0, 13);
+  if (card == null || card === "") return "";
+  if (typeof card === "number" && isFinite(card)) {
+    card = card >= 1e12 ? String(Math.round(card)) : String(card);
+  }
+  var s = String(card).replace(/^'/, "").trim();
+  if (/e/i.test(s)) {
+    var n = Number(s);
+    if (isFinite(n) && n >= 1e12) s = String(Math.round(n));
+  }
+  return s.replace(/\D/g, "").slice(0, 13);
 }
 
 function isValidMemberCardNo_(card) {
@@ -434,8 +462,7 @@ function getCustomerOrdersPublic_(params) {
   if (!isValidMemberCardNo_(card)) {
     return { error: true, message: "請輸入 13 碼會員卡號" };
   }
-  var ss = getProgressSpreadsheet_();
-  var all = getAllOrdersMerged_(ss);
+  var all = getAllOrdersMergedAllSources_();
   var matched = findOrdersForMemberCard_(all, card);
   matched.sort(function(a, b) {
     var ma = String(a.id || "").match(/^ORD(\d+)$/i);
@@ -526,20 +553,106 @@ function listOrderSourceSheets_(ss) {
   return result;
 }
 
+function mergeOrderRecord_(base, extra) {
+  if (!extra) return base;
+  if (!base) return extra;
+  var out = {};
+  var keys = {};
+  [base, extra].forEach(function(o) {
+    Object.keys(o || {}).forEach(function(k) { keys[k] = true; });
+  });
+  Object.keys(keys).forEach(function(k) {
+    var a = base[k];
+    var b = extra[k];
+    if (k === "memberCardNo") {
+      var card = normalizeMemberCardNo_(a || b || "");
+      if (card) out[k] = card;
+      return;
+    }
+    if (a != null && a !== "") out[k] = a;
+    else if (b != null && b !== "") out[k] = b;
+  });
+  return out;
+}
+
 function getAllOrdersMerged_(ss) {
   var sheets = listOrderSourceSheets_(ss);
-  var merged = [];
-  var seenIds = {};
+  var byId = {};
+  var order = [];
   for (var i = 0; i < sheets.length; i++) {
     var list = getOrders(sheets[i]);
     for (var j = 0; j < list.length; j++) {
       var nid = normalizeOrderId_(list[j].id);
-      if (!nid || seenIds[nid]) continue;
-      seenIds[nid] = true;
-      merged.push(list[j]);
+      if (!nid) continue;
+      if (byId[nid]) {
+        byId[nid] = mergeOrderRecord_(byId[nid], list[j]);
+      } else {
+        byId[nid] = list[j];
+        order.push(nid);
+      }
     }
   }
-  return merged;
+  return order.map(function(id) { return byId[id]; });
+}
+
+function getOrderSpreadsheetIds_() {
+  var ids = [];
+  var seen = {};
+  var primary = (CONFIG.spreadsheetId || "").toString().trim();
+  if (primary) {
+    seen[primary] = true;
+    ids.push(primary);
+  }
+  var shop = (CONFIG.shopSpreadsheetId || "").toString().trim();
+  if (shop && !seen[shop]) ids.push(shop);
+  return ids;
+}
+
+function getAllOrdersMergedAllSources_() {
+  var ids = getOrderSpreadsheetIds_();
+  if (!ids.length) return getAllOrdersMerged_(getProgressSpreadsheet_());
+  var byId = {};
+  var order = [];
+  for (var i = 0; i < ids.length; i++) {
+    try {
+      var ss = SpreadsheetApp.openById(ids[i]);
+      var list = getAllOrdersMerged_(ss);
+      for (var j = 0; j < list.length; j++) {
+        var nid = normalizeOrderId_(list[j].id);
+        if (!nid) continue;
+        if (byId[nid]) {
+          byId[nid] = mergeOrderRecord_(byId[nid], list[j]);
+        } else {
+          byId[nid] = list[j];
+          order.push(nid);
+        }
+      }
+    } catch (err) {
+      Logger.log("[getAllOrdersMergedAllSources_] " + ids[i] + " " + err);
+    }
+  }
+  return order.map(function(id) { return byId[id]; });
+}
+
+function getOrderSourceDebugPublic_() {
+  var ss = getProgressSpreadsheet_();
+  var all = getAllOrdersMergedAllSources_();
+  var withCard = 0;
+  for (var i = 0; i < all.length; i++) {
+    if (isValidMemberCardNo_(all[i] && all[i].memberCardNo)) withCard++;
+  }
+  var orderSheet = ss.getSheetByName((CONFIG.orderSheetName || "訂單").toString().trim());
+  var sheet1 = ss.getSheetByName((CONFIG.legacyProgressSheetName || "工作表1").toString().trim());
+  return {
+    ok: true,
+    spreadsheetId: CONFIG.spreadsheetId,
+    spreadsheetName: ss.getName(),
+    orderSheetRows: orderSheet ? Math.max(0, orderSheet.getLastRow() - 1) : 0,
+    sheet1Rows: sheet1 ? Math.max(0, sheet1.getLastRow() - 1) : 0,
+    mergedOrderCount: all.length,
+    ordersWithMemberCard: withCard,
+    shopSpreadsheetConfigured: !!(CONFIG.shopSpreadsheetId || "").toString().trim()
+  };
 }
 
 function isPublicUrlLike_(text) {
@@ -963,6 +1076,9 @@ function buildSyntheticTrackingHistory_(ord, items) {
   return steps;
 }
 
+/**
+ * 五碼訂單編號查詢：僅讀「工作表1」+「歷程」（不讀「訂單」分頁）
+ */
 function getOrderStatusPublic_(params) {
   params = params || {};
   var id = resolvePublicOrderIdParam_(params);
@@ -970,56 +1086,21 @@ function getOrderStatusPublic_(params) {
     return { error: true, message: "請輸入訂單編號" };
   }
   var ss = getProgressSpreadsheet_();
-
-  // 優先：MAARU 日本萌物GO訂單進度資料表「工作表1」+「歷程」
-  var sheet1Result = getSheet1OrderStatusPublic_(ss, id);
-  if (sheet1Result && sheet1Result.error === false) {
-    return sheet1Result;
+  var sheetName = (CONFIG.legacyProgressSheetName || "工作表1").toString().trim();
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    return {
+      error: true,
+      message: "找不到試算表分頁「" + sheetName + "」（" + (CONFIG.spreadsheetName || "") + "）"
+    };
   }
 
-  var all = getAllOrdersMerged_(ss);
-  var ord = findOrderById_(all, id);
-  if (!ord) {
-    if (sheet1Result && sheet1Result.notFound) {
-      return { error: true, message: "查無此訂單編號" };
-    }
-    return { error: true, message: "查無此訂單編號（請確認「工作表1」A 欄訂單編號）" };
+  var result = getSheet1OrderStatusPublic_(ss, id);
+  if (result && result.error === false) {
+    return result;
   }
-
-  var rawItems = Array.isArray(ord.items) ? ord.items : [];
-  var items = [];
-  for (var i = 0; i < rawItems.length; i++) {
-    var mapped = mapPublicStatusItem_(rawItems[i]);
-    if (mapped.name) items.push(mapped);
-  }
-  if (!items.length) {
-    items = buildItemsFromProductFields_(ord);
-  }
-  var itemSummary = buildPublicItemSummary_(items);
-
-  var history = parsePublicTrackingHistory_(ord);
-  if (!history || (Array.isArray(history) && history.length === 0)) {
-    history = getLegacyTrackingHistory_(ss, id);
-  }
-  if (!history || (Array.isArray(history) && history.length === 0)) {
-    history = buildSyntheticTrackingHistory_(ord, items);
-  }
-
-  var updated = normalizeSheetDateValue_(
-    ord.updated || ord.updatedAt || ord.lastUpdated || ord.shipDate || ord.date
-  ) || "";
-
   return {
-    error: false,
-    orderId: orderStatusQueryDisplayId_(ord.id),
-    orderIdFull: normalizeOrderId_(ord.id),
-    memberCardNo: normalizeMemberCardNo_(ord.memberCardNo || ""),
-    product: buildOrderProductText_(ord, items),
-    items: items,
-    itemSummary: itemSummary,
-    note: sanitizePublicOrderNote_(ord),
-    history: history,
-    status: derivePublicTrackingStatus_(ord, items),
-    updated: updated
+    error: true,
+    message: "查無此訂單編號（請確認「" + sheetName + "」A 欄訂單編號）"
   };
 }
