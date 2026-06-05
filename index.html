@@ -858,24 +858,6 @@
       border-color: var(--jp-sakura);
     }
 
-    .brand-nav-btn--points {
-      background: linear-gradient(135deg, #fff 0%, #f4faf7 100%);
-      border-color: rgba(125, 157, 140, 0.45);
-      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.1);
-      color: var(--jp-matcha-deep);
-    }
-
-    .brand-nav-btn--points .brand-nav-icon {
-      background: linear-gradient(135deg, var(--jp-matcha) 0%, var(--jp-matcha-deep) 100%);
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(95, 133, 116, 0.28);
-    }
-
-    .brand-nav-btn--points:hover {
-      box-shadow: 0 8px 20px rgba(95, 133, 116, 0.18);
-      border-color: var(--jp-matcha);
-    }
-
     .container.has-wide-result {
       max-width: 960px;
     }
@@ -1303,18 +1285,6 @@
         <span class="brand-nav-text">
           <span class="brand-nav-label">回到官網選購</span>
           <span class="brand-nav-desc">瀏覽最新日本代購商品</span>
-        </span>
-        <span class="brand-nav-arrow" aria-hidden="true">→</span>
-      </a>
-      <a class="brand-nav-btn brand-nav-btn--points" href="#" id="navPoints">
-        <span class="brand-nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        </span>
-        <span class="brand-nav-text">
-          <span class="brand-nav-label">查詢紅利點數</span>
-          <span class="brand-nav-desc">輸入會員卡號查餘額</span>
         </span>
         <span class="brand-nav-arrow" aria-hidden="true">→</span>
       </a>
@@ -2207,10 +2177,6 @@
     });
     document.getElementById("tabPoints").addEventListener("click", function() {
       setSearchMode("points");
-    });
-    document.getElementById("navPoints").addEventListener("click", function(e) {
-      e.preventDefault();
-      goToPointsTab(null, true);
     });
     document.getElementById("linkToPointsTab").addEventListener("click", function(e) {
       e.preventDefault();
