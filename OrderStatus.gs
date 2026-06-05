@@ -16,6 +16,7 @@
  * - action=order_status&orderId=00083
  * - ?orderId=00083（相容舊版）
  * - action=customer_orders&card=13碼（讀 ProductManagement2 試算表「訂單」）
+ * - action=points_balance&card=13碼（讀 ProductManagement2 試算表「紅利紀錄」）
  * - action=api_meta
  *
  * 函式庫對外入口：handleDoGet_(e)、handleOnEdit_(e)、lookupOrderById_(orderId)
@@ -30,6 +31,7 @@ var CONFIG = {
   shopSpreadsheetName: "ProductManagement2（後台訂單試算表）",
   shopApiUrl: "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec",
   orderSheetName: "訂單",
+  pointsSheetName: "紅利紀錄",
   legacyProgressSheetName: "工作表1",
   legacyHistorySheetName: "歷程"
 };
@@ -144,8 +146,11 @@ function handleDoGet_(e) {
         spreadsheetId: CONFIG.spreadsheetId,
         spreadsheetName: CONFIG.spreadsheetName,
         libraryScriptId: "12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc",
-        routes: ["customer_orders", "order_status", "orderId_legacy", "sheet1_progress"]
+        routes: ["customer_orders", "points_balance", "order_status", "orderId_legacy", "sheet1_progress"]
       });
+    }
+    if (action === "points_balance") {
+      return jsonOutput(getPointsBalancePublic_(params));
     }
     if (action === "order_source_debug" || action === "card_debug") {
       return jsonOutput(getOrderSourceDebugPublic_(params));
@@ -1345,4 +1350,302 @@ function getOrderStatusPublic_(params) {
     error: true,
     message: "查無此訂單編號（請確認「" + sheetName + "」A 欄訂單編號）"
   };
+}
+
+/** 讀取後台試算表「紅利紀錄」分頁（唯讀，不自動建立） */
+function getShopPointsSheet_(ss) {
+  ss = ss || getShopSpreadsheet_();
+  var name = (CONFIG.pointsSheetName || "紅利紀錄").toString().trim();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    var all = ss.getSheets();
+    for (var i = 0; i < all.length; i++) {
+      var n = (all[i].getName() || "").toString().trim();
+      if (n === name || n.indexOf("紅利") >= 0) {
+        sheet = all[i];
+        break;
+      }
+    }
+  }
+  return sheet || null;
+}
+
+function pointsKeyMap_(headers) {
+  var map = {};
+  var aliases = [
+    ["紀錄ID", "id"],
+    ["日期", "date"],
+    ["電話", "phone"],
+    ["Line ID", "lineId"],
+    ["姓名", "customerName"],
+    ["會員卡號", "memberCardNo", "memberCard"],
+    ["類型", "type"],
+    ["點數", "points"],
+    ["剩餘", "remaining"],
+    ["到期日", "expireDate"],
+    ["訂單編號", "orderId"],
+    ["備註", "note"]
+  ];
+  for (var c = 0; c < headers.length; c++) {
+    var h = (headers[c] || "").toString().trim();
+    if (!h) continue;
+    for (var a = 0; a < aliases.length; a++) {
+      var group = aliases[a];
+      for (var g = 0; g < group.length; g++) {
+        if (h === group[g]) {
+          map[c] = group[group.length - 1];
+          break;
+        }
+      }
+      if (map[c]) break;
+    }
+  }
+  return map;
+}
+
+function normalizePointLedgerRecord_(obj) {
+  if (!obj) return obj;
+  if (obj.date != null && obj.date !== "") obj.date = normalizeSheetDateValue_(obj.date);
+  if (obj.expireDate != null && obj.expireDate !== "") obj.expireDate = normalizeSheetDateValue_(obj.expireDate);
+  if (obj.customerName != null) obj.customerName = String(obj.customerName).trim();
+  if (obj.memberCardNo != null && obj.memberCardNo !== "") obj.memberCardNo = normalizeMemberCardNo_(obj.memberCardNo);
+  if (obj.type != null) obj.type = String(obj.type).trim();
+  if (obj.remaining != null && obj.remaining !== "") obj.remaining = Number(obj.remaining);
+  if (obj.points != null && obj.points !== "") obj.points = Number(obj.points);
+  return obj;
+}
+
+function getPointsLedger(sheet) {
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getValues();
+  if (!data || data.length < 2) return [];
+  var headers = data[0].map(function(h) { return (h || "").toString().trim(); });
+  var keyMap = pointsKeyMap_(headers);
+  var list = [];
+  for (var r = 1; r < data.length; r++) {
+    var row = data[r];
+    var obj = {};
+    var empty = true;
+    for (var c = 0; c < headers.length; c++) {
+      var key = keyMap[c];
+      if (!key) continue;
+      var val = row[c];
+      if (val === "" || val === null || val === undefined) continue;
+      obj[key] = val;
+      empty = false;
+    }
+    if (empty || !obj.id) continue;
+    list.push(normalizePointLedgerRecord_(obj));
+  }
+  return list;
+}
+
+function todayStrForPoints_() {
+  var d = new Date();
+  var m = d.getMonth() + 1;
+  var day = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+}
+
+function getPointRecordCustomerName_(rec) {
+  if (!rec) return "";
+  if (rec.customerName != null && String(rec.customerName).trim() !== "") return String(rec.customerName);
+  if (rec["姓名"] != null && String(rec["姓名"]).trim() !== "") return String(rec["姓名"]);
+  return "";
+}
+
+function getPointRecordMemberCard_(rec) {
+  if (rec.memberCardNo != null && String(rec.memberCardNo).trim() !== "") {
+    return normalizeMemberCardNo_(rec.memberCardNo);
+  }
+  return "";
+}
+
+function recordMatchesMemberCardForPoints_(rec, memberCardNo) {
+  var card = normalizeMemberCardNo_(memberCardNo);
+  if (!isValidMemberCardNo_(card)) return false;
+  return getPointRecordMemberCard_(rec) === card;
+}
+
+function isActivePointLot_(rec, today) {
+  var type = (rec.type || "").toString().trim();
+  if (type !== "發放" && type !== "調整") return false;
+  var remaining = Number(rec.remaining);
+  if (!remaining || remaining <= 0 || isNaN(remaining)) return false;
+  var exp = normalizeSheetDateValue_(rec.expireDate);
+  if (!exp) return true;
+  return exp >= today;
+}
+
+function recordMatchesCustomerForPoints_(rec, customerName) {
+  var n = normalizeCustomerNameForPoints_(customerName);
+  if (!n) return false;
+  return normalizeCustomerNameForPoints_(getPointRecordCustomerName_(rec)) === n;
+}
+
+function recordMatchesMemberCardExtended_(rec, card, linkedNames) {
+  if (recordMatchesMemberCardForPoints_(rec, card)) return true;
+  if (getPointRecordMemberCard_(rec)) return false;
+  if (!linkedNames || !linkedNames.length) return false;
+  var n = normalizeCustomerNameForPoints_(getPointRecordCustomerName_(rec));
+  return !!(n && linkedNames.indexOf(n) >= 0);
+}
+
+function getActiveLotsForMemberCardExtended_(ledger, allOrders, card) {
+  var linkedNames = collectCustomerNamesForMemberCard_(allOrders, card);
+  var today = todayStrForPoints_();
+  var lots = [];
+  for (var i = 0; i < (ledger || []).length; i++) {
+    var rec = ledger[i];
+    if (!recordMatchesMemberCardExtended_(rec, card, linkedNames)) continue;
+    if (!isActivePointLot_(rec, today)) continue;
+    lots.push({
+      date: rec.date != null ? normalizeSheetDateValue_(rec.date) : "",
+      remaining: Number(rec.remaining) || 0,
+      expireDate: normalizeSheetDateValue_(rec.expireDate)
+    });
+  }
+  lots.sort(function(a, b) {
+    return String(a.expireDate || "9999-12-31").localeCompare(String(b.expireDate || "9999-12-31"));
+  });
+  return lots;
+}
+
+function getActiveLotsForCustomer_(ledger, customerName) {
+  var today = todayStrForPoints_();
+  var lots = [];
+  for (var i = 0; i < ledger.length; i++) {
+    var rec = ledger[i];
+    if (!recordMatchesCustomerForPoints_(rec, customerName)) continue;
+    if (!isActivePointLot_(rec, today)) continue;
+    lots.push({
+      date: rec.date != null ? normalizeSheetDateValue_(rec.date) : "",
+      remaining: Number(rec.remaining) || 0,
+      expireDate: normalizeSheetDateValue_(rec.expireDate)
+    });
+  }
+  lots.sort(function(a, b) {
+    return String(a.expireDate || "9999-12-31").localeCompare(String(b.expireDate || "9999-12-31"));
+  });
+  return lots;
+}
+
+function buildPointsBalanceResult_(ledger, card, allOrders) {
+  var lots = getActiveLotsForMemberCardExtended_(ledger, allOrders || [], card);
+  var balance = 0;
+  for (var j = 0; j < lots.length; j++) {
+    balance += Number(lots[j].remaining) || 0;
+  }
+  var nextExpireDate = "";
+  var nextExpirePoints = 0;
+  if (lots.length > 0) {
+    nextExpireDate = lots[0].expireDate || "";
+    nextExpirePoints = Number(lots[0].remaining) || 0;
+  }
+  return {
+    error: false,
+    memberCardNo: card,
+    balance: balance,
+    pointValue: 1,
+    discountAmount: balance,
+    nextExpireDate: nextExpireDate,
+    nextExpirePoints: nextExpirePoints,
+    lots: lots,
+    rules: {
+      spendPerPoint: 100,
+      pointValue: 1,
+      expireDays: 365,
+      minRedeemNet: 199
+    },
+    message: balance > 0 ? "OK" : "目前尚無可用紅利點數"
+  };
+}
+
+function fetchShopPointsByApi_(card) {
+  var base = (CONFIG.shopApiUrl || "").toString().trim();
+  if (!base || !isValidMemberCardNo_(card)) return null;
+  try {
+    var url = base + (base.indexOf("?") >= 0 ? "&" : "?")
+      + "action=points_balance&card=" + encodeURIComponent(card);
+    var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+    var text = res.getContentText() || "";
+    if (text.indexOf("<!DOCTYPE") >= 0 || text.indexOf("<html") >= 0) return null;
+    var data = JSON.parse(text);
+    if (data && data.error === false) return data;
+  } catch (err) {
+    Logger.log("[fetchShopPointsByApi_] " + err);
+  }
+  return null;
+}
+
+function getPointsBalancePublic_(params) {
+  params = params || {};
+  var card = resolvePublicMemberCardParam_(params);
+  if (!isValidMemberCardNo_(card)) {
+    var legacyName = normalizeCustomerNameForPoints_(
+      params.name || params.customerName || params["姓名"] || ""
+    );
+    if (legacyName.length < 2) {
+      return { error: true, message: "請輸入 13 碼會員卡號" };
+    }
+    try {
+      var ssLegacy = getShopSpreadsheet_();
+      var pointsSheetLegacy = getShopPointsSheet_(ssLegacy);
+      if (!pointsSheetLegacy) {
+        return { error: true, message: "找不到紅利紀錄工作表" };
+      }
+      var ledgerLegacy = getPointsLedger(pointsSheetLegacy);
+      var nameLots = getActiveLotsForCustomer_(ledgerLegacy, legacyName);
+      var nameBalance = 0;
+      for (var i = 0; i < nameLots.length; i++) {
+        nameBalance += Number(nameLots[i].remaining) || 0;
+      }
+      var nameNextExpireDate = "";
+      var nameNextExpirePoints = 0;
+      if (nameLots.length > 0) {
+        nameNextExpireDate = nameLots[0].expireDate || "";
+        nameNextExpirePoints = Number(nameLots[0].remaining) || 0;
+      }
+      return {
+        error: false,
+        memberCardNo: "",
+        customerName: legacyName,
+        balance: nameBalance,
+        pointValue: 1,
+        discountAmount: nameBalance,
+        nextExpireDate: nameNextExpireDate,
+        nextExpirePoints: nameNextExpirePoints,
+        lots: nameLots,
+        rules: {
+          spendPerPoint: 100,
+          pointValue: 1,
+          expireDays: 365,
+          minRedeemNet: 199
+        },
+        message: nameBalance > 0 ? "OK" : "目前尚無可用紅利點數"
+      };
+    } catch (legacyErr) {
+      Logger.log("[getPointsBalancePublic_] legacy " + legacyErr);
+      return { error: true, message: String(legacyErr && legacyErr.message ? legacyErr.message : legacyErr) };
+    }
+  }
+
+  try {
+    var ss = getShopSpreadsheet_();
+    var pointsSheet = getShopPointsSheet_(ss);
+    if (!pointsSheet) {
+      var apiFallback = fetchShopPointsByApi_(card);
+      if (apiFallback) return apiFallback;
+      return { error: true, message: "找不到紅利紀錄工作表" };
+    }
+    var ledger = getPointsLedger(pointsSheet);
+    var orderSheet = getShopOrderSheet_(ss);
+    var allOrders = orderSheet ? getOrders(orderSheet) : [];
+    return buildPointsBalanceResult_(ledger, card, allOrders);
+  } catch (shopErr) {
+    Logger.log("[getPointsBalancePublic_] " + shopErr);
+    var apiData = fetchShopPointsByApi_(card);
+    if (apiData) return apiData;
+    return { error: true, message: String(shopErr && shopErr.message ? shopErr.message : shopErr) };
+  }
 }
