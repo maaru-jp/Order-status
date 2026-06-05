@@ -742,11 +742,72 @@
       letter-spacing: 0.12em;
     }
 
-    .card-hint {
+    .card-hint,
+    .panel-hint {
       font-size: 11px;
       color: var(--jp-ink-soft);
       margin: -6px 0 12px;
       line-height: 1.5;
+    }
+
+    .panel-hint a,
+    .brand-links a {
+      color: var(--jp-matcha-deep);
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .brand-links {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-links a {
+      color: var(--jp-sakura-deep);
+    }
+
+    .container.has-wide-result {
+      max-width: 960px;
+    }
+
+    .btn-search:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+
+    .order-list-items {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--jp-ink);
+      line-height: 1.45;
+    }
+
+    .order-list-items li {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result-back {
+      margin-bottom: 12px;
+    }
+
+    .result-back button {
+      border: none;
+      background: none;
+      color: var(--jp-matcha-deep);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
     }
 
     .card-summary {
@@ -949,6 +1010,10 @@
     <img src="S__283426825.jpg">
     <h2>MAARU 日本萌GO</h2>
     <p>日本代購｜訂單查詢</p>
+    <nav class="brand-links" aria-label="快速連結">
+      <a href="https://maaru-jp.github.io/ProductManagement2-main/index.html" target="_blank" rel="noopener">回到官網選購 →</a>
+      <a href="https://maaru-jp.github.io/ProductManagement2-main/index.html#/points" target="_blank" rel="noopener">查詢紅利點數 →</a>
+    </nav>
   </aside>
 
   <!-- 右側查詢功能 -->
@@ -971,11 +1036,15 @@
       <div id="panelOrder" class="mode-panel">
       <div class="search-panel">
         <label for="orderId">請輸入訂單編號（共五碼數字）</label>
-        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off">
-        <button type="button" class="btn-search" onclick="searchOrder()">查詢訂單</button>
+        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off" inputmode="numeric">
+        <p class="panel-hint">不知道編號？可改用 <a href="#" id="linkToCardTab">會員卡號查全部訂單</a>，點選訂單後自動帶入進度。</p>
+        <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
       </div>
 
       <div class="result" id="resultBox">
+        <div class="result-back" id="resultBackWrap" style="display:none;">
+          <button type="button" id="btnBackToCardList">← 返回會員卡號訂單列表</button>
+        </div>
         <div class="result-layout">
           <section class="summary-card">
             <div class="card-title">訂單摘要</div>
@@ -1031,6 +1100,7 @@
           <label for="memberCardNo">請輸入會員卡號（13 碼純數字）</label>
           <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
           <p class="card-hint">卡號由店家於下單後提供。查詢全部歷史訂單後，點選任一筆可查看配送進度。</p>
+          <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a>。</p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢我的訂單</button>
         </div>
 
@@ -1072,6 +1142,9 @@
   const CORS_PROXY_PREFIX = "https://corsproxy.io/?";
   const MEMBER_CARD_KEY = "maarushop_member_card_v1";
   const PROGRESS_STEPS = ["訂單成立", "集運中", "已抵台", "已出貨📦"];
+  let cachedCardOrders = [];
+  let cachedCardNo = "";
+  let openedFromCardList = false;
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -1137,15 +1210,149 @@
     );
   }
 
+  function buildOrderStatusFetchUrls(orderId) {
+    const queryId = toOrderStatusQueryId(orderId);
+    const enc = encodeURIComponent(queryId);
+    return [
+      buildApiUrl("action=customer_orders&orderId=" + enc),
+      buildApiUrl("action=order_status&orderId=" + enc),
+      buildApiUrl("orderId=" + enc)
+    ];
+  }
+
   function isValidOrderStatusResponse(data) {
     if (!data || data.error) return false;
     if (Array.isArray(data.products)) return false;
+    if (Array.isArray(data.orders)) return false;
     return !!(
       data.orderId ||
       data.status ||
       Array.isArray(data.history) ||
       Array.isArray(data.items) ||
       data.product
+    );
+  }
+
+  function mapCustomerOrderItem(it) {
+    const label = String((it && (it.shipStatus || it.itemStatus)) || "待出貨").trim() || "待出貨";
+    const shipped = /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(label);
+    return {
+      name: String((it && it.lineName) || "").trim() || "商品",
+      image: "",
+      itemStatus: label,
+      itemStatusCode: shipped ? "shipped" : "pending"
+    };
+  }
+
+  function buildOrderStatusFromCustomerOrder(ord) {
+    const items = Array.isArray(ord && ord.items) ? ord.items.map(mapCustomerOrderItem) : [];
+    const names = items.map(function(it) { return it.name; }).filter(Boolean);
+    const statusRaw = String((ord && ord.status) || "").trim();
+    let trackingStatus = statusRaw || "訂單成立";
+    if (statusRaw === "已完成") trackingStatus = "已出貨";
+    else if (statusRaw === "出貨中") trackingStatus = "集運中";
+    else if (statusRaw === "已確認") trackingStatus = "已採購";
+    else if (statusRaw === "待處理") trackingStatus = "訂單成立";
+
+    const history = [];
+    const orderDate = String((ord && ord.date) || "").slice(0, 10);
+    const shipDate = String((ord && ord.shipDate) || "").slice(0, 10);
+    if (orderDate) {
+      history.push({ time: orderDate, status: "訂單成立", note: "" });
+    }
+    if (trackingStatus && trackingStatus !== "訂單成立") {
+      history.push({ time: shipDate || orderDate || "", status: trackingStatus, note: "" });
+    }
+    if (items.length) {
+      history.push({
+        time: shipDate || orderDate || "",
+        status: items.map(function(it) { return it.name + "：" + it.itemStatus; }).join("\n"),
+        note: ""
+      });
+    }
+
+    return {
+      error: false,
+      orderId: toOrderStatusQueryId(ord && ord.id),
+      product: names.join("\n"),
+      items: items,
+      itemSummary: buildItemSummary(items),
+      note: "-",
+      history: history,
+      status: trackingStatus,
+      updated: shipDate || orderDate || ""
+    };
+  }
+
+  function findOrderInCardCache(orderId) {
+    const queryId = toOrderStatusQueryId(orderId);
+    if (!queryId || !cachedCardOrders.length) return null;
+    return cachedCardOrders.find(function(o) {
+      return toOrderStatusQueryId(o.id) === queryId;
+    }) || null;
+  }
+
+  async function fetchOrdersByCard(card) {
+    const data = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card));
+    if (data && data.error) {
+      throw new Error(data.message || "查詢失敗");
+    }
+    const orders = Array.isArray(data.orders) ? data.orders : [];
+    cachedCardOrders = orders;
+    cachedCardNo = normalizeMemberCardInput(data.memberCardNo || card);
+    return data;
+  }
+
+  async function fetchOrderStatusData(orderId) {
+    const queryId = toOrderStatusQueryId(orderId);
+    let lastError = null;
+
+    const cached = findOrderInCardCache(queryId);
+    if (cached) {
+      return buildOrderStatusFromCustomerOrder(cached);
+    }
+
+    const card = getSavedMemberCard();
+    if (isValidMemberCardNo(card)) {
+      try {
+        const listData = await fetchOrdersByCard(card);
+        const ord = (listData.orders || []).find(function(o) {
+          return toOrderStatusQueryId(o.id) === queryId;
+        });
+        if (ord) {
+          return buildOrderStatusFromCustomerOrder(ord);
+        }
+        lastError = new Error("此會員卡號下找不到訂單 " + queryId);
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    const urls = buildOrderStatusFetchUrls(queryId);
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const data = await fetchJsonWithCorsFallback(urls[i]);
+        if (data && data.error) {
+          lastError = new Error(data.message || "查無此訂單編號");
+          continue;
+        }
+        if (isValidOrderStatusResponse(data)) {
+          return data;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (!isValidMemberCardNo(card)) {
+      throw lastError || new Error(
+        "查無此訂單編號。若您有會員卡號，請先至「會員卡號查訂單」輸入卡號後再查，或確認編號是否正確。"
+      );
+    }
+
+    const metaUrl = buildApiUrl("action=api_meta");
+    throw lastError || new Error(
+      "查無此訂單編號。若後台已更新配送歷程仍查不到，請請店家重新部署 Code.gs（驗證：" + metaUrl + "）"
     );
   }
 
@@ -1190,31 +1397,83 @@
     if (isCard) {
       pageTitle.innerText = "會員卡號查訂單";
       pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查看全部歷史訂單</span>';
+      document.querySelector(".container").classList.toggle(
+        "has-wide-result",
+        cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
+      );
     } else {
       pageTitle.innerText = "訂單查詢";
       pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 查看配送進度與商品狀態</span>';
+      document.querySelector(".container").classList.remove("has-wide-result");
+    }
+
+    if (isCard) {
+      openedFromCardList = false;
+      document.getElementById("resultBackWrap").style.display = "none";
     }
 
     const params = new URLSearchParams(window.location.search);
-    if (isCard) params.set("mode", "card");
-    else params.delete("mode");
+    if (isCard) {
+      params.set("mode", "card");
+      const cardVal = normalizeMemberCardInput(document.getElementById("memberCardNo").value);
+      if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
+      else params.delete("card");
+      params.delete("orderId");
+    } else {
+      params.delete("mode");
+      params.delete("card");
+    }
     const qs = params.toString();
     history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
   }
 
-  function openOrderDetail(orderId) {
+  function showOrderResultFromData(data, options) {
+    const opts = options || {};
+    const queryId = data.orderId || "";
+    document.getElementById("rOrderId").innerText = queryId;
+    renderProduct(data.product, data.items, data.itemSummary);
+    document.getElementById("rNote").innerText = formatOrderNote(data.note);
+    const history = normalizeHistory(data.history, data.status, data.updated);
+    renderHistory(history, data.items, data.itemSummary);
+    document.getElementById("resultBox").style.display = "block";
+    document.getElementById("errorBox").style.display = "none";
+    document.getElementById("resultBackWrap").style.display = opts.showBack ? "block" : "none";
+    document.querySelector(".container").classList.add("has-wide-result");
+  }
+
+  function openOrderDetail(orderId, fromCardList) {
     const queryId = toOrderStatusQueryId(orderId);
+    openedFromCardList = !!fromCardList;
     setSearchMode("order");
     const input = document.getElementById("orderId");
     input.value = queryId;
 
     const params = new URLSearchParams(window.location.search);
     params.delete("mode");
+    params.delete("card");
     params.set("orderId", queryId);
     history.replaceState(null, "", "?" + params.toString());
 
+    const cached = findOrderInCardCache(queryId);
+    if (cached) {
+      showOrderResultFromData(buildOrderStatusFromCustomerOrder(cached), { showBack: openedFromCardList });
+      document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
     searchOrder();
     input.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function backToCardList() {
+    openedFromCardList = false;
+    setSearchMode("card");
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("errorBox").style.display = "none";
+    if (cachedCardOrders.length) {
+      document.getElementById("cardResultBox").style.display = "block";
+    }
+    document.getElementById("cardResultBox").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderOrderList(orders) {
@@ -1268,10 +1527,27 @@
       action.innerText = "點擊查看配送進度 →";
 
       item.appendChild(top);
+      if (itemCount > 0) {
+        const preview = document.createElement("ul");
+        preview.className = "order-list-items";
+        ord.items.slice(0, 3).forEach(function(it) {
+          const li = document.createElement("li");
+          const name = String(it.lineName || "").trim();
+          const ship = String(it.shipStatus || "").trim();
+          li.innerText = name + (ship && ship !== "待出貨" ? "（" + ship + "）" : "");
+          preview.appendChild(li);
+        });
+        if (ord.items.length > 3) {
+          const more = document.createElement("li");
+          more.innerText = "…另有 " + (ord.items.length - 3) + " 項";
+          preview.appendChild(more);
+        }
+        item.appendChild(preview);
+      }
       item.appendChild(meta);
       item.appendChild(action);
       item.addEventListener("click", function() {
-        openOrderDetail(ord.id);
+        openOrderDetail(ord.id, true);
       });
 
       listEl.appendChild(item);
@@ -1306,11 +1582,21 @@
       }
 
       saveMemberCard(card);
-      document.getElementById("rCardNo").innerText = formatMemberCardDisplay(data.memberCardNo || card);
+      cachedCardOrders = Array.isArray(data.orders) ? data.orders : [];
+      cachedCardNo = normalizeMemberCardInput(data.memberCardNo || card);
+      document.getElementById("rCardNo").innerText = formatMemberCardDisplay(cachedCardNo);
       document.getElementById("rOrderCount").innerText = String(data.orderCount || 0);
       document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
-      renderOrderList(Array.isArray(data.orders) ? data.orders : []);
+      renderOrderList(cachedCardOrders);
+
+      const params = new URLSearchParams(window.location.search);
+      params.set("mode", "card");
+      params.set("card", card);
+      params.delete("orderId");
+      history.replaceState(null, "", "?" + params.toString());
+
       resultBox.style.display = "block";
+      document.querySelector(".container").classList.add("has-wide-result");
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "查詢失敗";
       if (/至少.*姓名|客戶姓名/.test(msg)) {
@@ -1332,6 +1618,17 @@
     document.getElementById("tabCard").addEventListener("click", function() {
       setSearchMode("card");
     });
+    document.getElementById("linkToCardTab").addEventListener("click", function(e) {
+      e.preventDefault();
+      setSearchMode("card");
+      document.getElementById("memberCardNo").focus();
+    });
+    document.getElementById("linkToOrderTab").addEventListener("click", function(e) {
+      e.preventDefault();
+      setSearchMode("order");
+      document.getElementById("orderId").focus();
+    });
+    document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
@@ -1341,6 +1638,9 @@
         e.preventDefault();
         searchByCard();
       }
+    });
+    document.getElementById("orderId").addEventListener("input", function(e) {
+      e.target.value = String(e.target.value || "").replace(/\D/g, "").slice(0, 5);
     });
     document.getElementById("orderId").addEventListener("keydown", function(e) {
       if (e.key === "Enter") {
@@ -1789,21 +2089,9 @@
     }
 
     try {
-      const data = await fetchJsonWithCorsFallback(buildOrderStatusUrl(queryId));
-      if (data.error) {
-        throw new Error(data.message || "查無此訂單編號");
-      }
-      if (!isValidOrderStatusResponse(data)) {
-        throw new Error(
-          "訂單進度 API 尚未更新（回傳了商品資料）。請至 Apps Script 貼上最新 Code.gs 並重新部署網頁應用程式。"
-        );
-      }
-      document.getElementById("rOrderId").innerText = data.orderId || queryId;
-      renderProduct(data.product, data.items, data.itemSummary);
-      document.getElementById("rNote").innerText = formatOrderNote(data.note);
-      const history = normalizeHistory(data.history, data.status, data.updated);
-      renderHistory(history, data.items, data.itemSummary);
-      resultBox.style.display = "block";
+      const data = await fetchOrderStatusData(queryId);
+      showOrderResultFromData(data, { showBack: openedFromCardList });
+      resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "查詢失敗";
       errorBox.innerText = /查無|找不到/.test(msg)

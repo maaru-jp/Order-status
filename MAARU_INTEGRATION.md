@@ -79,9 +79,10 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOI
 
 1. 開啟試算表 → **擴充功能 → Apps Script**，確認 `Code.gs` 含 `order_status`（約第 45 行 `if (action === "order_status")`）
 2. **部署 → 管理部署 → 編輯 → 版本選「新版本」→ 部署**（只儲存不會更新線上 URL）
-3. 驗證：瀏覽器開  
-   `你的GAS_URL?action=order_status&orderId=00001`  
-   應回傳 `orderId`、`history` 等，**不可**回傳 `products` 陣列
+3. 驗證（兩個網址都要過）：  
+   - `你的GAS_URL?action=api_meta` → 應有 `"apiVersion":"2026-06-04"`  
+   - `你的GAS_URL?action=customer_orders&orderId=00001` → 應有 `orderId`，**不可**有 `products`  
+   詳細圖文見 ProductManagement2 專案 **`GAS訂單進度修復.md`**
 4. 後台同步訂單至試算表、補齊會員卡號
 
 ### 2. 前端（本 repo）
