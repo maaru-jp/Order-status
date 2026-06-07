@@ -1788,8 +1788,7 @@
 
       <div class="mode-tabs" role="tablist" aria-label="查詢方式">
         <button type="button" id="tabOrder" class="mode-tab is-active" role="tab" aria-selected="true">訂單編號查進度</button>
-        <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">歷史訂單</button>
-        <button type="button" id="tabPoints" class="mode-tab" role="tab" aria-selected="false">會員中心（紅利）</button>
+        <button type="button" id="tabCard" class="mode-tab" role="tab" aria-selected="false">會員中心</button>
       </div>
 
       <div id="panelOrder" class="mode-panel">
@@ -1860,9 +1859,9 @@
             <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
             <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
-          <p class="card-hint">輸入 13 碼會員卡號，查詢 ProductManagement2「歷史訂單」中所有交易紀錄；每筆顯示獲得／折抵的紅利點數，點選可查看配送進度。</p>
-          <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a> · <a href="#" id="linkToPointsTabInline">查看紅利歷程 →</a></p>
-          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢歷史訂單</button>
+          <p class="card-hint">輸入 13 碼會員卡號，查詢所有過往交易訂單；點選任一筆可查看配送進度與商品狀態。</p>
+          <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a></p>
+          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
@@ -1882,16 +1881,8 @@
               <div class="label">待結清合計</div>
               <div class="value" id="rTotalDue">NT$0</div>
             </div>
-            <div class="card-summary-item">
-              <div class="label">累計獲得點數</div>
-              <div class="value" id="rTotalPointsEarned">0</div>
-            </div>
-            <div class="card-summary-item">
-              <div class="label">累計折抵點數</div>
-              <div class="value" id="rTotalPointsUsed">0</div>
-            </div>
           </div>
-          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（含每筆紅利）</div>
+          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄</div>
           <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
             <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
               <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
@@ -1903,72 +1894,9 @@
           <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
           <div class="order-list" id="rOrderList"></div>
           <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
-          <div class="card-links">
-            <a href="#" id="linkToPointsTab">查看紅利異動歷程 →</a>
-          </div>
         </div>
 
         <div class="error error-card" id="cardErrorBox" style="display:none;">
-          ⚠ 查詢失敗，請確認卡號是否正確
-        </div>
-      </div>
-
-      <div id="panelPoints" class="mode-panel is-hidden">
-        <div class="search-panel">
-          <label for="pointsMemberCardNo">請輸入會員卡號（13 碼純數字）</label>
-          <div class="card-input-row">
-            <input type="text" id="pointsMemberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
-          </div>
-          <p class="card-hint">會員中心：讀取 ProductManagement2「紅利點數」分頁，顯示可用餘額與完整異動歷程（發放、折抵、失效、調整）。訂單改「已確認」後才會入帳。</p>
-          <p class="panel-hint">也可 <a href="#" id="linkToCardTabFromPoints">查此卡號的歷史訂單</a>，或改用 <a href="#" id="linkToOrderTabFromPoints">訂單編號查配送進度</a>。</p>
-          <button type="button" class="btn-search btn-search-amber" id="btnSearchPoints">查詢紅利歷程</button>
-        </div>
-
-        <div class="points-summary" id="pointsResultBox" style="display:none;">
-          <div class="points-summary-inner">
-            <div class="points-meta">
-              <span class="card-no-row">
-                會員卡號 <span id="rPointsCardNo" class="order-list-id"></span>
-                <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultPoints" title="複製 13 碼卡號">複製</button>
-              </span>
-              <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
-            </div>
-
-            <div class="pt-subtabs" role="tablist" aria-label="紅利檢視">
-              <button type="button" id="ptTabHistory" class="pt-subtab is-active" role="tab" aria-selected="true">點數紀錄</button>
-              <button type="button" id="ptTabAvailable" class="pt-subtab" role="tab" aria-selected="false">可用點數</button>
-            </div>
-          </div>
-
-          <div id="ptPanelHistory" class="pt-subpanel" role="tabpanel">
-            <div class="pt-ledger-list" id="ptHistoryList"></div>
-            <div class="pt-empty" id="pointsEmptyHistory" style="display:none;">目前尚無點數異動紀錄</div>
-          </div>
-
-          <div id="ptPanelAvailable" class="pt-subpanel is-hidden" role="tabpanel">
-            <div class="points-hero" style="margin:12px 12px 0;border-radius:12px;">
-              <div class="points-hero-label">可用紅利點數</div>
-              <div class="points-hero-value" id="rPointsBalance">0</div>
-              <div class="points-hero-sub" id="rPointsDiscount">可折抵 NT$0</div>
-            </div>
-            <div class="pt-lots-list" id="ptLotsList"></div>
-            <div class="pt-empty" id="pointsEmptyLots" style="display:none;">
-              目前尚無有效點數批次。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
-            </div>
-          </div>
-
-          <div class="points-summary-footer">
-            <details class="points-rules">
-              <summary>紅利規則說明</summary>
-              <ul id="rPointsRules"></ul>
-            </details>
-            <div class="card-links">
-              <a href="#" id="linkToCardTabFromResult">查看此卡號的歷史訂單 →</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="error error-card" id="pointsErrorBox" style="display:none;">
           ⚠ 查詢失敗，請確認卡號是否正確
         </div>
       </div>
@@ -1996,8 +1924,6 @@
   let orderListFilter = "all";
   let orderListSearchQuery = "";
   let orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
-  let cachedPointsData = null;
-  let pointsSubMode = "history";
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -2090,7 +2016,6 @@
         return;
       }
       input.value = card;
-      syncPointsCardInputs(card);
       if (isValidMemberCardNo(card)) {
         flashActionButton(btn, "已貼上", "貼上");
       } else {
@@ -2111,15 +2036,6 @@
     if (btnCopyResultCard) {
       btnCopyResultCard.addEventListener("click", function() {
         copyMemberCardNumber(cachedCardNo, this);
-      });
-    }
-    const btnCopyResultPoints = document.getElementById("btnCopyResultPoints");
-    if (btnCopyResultPoints) {
-      btnCopyResultPoints.addEventListener("click", function() {
-        copyMemberCardNumber(
-          normalizeMemberCardInput(document.getElementById("rPointsCardNo").innerText),
-          this
-        );
       });
     }
   }
@@ -2336,28 +2252,11 @@
     );
   }
 
-  function buildPointsBalanceUrl(memberCardNo) {
-    const card = normalizeMemberCardInput(memberCardNo);
-    return buildApiUrl(
-      "action=points_balance&card=" + encodeURIComponent(card)
-      + "&memberCardNo=" + encodeURIComponent(card)
-    );
-  }
-
-  function resolveCardForPoints() {
-    return normalizeMemberCardInput(
-      document.getElementById("pointsMemberCardNo").value
-      || document.getElementById("memberCardNo").value
-      || cachedCardNo
-      || getSavedMemberCard()
-    );
-  }
-
-  function syncPointsCardInputs(card) {
+  function syncMemberCardInput(card) {
     const c = normalizeMemberCardInput(card);
     if (!c) return;
-    document.getElementById("pointsMemberCardNo").value = c;
-    document.getElementById("memberCardNo").value = c;
+    const el = document.getElementById("memberCardNo");
+    if (el) el.value = c;
   }
 
   async function fetchJsonWithCorsFallback(url, options) {
@@ -2397,39 +2296,24 @@
   function setSearchMode(mode) {
     const isOrder = mode === "order";
     const isCard = mode === "card";
-    const isPoints = mode === "points";
 
     document.getElementById("tabOrder").classList.toggle("is-active", isOrder);
     document.getElementById("tabCard").classList.toggle("is-active", isCard);
-    document.getElementById("tabPoints").classList.toggle("is-active", isPoints);
     document.getElementById("tabOrder").setAttribute("aria-selected", isOrder ? "true" : "false");
     document.getElementById("tabCard").setAttribute("aria-selected", isCard ? "true" : "false");
-    document.getElementById("tabPoints").setAttribute("aria-selected", isPoints ? "true" : "false");
     document.getElementById("panelOrder").classList.toggle("is-hidden", !isOrder);
     document.getElementById("panelCard").classList.toggle("is-hidden", !isCard);
-    document.getElementById("panelPoints").classList.toggle("is-hidden", !isPoints);
 
     const pageTitle = document.getElementById("pageTitle");
     const pageSub = document.getElementById("pageSub");
     const container = document.querySelector(".container");
 
     if (isCard) {
-      pageTitle.innerText = "歷史訂單";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢「歷史訂單」交易紀錄與每筆獲得／折抵點數</span>';
+      pageTitle.innerText = "會員中心";
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢過往交易訂單與配送進度</span>';
       container.classList.toggle(
         "has-wide-result",
         cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
-      );
-    } else if (isPoints) {
-      pageTitle.innerText = "會員中心（紅利）";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢「紅利點數」餘額與完整異動歷程</span>';
-      const cardVal = resolveCardForPoints();
-      if (isValidMemberCardNo(cardVal)) {
-        syncPointsCardInputs(cardVal);
-      }
-      container.classList.toggle(
-        "has-wide-result",
-        document.getElementById("pointsResultBox").style.display !== "none"
       );
     } else {
       pageTitle.innerText = "訂單查詢";
@@ -2437,7 +2321,7 @@
       container.classList.remove("has-wide-result");
     }
 
-    if (isCard || isPoints) {
+    if (isCard) {
       openedFromCardList = false;
       document.getElementById("resultBackWrap").style.display = "none";
     }
@@ -2449,371 +2333,12 @@
       if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
       else params.delete("card");
       params.delete("orderId");
-    } else if (isPoints) {
-      params.set("mode", "points");
-      const cardVal = resolveCardForPoints();
-      if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
-      else params.delete("card");
-      params.delete("orderId");
     } else {
       params.delete("mode");
       if (!params.get("orderId")) params.delete("card");
     }
     const qs = params.toString();
     history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
-  }
-
-  function renderPointsRules(rules) {
-    const r = rules || {};
-    const spend = r.spendPerPoint != null ? r.spendPerPoint : 100;
-    const value = r.pointValue != null ? r.pointValue : 1;
-    const minNet = r.minRedeemNet != null ? r.minRedeemNet : 199;
-    const days = r.expireDays != null ? r.expireDays : 365;
-    const listEl = document.getElementById("rPointsRules");
-    listEl.innerHTML = "";
-    [
-      "消費滿 NT$" + spend + " 集 1 點（不含運費）",
-      "1 點可折 NT$" + value,
-      "商品淨額滿 NT$" + minNet + " 才可折抵；未勾選折抵時點數持續累積",
-      "點數自發放日起 " + days + " 天內有效",
-      "訂單狀態改為「已確認」後才會入帳（每筆訂單僅發放一次）"
-    ].forEach(function(line) {
-      const li = document.createElement("li");
-      li.innerText = line;
-      listEl.appendChild(li);
-    });
-  }
-
-  function pointsTypePillClass(type) {
-    const t = String(type || "").trim();
-    if (t === "發放") return "type-earn";
-    if (t === "折抵") return "type-use";
-    if (t === "失效") return "type-expire";
-    return "type-adjust";
-  }
-
-  function formatPointHistoryNote(note) {
-    const text = String(note || "")
-      .replace(/（不含運費、訂金）/g, "（不含運費）")
-      .replace(/\(不含運費、訂金\)/g, "（不含運費）")
-      .trim();
-    return text || "—";
-  }
-
-  function formatLedgerDisplayDate(dateStr) {
-    const raw = String(dateStr || "").trim();
-    if (!raw) return "—";
-    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
-    if (!m) return raw;
-    if (m[4] != null) {
-      return m[1] + "/" + m[2] + "/" + m[3] + " " + m[4] + ":" + m[5];
-    }
-    return m[1] + "/" + m[2] + "/" + m[3];
-  }
-
-  function pointLedgerTypeLabel(type) {
-    const t = String(type || "").trim();
-    if (t === "發放") return "消費給點";
-    if (t === "折抵") return "紅利折抵";
-    if (t === "失效") return "點數失效";
-    if (t === "調整") return "點數調整";
-    return t || "點數異動";
-  }
-
-  function formatPointAmountDisplay(pts) {
-    const n = Math.floor(Number(pts) || 0);
-    if (n > 0) return "+" + n.toLocaleString("zh-TW");
-    return n.toLocaleString("zh-TW");
-  }
-
-  function setPointsSubMode(mode) {
-    pointsSubMode = mode === "available" ? "available" : "history";
-    const isHistory = pointsSubMode === "history";
-    document.getElementById("ptTabHistory").classList.toggle("is-active", isHistory);
-    document.getElementById("ptTabAvailable").classList.toggle("is-active", !isHistory);
-    document.getElementById("ptTabHistory").setAttribute("aria-selected", isHistory ? "true" : "false");
-    document.getElementById("ptTabAvailable").setAttribute("aria-selected", !isHistory ? "true" : "false");
-    document.getElementById("ptPanelHistory").classList.toggle("is-hidden", !isHistory);
-    document.getElementById("ptPanelAvailable").classList.toggle("is-hidden", isHistory);
-  }
-
-  function bindPointsSubTabs() {
-    document.getElementById("ptTabHistory").addEventListener("click", function() {
-      setPointsSubMode("history");
-    });
-    document.getElementById("ptTabAvailable").addEventListener("click", function() {
-      setPointsSubMode("available");
-    });
-  }
-
-  function renderPointsHistory(history) {
-    const listEl = document.getElementById("ptHistoryList");
-    const emptyEl = document.getElementById("pointsEmptyHistory");
-    if (!listEl || !emptyEl) return;
-    listEl.innerHTML = "";
-
-    if (!Array.isArray(history) || !history.length) {
-      emptyEl.style.display = "block";
-      return;
-    }
-
-    emptyEl.style.display = "none";
-    history.forEach(function(rec) {
-      const pts = Math.floor(Number(rec.points) || 0);
-      const orderId = String(rec.orderId || "").trim();
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "pt-ledger-item" + (orderId ? "" : " is-static");
-      item.setAttribute("aria-label", pointLedgerTypeLabel(rec.type) + " " + formatPointAmountDisplay(pts) + " 點");
-
-      const main = document.createElement("div");
-      main.className = "pt-ledger-main";
-
-      const topDate = document.createElement("div");
-      topDate.className = "pt-ledger-top-date";
-      topDate.innerText = formatLedgerDisplayDate(rec.date);
-
-      const title = document.createElement("div");
-      title.className = "pt-ledger-title";
-      title.innerText = pointLedgerTypeLabel(rec.type);
-
-      const orderLine = document.createElement("div");
-      orderLine.className = "pt-ledger-order";
-      orderLine.innerText = "訂單編號：" + (orderId || "—");
-
-      main.appendChild(topDate);
-      main.appendChild(title);
-      main.appendChild(orderLine);
-
-      const noteText = formatPointHistoryNote(rec.note);
-      if (noteText && noteText !== "—") {
-        const noteLine = document.createElement("div");
-        noteLine.className = "pt-ledger-note";
-        noteLine.innerText = noteText;
-        main.appendChild(noteLine);
-      }
-
-      if (rec.expireDate && pts > 0 && String(rec.type || "").trim() === "發放") {
-        const sub = document.createElement("div");
-        sub.className = "pt-ledger-sub";
-        sub.innerText = "到期：" + formatLedgerDisplayDate(rec.expireDate);
-        main.appendChild(sub);
-      }
-
-      const amt = document.createElement("div");
-      amt.className = "pt-ledger-amt " + (pts >= 0 ? "positive" : "negative");
-      amt.innerText = formatPointAmountDisplay(pts);
-
-      item.appendChild(main);
-      item.appendChild(amt);
-
-      if (orderId) {
-        const chev = document.createElement("span");
-        chev.className = "pt-ledger-chevron";
-        chev.setAttribute("aria-hidden", "true");
-        chev.innerText = "›";
-        item.appendChild(chev);
-        item.addEventListener("click", function() {
-          openOrderDetail(orderId, false);
-        });
-      }
-
-      listEl.appendChild(item);
-    });
-  }
-
-  function renderPointsLots(lots) {
-    const listEl = document.getElementById("ptLotsList");
-    const emptyEl = document.getElementById("pointsEmptyLots");
-    if (!listEl || !emptyEl) return;
-    listEl.innerHTML = "";
-
-    if (!Array.isArray(lots) || !lots.length) {
-      emptyEl.style.display = "block";
-      return;
-    }
-
-    emptyEl.style.display = "none";
-    lots.forEach(function(lot) {
-      const row = document.createElement("div");
-      row.className = "pt-lot-item";
-
-      const main = document.createElement("div");
-      main.className = "pt-lot-main";
-
-      const label = document.createElement("div");
-      label.className = "pt-lot-label";
-      label.innerText = "發放日期";
-
-      const value = document.createElement("div");
-      value.className = "pt-lot-value";
-      value.innerText = formatLedgerDisplayDate(lot.date);
-
-      const expire = document.createElement("div");
-      expire.className = "pt-lot-expire";
-      expire.innerText = "到期 " + formatLedgerDisplayDate(lot.expireDate);
-
-      main.appendChild(label);
-      main.appendChild(value);
-      main.appendChild(expire);
-
-      const remain = document.createElement("div");
-      remain.className = "pt-lot-remain";
-      remain.innerText = String(lot.remaining != null ? lot.remaining : 0);
-
-      row.appendChild(main);
-      row.appendChild(remain);
-      listEl.appendChild(row);
-    });
-  }
-
-  function showPointsResult(data) {
-    cachedPointsData = data || null;
-    const balance = Math.max(0, Math.floor(Number(data.balance) || 0));
-    const discount = Math.max(0, Math.floor(Number(data.discountAmount != null ? data.discountAmount : balance) || 0));
-    const card = normalizeMemberCardInput(data.memberCardNo || resolveCardForPoints());
-
-    document.getElementById("rPointsBalance").innerText = String(balance);
-    document.getElementById("rPointsDiscount").innerText = "可折抵 NT$" + discount;
-    document.getElementById("rPointsCardNo").innerText = card ? formatMemberCardDisplay(card) : "—";
-
-    const expireEl = document.getElementById("rPointsExpire");
-    const nextDate = String(data.nextExpireDate || "").trim();
-    const nextPts = Math.floor(Number(data.nextExpirePoints) || 0);
-    if (nextDate && nextPts > 0 && balance > 0) {
-      expireEl.innerText = "最近到期：" + nextDate + "（" + nextPts + " 點）";
-      expireEl.style.display = "inline-flex";
-    } else {
-      expireEl.style.display = "none";
-    }
-
-    renderPointsLots(data.lots);
-    renderPointsHistory(data.history);
-    renderPointsRules(data.rules);
-    setPointsSubMode("history");
-
-    const emptyHistory = document.getElementById("pointsEmptyHistory");
-    const emptyLots = document.getElementById("pointsEmptyLots");
-    const hasHistory = Array.isArray(data.history) && data.history.length > 0;
-    const hasLots = Array.isArray(data.lots) && data.lots.length > 0;
-
-    if (emptyHistory && !hasHistory) {
-      const apiMsg = String(data.message || "").trim();
-      const dbg = data.debug || {};
-      let hint = apiMsg && apiMsg !== "OK" ? apiMsg : "目前尚無點數異動紀錄";
-      if (dbg.pointsSheetName) {
-        hint += "（試算表「" + dbg.pointsSheetName + "」共 " + (dbg.ledgerRowCount || 0) + " 筆";
-        if (dbg.ledgerForCard != null) hint += "，與此卡號相關 " + dbg.ledgerForCard + " 筆";
-        hint += "）";
-      }
-      if (dbg.ledgerRowCount === 0) {
-        hint += "。請至後台「紅利點數」按「同步至試算表」。";
-      } else if ((dbg.ledgerForCard || 0) === 0 && (dbg.ordersForCard || 0) > 0) {
-        hint += "。歷史訂單有點數但紅利分頁尚未對應此卡，請再查詢一次或請店家後台按「同步至試算表」。";
-      } else if ((dbg.ledgerRowCount || 0) > 0 && (dbg.ledgerForCard || 0) === 0) {
-        hint += "。試算表有資料但未對應此卡號，請確認卡號是否正確。";
-      }
-      emptyHistory.innerText = hint;
-    }
-
-    if (emptyLots && balance <= 0 && !hasLots && !hasHistory) {
-      emptyLots.innerText = "目前尚無可用點數。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。";
-    }
-
-    document.getElementById("pointsResultBox").style.display = "block";
-    document.getElementById("pointsErrorBox").style.display = "none";
-    document.querySelector(".container").classList.add("has-wide-result");
-  }
-
-  function goToPointsTab(prefillCard, autoSearch) {
-    const card = normalizeMemberCardInput(
-      prefillCard || cachedCardNo || document.getElementById("memberCardNo").value || getSavedMemberCard()
-    );
-    if (isValidMemberCardNo(card)) {
-      syncPointsCardInputs(card);
-      saveMemberCard(card);
-    }
-    setSearchMode("points");
-    if (autoSearch !== false && isValidMemberCardNo(card)) {
-      searchByPoints();
-    } else {
-      document.getElementById("pointsMemberCardNo").focus();
-    }
-  }
-
-  function goToCardTab(prefillCard, autoSearch) {
-    const card = normalizeMemberCardInput(
-      prefillCard || document.getElementById("pointsMemberCardNo").value || cachedCardNo || getSavedMemberCard()
-    );
-    if (isValidMemberCardNo(card)) {
-      syncPointsCardInputs(card);
-      saveMemberCard(card);
-    }
-    setSearchMode("card");
-    if (autoSearch !== false && isValidMemberCardNo(card)) {
-      searchByCard();
-    } else {
-      document.getElementById("memberCardNo").focus();
-    }
-  }
-
-  async function searchByPoints() {
-    const cardInput = document.getElementById("pointsMemberCardNo");
-    const card = normalizeMemberCardInput(cardInput.value);
-    cardInput.value = card;
-
-    const resultBox = document.getElementById("pointsResultBox");
-    const errorBox = document.getElementById("pointsErrorBox");
-    const btn = document.getElementById("btnSearchPoints");
-
-    resultBox.style.display = "none";
-    errorBox.style.display = "none";
-    document.getElementById("ptHistoryList").innerHTML = "";
-    document.getElementById("ptLotsList").innerHTML = "";
-    document.getElementById("pointsEmptyHistory").style.display = "none";
-    document.getElementById("pointsEmptyLots").style.display = "none";
-
-    if (!isValidMemberCardNo(card)) {
-      errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（純數字）";
-      errorBox.style.display = "block";
-      document.querySelector(".container").classList.remove("has-wide-result");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = "查詢中…";
-
-    try {
-      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card), {
-        skipProxy: true,
-        timeoutMs: 55000
-      });
-      if (data.error) {
-        throw new Error(data.message || "查詢失敗");
-      }
-
-      saveMemberCard(card);
-      syncPointsCardInputs(card);
-      showPointsResult(data);
-
-      const params = new URLSearchParams(window.location.search);
-      params.set("mode", "points");
-      params.set("card", card);
-      params.delete("orderId");
-      history.replaceState(null, "", "?" + params.toString());
-    } catch (err) {
-      const msg = err && err.message ? String(err.message) : "查詢失敗";
-      if (/points_balance|action=/.test(msg) || /請使用 action/.test(msg)) {
-        errorBox.innerText = "⚠ 紅利查詢 API 尚未部署，請聯絡店家更新 GAS 後再試";
-      } else {
-        errorBox.innerText = "⚠ " + msg;
-      }
-      errorBox.style.display = "block";
-      document.querySelector(".container").classList.remove("has-wide-result");
-    } finally {
-      btn.disabled = false;
-      btn.innerText = "查詢紅利歷程";
-    }
   }
 
   function showOrderResultFromData(data, options) {
@@ -3006,8 +2531,6 @@
       top.appendChild(left);
       top.appendChild(pill);
 
-      const earned = Math.max(0, Math.floor(Number(ord.pointsEarned) || 0));
-      const used = Math.max(0, Math.floor(Number(ord.pointsUsed) || 0));
       const summary = summarizeOrderItemsForList(ord);
       const productText = summary.productText;
       const itemCount = summary.total;
@@ -3052,24 +2575,8 @@
           t.innerText = "待結清 NT$" + ord.amountDue;
           tags.appendChild(t);
         }
-        if (earned > 0) {
-          const t = document.createElement("span");
-          t.className = "order-list-tag ok";
-          t.innerText = "＋" + earned + " 點";
-          tags.appendChild(t);
-        }
-        if (used > 0) {
-          const t = document.createElement("span");
-          t.className = "order-list-tag";
-          t.innerText = "折抵 " + used + " 點";
-          tags.appendChild(t);
-        }
         if (tags.childNodes.length) item.appendChild(tags);
       } else {
-        let pointsParts = [];
-        if (earned > 0) pointsParts.push("獲得 " + earned + " 點");
-        if (used > 0) pointsParts.push("折抵 " + used + " 點");
-
         if (itemCount > 0) {
           const preview = document.createElement("ul");
           preview.className = "order-list-items";
@@ -3091,12 +2598,6 @@
           preview.className = "order-list-product-preview";
           preview.innerText = productText;
           item.appendChild(preview);
-        }
-        if (pointsParts.length) {
-          const pointsEl = document.createElement("div");
-          pointsEl.className = "order-list-points";
-          pointsEl.innerText = "⭐ " + pointsParts.join(" · ");
-          item.appendChild(pointsEl);
         }
         const meta = document.createElement("div");
         meta.className = "order-list-meta";
@@ -3162,8 +2663,6 @@
       document.getElementById("rCardNo").innerText = formatMemberCardDisplay(cachedCardNo);
       document.getElementById("rOrderCount").innerText = String(data.orderCount || 0);
       document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
-      document.getElementById("rTotalPointsEarned").innerText = String(data.totalPointsEarned || 0);
-      document.getElementById("rTotalPointsUsed").innerText = String(data.totalPointsUsed || 0);
       resetOrderListViewState();
       renderOrderList(cachedCardOrders);
 
@@ -3211,7 +2710,7 @@
       errorBox.style.display = "block";
     } finally {
       btn.disabled = false;
-      btn.innerText = "查詢歷史訂單";
+      btn.innerText = "查詢交易紀錄";
     }
   }
 
@@ -3264,33 +2763,6 @@
     document.getElementById("tabCard").addEventListener("click", function() {
       setSearchMode("card");
     });
-    document.getElementById("tabPoints").addEventListener("click", function() {
-      setSearchMode("points");
-    });
-    document.getElementById("linkToPointsTab").addEventListener("click", function(e) {
-      e.preventDefault();
-      goToPointsTab(cachedCardNo || document.getElementById("memberCardNo").value, true);
-    });
-    var linkPointsInline = document.getElementById("linkToPointsTabInline");
-    if (linkPointsInline) {
-      linkPointsInline.addEventListener("click", function(e) {
-        e.preventDefault();
-        goToPointsTab(document.getElementById("memberCardNo").value, true);
-      });
-    }
-    document.getElementById("linkToCardTabFromPoints").addEventListener("click", function(e) {
-      e.preventDefault();
-      goToCardTab(null, true);
-    });
-    document.getElementById("linkToCardTabFromResult").addEventListener("click", function(e) {
-      e.preventDefault();
-      goToCardTab(document.getElementById("rPointsCardNo").innerText.replace(/\s/g, ""), true);
-    });
-    document.getElementById("linkToOrderTabFromPoints").addEventListener("click", function(e) {
-      e.preventDefault();
-      setSearchMode("order");
-      document.getElementById("orderId").focus();
-    });
     document.getElementById("linkToOrderTab").addEventListener("click", function(e) {
       e.preventDefault();
       setSearchMode("order");
@@ -3298,9 +2770,7 @@
     });
     document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
-    document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
     bindOrderListControls();
-    bindPointsSubTabs();
     bindCardClipboardActions();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
@@ -3309,15 +2779,6 @@
       if (e.key === "Enter") {
         e.preventDefault();
         searchByCard();
-      }
-    });
-    document.getElementById("pointsMemberCardNo").addEventListener("input", function(e) {
-      e.target.value = normalizeMemberCardInput(e.target.value);
-    });
-    document.getElementById("pointsMemberCardNo").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        searchByPoints();
       }
     });
     document.getElementById("orderId").addEventListener("input", function(e) {
@@ -3336,7 +2797,7 @@
     const cardToUse = isValidMemberCardNo(cardParam) ? cardParam : saved;
 
     if (cardToUse) {
-      syncPointsCardInputs(cardToUse);
+      syncMemberCardInput(cardToUse);
       if (isValidMemberCardNo(cardToUse)) {
         saveMemberCard(cardToUse);
       }
@@ -3349,12 +2810,7 @@
       setSearchMode("order");
       document.getElementById("orderId").value = toOrderStatusQueryId(orderIdParam);
       openOrderDetail(orderIdParam);
-    } else if (mode === "points") {
-      setSearchMode("points");
-      if (isValidMemberCardNo(cardToUse)) {
-        searchByPoints();
-      }
-    } else if (mode === "card") {
+    } else if (mode === "points" || mode === "card") {
       setSearchMode("card");
       if (isValidMemberCardNo(cardToUse)) {
         searchByCard();
