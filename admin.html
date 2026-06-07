@@ -203,6 +203,12 @@
     </div>
   </div>
 
+  <div id="apiConnectivityBanner" class="hidden bg-amber-50 border-b border-amber-300 text-amber-950 px-4 py-3 text-sm leading-relaxed" role="alert">
+    <strong class="font-semibold">無法連線試算表 API</strong>
+    <span id="apiConnectivityBannerText" class="ml-1"></span>
+    <a id="apiConnectivityBannerLink" href="http://localhost:3000/admin.html" class="ml-2 underline font-medium whitespace-nowrap">改用本機後台</a>
+  </div>
+
   <div id="adminApp" class="flex min-h-screen">
     <!-- 左側導覽 -->
     <div class="admin-sidebar-wrap shrink-0 flex">
@@ -214,6 +220,7 @@
         <nav class="p-2 flex-1 flex flex-col justify-center">
           <a href="#" id="navReports" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-slate-300 hover:bg-white/10 text-sm" title="總覽報表"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span class="nav-text">總覽報表</span></a>
           <a href="#" id="navOrders" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-slate-300 hover:bg-white/10 text-sm" title="訂單管理"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span><span class="nav-text">訂單管理</span></a>
+          <a href="#" id="navMembers" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-slate-300 hover:bg-white/10 text-sm" title="會員名單"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-text">會員名單</span></a>
           <a href="#" id="navLoyalty" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-slate-300 hover:bg-white/10 text-sm" title="紅利點數"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span><span class="nav-text">紅利點數</span></a>
           <a href="#" id="navProducts" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-sm bg-white/10 active" title="商品管理"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span><span class="nav-text">商品管理</span></a>
           <a href="#" id="navLayout" class="nav-item flex items-center gap-3 py-2.5 px-3 rounded text-slate-300 hover:bg-white/10 text-sm" title="首頁排版"><span class="nav-icon shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span class="nav-text">首頁排版</span></a>
@@ -401,7 +408,7 @@
         <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-xs text-slate-700 space-y-2">
           <p class="font-semibold text-sky-900">訂單合併與紅利（追加商品時）</p>
           <p><strong>做法 A｜同一訂單編號：</strong>用「追加」併入原單。<span class="text-amber-800">請等全部併完再改「已確認」</span>，否則發點後再追加，不會自動補發差額點數。</p>
-          <p><strong>做法 B｜不同訂單編號：</strong>同顧客開新單，適合分次下單／分次出貨。點客戶旁 <strong>總覽</strong> 或請顧客至 <a href="https://maaru-jp.github.io/Order-status/" target="_blank" rel="noopener"><strong>訂單查詢中心</strong></a> 查詢。</p>
+          <p><strong>做法 B｜不同訂單編號（推薦加單）：</strong>同顧客開新 ORD、同一會員卡；<strong>併箱免運</strong>時新單勾選「併箱出貨」、運費填 0，運費只留在出貨主單。點 <strong>總覽</strong> 可看「本批應收運費 1 次」。</p>
         </div>
 
         <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -428,29 +435,125 @@
         <div class="mt-6 p-4 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3">
           <span class="text-slate-500 text-lg">💡</span>
           <div class="text-sm text-slate-700 space-y-2">
-            <p><strong>產生 PDF：</strong>每筆訂單「操作」欄 → 列印視窗選「另存為 PDF」。僅含「待出貨」品項，供客人出貨明細，<strong>不會</strong>觸發紅利發放。</p>
+            <p><strong>產生 PDF：</strong>每筆訂單「操作」欄 → 列印視窗選「另存為 PDF」。僅含「待出貨」品項；<strong>併箱出貨</strong>可產生併箱 PDF 或於<strong>顧客總覽</strong>操作。</p>
             <p><strong>狀態與紅利：</strong><strong>已確認</strong>＝發點（建議金額定案後再改）· <strong>出貨中／PDF</strong>＝出貨作業 · <strong>已完成</strong>＝結案（不重複發點）。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 會員名單 -->
+      <section id="sectionMembers" class="hidden">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+          <h2 class="text-xl font-semibold text-slate-800 section-title-with-icon">
+            <svg class="section-title-icon text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            會員名單
+          </h2>
+          <div class="flex flex-wrap gap-2 shrink-0">
+            <button type="button" id="btnMemberSyncOrders" class="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm hover:bg-sky-700">從訂單匯入</button>
+            <button type="button" id="btnMemberAdd" class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">新增會員</button>
+            <button type="button" id="btnMemberReload" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-50">重新載入</button>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 mb-6">
+          <p class="text-sm font-semibold text-sky-900 mb-2">為什麼需要會員名單？</p>
+          <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+            <li><strong>一個顧客 = 一張 13 碼卡</strong>，作為紅利、歷史訂單、會員中心的共同主鍵</li>
+            <li>資料寫入獨立試算表 <strong>Memberist</strong> 的「<strong>會員名單</strong>」分頁（非 ProductManagement2 本簿）</li>
+            <li>訂單儲存至試算表時會<strong>自動更新</strong>會員名單；亦可按「從訂單匯入」一次補齊</li>
+            <li>同名多卡、電話重複時會<strong>提示衝突</strong>，避免顧客查不到點數</li>
+          </ul>
+          <p class="text-xs text-slate-500 mt-3" id="membersStatLine">載入中…</p>
+          <p id="membersMessage" class="text-sm mt-2 hidden" role="status"></p>
+        </div>
+
+        <div id="membersConflictBox" class="hidden rounded-xl border border-amber-200 bg-amber-50 p-4 mb-4"></div>
+
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-semibold text-slate-800">會員清冊</h3>
+            <input type="text" id="membersSearchInput" placeholder="搜尋姓名、電話、卡號" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs w-52" />
+          </div>
+          <div class="overflow-x-auto max-h-[520px] overflow-y-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 sticky top-0">
+                <tr>
+                  <th class="text-left py-2 px-3 font-medium text-slate-600">會員卡號</th>
+                  <th class="text-left py-2 px-3 font-medium text-slate-600">姓名</th>
+                  <th class="text-left py-2 px-3 font-medium text-slate-600">電話</th>
+                  <th class="text-left py-2 px-3 font-medium text-slate-600">Line ID</th>
+                  <th class="text-left py-2 px-3 font-medium text-slate-600">狀態</th>
+                  <th class="text-right py-2 px-3 font-medium text-slate-600">操作</th>
+                </tr>
+              </thead>
+              <tbody id="membersTableBody">
+                <tr><td colspan="6" class="py-10 text-center text-slate-400">載入中…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 新增／編輯 Modal -->
+        <div id="memberFormModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-5" role="dialog" aria-labelledby="memberFormTitle">
+            <div class="flex items-center justify-between mb-4">
+              <h3 id="memberFormTitle" class="text-base font-semibold text-slate-800">新增會員</h3>
+              <button type="button" id="btnMemberFormClose" class="text-slate-400 hover:text-slate-600 text-xl leading-none" aria-label="關閉">&times;</button>
+            </div>
+            <form id="memberForm" class="space-y-3">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">會員卡號 <span class="text-rose-500">*</span></label>
+                <div class="flex gap-2">
+                  <input type="text" id="memberFormCard" required maxlength="13" inputmode="numeric" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono tracking-wider" placeholder="13 碼純數字" />
+                  <button type="button" id="btnMemberGenCard" class="shrink-0 px-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-700 hover:bg-slate-50">自動產生</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">姓名</label>
+                <input type="text" id="memberFormName" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="客戶姓名" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-slate-500 mb-1">電話</label>
+                  <input type="text" id="memberFormPhone" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-500 mb-1">Line ID</label>
+                  <input type="text" id="memberFormLineId" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">Email</label>
+                <input type="email" id="memberFormEmail" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">狀態</label>
+                <select id="memberFormStatus" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                  <option value="有效">有效</option>
+                  <option value="停用">停用</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">備註</label>
+                <input type="text" id="memberFormNote" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700">儲存</button>
+            </form>
           </div>
         </div>
       </section>
 
       <!-- 紅利點數區塊 -->
       <section id="sectionLoyalty" class="hidden">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
           <h2 class="text-xl font-semibold text-slate-800 section-title-with-icon">
             <svg class="section-title-icon text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             紅利點數
           </h2>
-          <button type="button" id="btnSyncPointsSheet" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-50">同步至試算表</button>
-        </div>
-
-        <div class="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 mb-6">
-          <p class="text-sm font-semibold text-amber-900 mb-3">集點規則</p>
-          <ul class="text-sm text-slate-700 space-y-2 list-none">
-            <li>消費滿 NT$100 集 1 點（不含運費）</li>
-            <li>1 點可折抵 NT$1（下一次消費須滿 NT$199 才可折抵）</li>
-            <li>點數自發放日起 365 天內有效</li>
-          </ul>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <button type="button" id="btnSyncPointsSheet" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-50">同步至試算表</button>
+            <p id="loyaltyMessage" class="text-sm text-right max-w-sm hidden" role="status" aria-live="polite"></p>
+          </div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 mb-6">
@@ -459,14 +562,18 @@
           <p class="text-sm text-slate-600 mt-2"><strong>備用：</strong>若從未改過「已確認」、直接改 <strong>已完成</strong>，也會發點一次，但不會重複發放。</p>
           <p class="text-sm text-slate-600 mt-2"><strong>不發點：</strong>「產生 PDF」、狀態「出貨中」本身<strong>不會</strong>觸發紅利；「已完成」僅作結案，若已在「已確認」發過點則不再發。</p>
           <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-3">
-            <strong>顧客官網查點數</strong>讀取試算表「紅利紀錄」。狀態改「已確認」後系統會嘗試自動同步；若顧客查不到，請至本頁按 <strong>同步至試算表</strong>。
+            <strong>資料分工：</strong>試算表「<strong>紅利點數</strong>」＝後台餘額與異動；「<strong>歷史訂單</strong>」＝每筆交易金額與狀態。顧客查詢中心「會員中心」僅顯示歷史訂單。
+          </p>
+          <p class="text-xs text-slate-600 mt-2">
+            訂單改「已確認」並寫入「歷史訂單」後，系統會<strong>自動同步紅利至「紅利點數」</strong>；若顧客查不到，請至本頁按「同步至試算表」。會員卡號請先在側欄<strong>「會員名單」</strong>確認一人一卡通。
+            <strong class="text-sky-800">進入本頁會自動從試算表重新載入，餘額與會員中心一致。</strong>
           </p>
           <div class="flex flex-wrap gap-2 mt-3">
             <button type="button" id="btnLoyaltyProcessOrders" class="px-3 py-1.5 rounded-lg border border-amber-300 text-sm text-amber-800 hover:bg-amber-50">補處理未發點訂單</button>
+            <button type="button" id="btnLoyaltyMergeDupEarn" class="px-3 py-1.5 rounded-lg border border-rose-300 text-sm text-rose-800 hover:bg-rose-50">合併重複發放</button>
             <button type="button" id="btnLoyaltyExpireAll" class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm text-slate-700 hover:bg-slate-50">執行到期失效檢查</button>
             <button type="button" id="btnLoyaltyReload" class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm text-slate-700 hover:bg-slate-50">重新載入</button>
           </div>
-          <p id="loyaltyMessage" class="mt-3 text-sm text-slate-500 hidden"></p>
         </div>
 
         <div class="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 mb-6">
@@ -1280,7 +1387,13 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">門市店號</label>
-              <input type="text" id="orderStoreId" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="選填" />
+              <input type="text" id="orderStoreId" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono" placeholder="6 碼店號" />
+            </div>
+          </div>
+          <div id="order711StorePickerWrap" class="hidden rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-3 space-y-2">
+            <p class="text-xs text-emerald-900">7-11 店到店：請至 <a href="https://www.ibon.com.tw/mobile/retail_inquiry.aspx#gsc.tab=0" target="_blank" rel="noopener noreferrer" class="underline font-medium">ibon 門市查詢</a> 選定門市後，手動填入店名、店號與地址。</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="btnOpenIbonRetailInquiry" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">ibon 門市查詢</button>
             </div>
           </div>
           <div>
@@ -1317,7 +1430,7 @@
                 <span class="text-sm font-medium text-amber-900">⭐ 紅利點數</span>
                 <span class="text-xs text-amber-800">可用：<strong id="orderPointsBalance">0</strong> 點</span>
               </div>
-              <p class="text-[11px] text-amber-900/70">消費滿 NT$100 集 1 點（不含運費）· 1 點折 NT$1（下次滿 NT$199 可折）· 365 天有效</p>
+              <p class="text-[11px] text-amber-900/70">1 點折 NT$1（商品淨額滿 NT$350 可折抵）</p>
               <div class="flex flex-wrap items-center gap-2">
                 <label class="inline-flex items-center gap-2">
                   <input type="checkbox" id="orderUsePointsCheck" class="rounded border-amber-300" />
@@ -1327,8 +1440,6 @@
                 <span class="text-sm text-slate-600">點（- NT$ <span id="orderPointsDiscountAmount">0</span>）</span>
                 <button type="button" id="btnOrderPointsMax" class="px-2 py-1 rounded border border-amber-300 text-xs text-amber-800 hover:bg-amber-100">全部折抵</button>
               </div>
-              <p class="text-xs text-slate-600">預估本次可獲得：<strong id="orderPointsEarnPreview">0</strong> 點（改為「<strong>已確認</strong>」時發放；PDF／出貨中不發點）</p>
-              <p class="text-[11px] text-slate-500">集點基準：<strong id="orderPointsEarnBase">NT$0</strong>（小計−折扣−紅利，不含運費與預購訂金）</p>
               <p id="orderPointsHint" class="text-xs text-amber-800 hidden"></p>
               <p id="orderPointsProcessedHint" class="text-xs text-rose-600 hidden">此訂單紅利已處理，無法再修改折抵點數</p>
             </div>
@@ -1338,6 +1449,11 @@
                 <input type="number" id="orderShippingFee" min="0" value="0" step="1" class="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                 <span class="text-sm text-slate-600">元</span>
               </div>
+              <label class="mt-2 inline-flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" id="orderCombineShipFree" class="rounded border-sky-400" />
+                <span>併箱出貨（本單免運，運費併入關聯主單）</span>
+              </label>
+              <div id="orderCombineShipBanner" class="hidden mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900 leading-relaxed"></div>
               <label class="mt-2 inline-flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" id="orderShippingStatusCoupon" class="rounded border-slate-300" />
                 <span>運費狀態：免運券折抵</span>
@@ -1451,6 +1567,7 @@
         </div>
         <div class="p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
           <div id="customerOverviewSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+          <div id="customerOverviewShippingBanner" class="hidden rounded-xl border px-4 py-3 text-sm leading-relaxed"></div>
           <div class="rounded-xl border border-slate-200 overflow-hidden">
             <table class="w-full text-sm">
               <thead class="bg-slate-50 border-b border-slate-200">
@@ -1458,12 +1575,13 @@
                   <th class="text-left py-2.5 px-3 font-medium text-slate-600">訂單編號</th>
                   <th class="text-left py-2.5 px-3 font-medium text-slate-600">狀態</th>
                   <th class="text-left py-2.5 px-3 font-medium text-slate-600">待結清</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-slate-600">運費</th>
                   <th class="text-left py-2.5 px-3 font-medium text-slate-600">關聯</th>
                   <th class="text-left py-2.5 px-3 font-medium text-slate-600">操作</th>
                 </tr>
               </thead>
               <tbody id="customerOverviewTableBody">
-                <tr><td colspan="5" class="py-8 text-center text-slate-500">載入中…</td></tr>
+                <tr><td colspan="6" class="py-8 text-center text-slate-500">載入中…</td></tr>
               </tbody>
             </table>
           </div>
@@ -1473,59 +1591,150 @@
     </div>
   </div>
 
-  <script src="js/member-card.js"></script>
-  <script src="js/admin-loyalty.js"></script>
+  <script src="js/member-card.js?v=20260607-canonical"></script>
+  <script src="js/admin-loyalty.js?v=20260607-min350"></script>
+  <script src="js/admin-members.js?v=20260607-2"></script>
+  <script src="js/admin-711-store.js?v=20260606-5"></script>
   <script>
     (function() {
-      // ※ 重要：請換成「您自己的」Google 試算表網頁應用程式 URL，否則後台無法寫入試算表、顧客頁也讀不到資料。
-      // 步驟：試算表 → 擴充功能 → Apps Script → 貼上 Code.gs → 部署 → 新增部署 → 網頁應用程式 →
-      // 執行身分「我」、誰可以存取「任何人」→ 部署 → 複製「網頁應用程式 URL」貼到下面兩行（READ 與 WRITE 用同一個 URL）。
-      var isLocalHost = (
+      // ※ 重要：後台「寫入訂單」必須使用 **ProductManagement2 試算表**（14dqpe...）部署的 GAS URL。
+      // 不可使用「訂單進度試算表」的 URL，否則改「已確認」不會寫入「歷史訂單」。
+      // 步驟：開啟 ProductManagement2 試算表 → 擴充功能 → Apps Script → 貼上 Code.gs →
+      // 部署 → 網頁應用程式（執行身分：我、存取：任何人）→ 複製 URL 貼到 API_BASE。
+      // 驗證：開啟 API_BASE?action=spreadsheet_info 應見 spreadsheetId 為 14dqpe... 且含 postRoutes。
+      var onLocalDevServer = (
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        window.location.protocol === "file:"
+        window.location.hostname === "127.0.0.1"
       );
       var API_BASE = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec";
-      var API_READ = isLocalHost ? "/api" : API_BASE;
-      var API_WRITE = isLocalHost ? "/api-write" : API_BASE;
+      var API_READ = onLocalDevServer ? "/api" : API_BASE;
+      var API_WRITE = onLocalDevServer ? "/api-write" : API_BASE;
       var CORS_PROXY_PREFIX = "https://corsproxy.io/?";
       // 請與 Code.gs 的 CONFIG.adminWriteToken 設成相同字串
       var ADMIN_WRITE_TOKEN = "CHANGE_ME_TO_A_STRONG_TOKEN_2026";
+      var EXPECTED_SHOP_SPREADSHEET_ID = "14dqpeCDpKRA8_Ca2b5Phinh00ydPiaBh3MHKrVYMVOI";
 
-      function fetchWrite(body) {
+      function getFetchWriteUrls_() {
+        if (onLocalDevServer) return ["/api-write"];
+        return [API_BASE];
+      }
+
+      function fetchWriteTimeoutMs_(body) {
+        var action = body && body.action ? String(body.action) : "";
+        if (action === "points_sync") return 240000;
+        if (action === "member_sync_from_orders") return 180000;
+        if (action === "order_list" || action === "order_upsert") return 120000;
+        return 90000;
+      }
+
+      function fetchWrite(body, options) {
+        options = options || {};
         var payload = Object.assign({}, body || {}, { token: ADMIN_WRITE_TOKEN });
-        var opts = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) };
-        var candidates = [];
-        // 1) 先試目前設定（可能是本地代理 /api-write）
-        candidates.push(API_WRITE);
-        // 2) 直打 Apps Script
-        candidates.push(API_BASE);
-        // 3) 走 proxy 的 API_WRITE
-        candidates.push(CORS_PROXY_PREFIX + encodeURIComponent(API_WRITE));
-        // 4) 走 proxy 的 API_BASE
-        candidates.push(CORS_PROXY_PREFIX + encodeURIComponent(API_BASE));
-        function tryAt(i) {
-          if (i >= candidates.length) throw new Error("Failed to fetch");
-          return fetch(candidates[i], opts).then(function(res) {
-            if (!res || !res.ok) return tryAt(i + 1);
+        var jsonBody = JSON.stringify(payload);
+        var urls = getFetchWriteUrls_();
+        var strategies = onLocalDevServer
+          ? [{ headers: { "Content-Type": "text/plain;charset=utf-8" } }]
+          : [
+            { headers: { "Content-Type": "text/plain;charset=utf-8" } },
+            { headers: { "Content-Type": "application/json" } }
+          ];
+        var timeoutMs = options.timeoutMs || fetchWriteTimeoutMs_(body);
+        var lastErr = null;
+
+        function tryCombo(urlIndex, strategyIndex) {
+          if (urlIndex >= urls.length) {
+            if (strategyIndex + 1 < strategies.length) return tryCombo(0, strategyIndex + 1);
+            var hint = "";
+            if (window.location.protocol === "file:") {
+              hint = "請執行專案資料夾的 start.bat，改用 http://localhost:3000/admin.html 開啟後台";
+            } else if (!onLocalDevServer) {
+              hint = "若仍失敗，請在本機執行 start.bat，用 http://localhost:3000/admin.html 操作";
+            } else {
+              hint = "請確認已執行 start.bat，並用 http://localhost:3000/admin.html 開啟";
+            }
+            throw new Error((lastErr && lastErr.message ? lastErr.message : "無法連線 GAS") + "。" + hint);
+          }
+          var url = urls[urlIndex];
+          var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+          var timer = null;
+          var opts = {
+            method: "POST",
+            headers: strategies[strategyIndex].headers,
+            body: jsonBody,
+            redirect: "follow",
+            cache: "no-store"
+          };
+          if (controller) {
+            opts.signal = controller.signal;
+            timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+          }
+          return fetch(url, opts).then(function(res) {
+            if (timer) clearTimeout(timer);
+            if (!res || !res.ok) {
+              lastErr = new Error("HTTP " + (res ? res.status : "?"));
+              return tryCombo(urlIndex + 1, strategyIndex);
+            }
             return res;
-          }).catch(function() {
-            return tryAt(i + 1);
+          }).catch(function(err) {
+            if (timer) clearTimeout(timer);
+            if (controller && err && err.name === "AbortError") {
+              lastErr = new Error("同步逾時（超過 " + Math.round(timeoutMs / 1000) + " 秒）。請確認 start.bat 視窗仍開啟，或稍後再試");
+              return tryCombo(urlIndex + 1, strategyIndex);
+            }
+            lastErr = err;
+            return tryCombo(urlIndex + 1, strategyIndex);
           });
         }
-        return tryAt(0);
+
+        return tryCombo(0, 0);
       }
+
+      window.fetchWrite = fetchWrite;
+      window.fetchWriteTimeoutMs_ = fetchWriteTimeoutMs_;
 
       function formatNetworkError(err) {
         var raw = (err && err.message) ? String(err.message) : "網路錯誤";
-        if (/failed to fetch/i.test(raw)) {
+        if (/同步逾時/.test(raw)) return raw;
+        if (/failed to fetch|無法連線|networkerror|load failed/i.test(raw)) {
           if (window.location.protocol === "file:") {
-            return "目前用 file:// 開啟，請改用 http://localhost 開啟 admin.html";
+            return "無法連線。請雙擊專案資料夾的 start.bat，改用 http://localhost:3000/admin.html 開啟後台（勿用 file://）";
           }
-            return "載入失敗：網路連線異常";
+          if (!onLocalDevServer) {
+            return "無法連線 GAS。請在本機雙擊 start.bat，用 http://localhost:3000/admin.html 操作";
+          }
+          return "無法連線。請先執行 start.bat（或 python server.py），再用 http://localhost:3000/admin.html 開啟";
         }
+        if (/start\.bat|localhost:3000/i.test(raw)) return raw;
         return raw;
       }
+
+      function showApiConnectivityBanner_(message) {
+        var wrap = document.getElementById("apiConnectivityBanner");
+        var text = document.getElementById("apiConnectivityBannerText");
+        if (!wrap || !text) return;
+        text.textContent = message || "";
+        wrap.classList.remove("hidden");
+      }
+
+      function checkApiConnectivity_() {
+        if (window.location.protocol === "file:") {
+          showApiConnectivityBanner_("您目前用 file:// 開啟，瀏覽器無法寫入試算表。請雙擊 start.bat，改用");
+          return Promise.resolve(false);
+        }
+        return fetchWrite({ action: "points_list" })
+          .then(function(res) { return res && res.ok; })
+          .catch(function() { return false; })
+          .then(function(ok) {
+            if (!ok) {
+              var msg = onLocalDevServer
+                ? "本機代理未啟動或連線失敗。請雙擊 start.bat 後，用"
+                : "無法連線試算表 API。請在本機雙擊 start.bat，用";
+              showApiConnectivityBanner_(msg);
+            }
+            return ok;
+          });
+      }
+      window.checkApiConnectivity_ = checkApiConnectivity_;
 
       var products = [];
       var productsLoadSeq = 0;
@@ -1580,7 +1789,7 @@
       }
 
       function setNavActive(navId) {
-        var navs = ["navReports", "navOrders", "navLoyalty", "navProducts", "navPurchases", "navLayout", "navSettings"];
+        var navs = ["navReports", "navOrders", "navMembers", "navLoyalty", "navProducts", "navPurchases", "navLayout", "navSettings"];
         navs.forEach(function(id) {
           var el = document.getElementById(id);
           if (!el) return;
@@ -1596,6 +1805,7 @@
         var reportsSection = document.getElementById("sectionReports");
         var productsSection = document.getElementById("sectionProducts");
         var ordersSection = document.getElementById("sectionOrders");
+        var membersSection = document.getElementById("sectionMembers");
         var loyaltySection = document.getElementById("sectionLoyalty");
         var purchasesSection = document.getElementById("sectionPurchases");
         var layoutSection = document.getElementById("sectionLayout");
@@ -1603,15 +1813,32 @@
         if (reportsSection) reportsSection.classList.toggle("hidden", sectionId !== "sectionReports");
         if (productsSection) productsSection.classList.toggle("hidden", sectionId !== "sectionProducts");
         if (ordersSection) ordersSection.classList.toggle("hidden", sectionId !== "sectionOrders");
+        if (membersSection) membersSection.classList.toggle("hidden", sectionId !== "sectionMembers");
         if (loyaltySection) loyaltySection.classList.toggle("hidden", sectionId !== "sectionLoyalty");
         if (purchasesSection) purchasesSection.classList.toggle("hidden", sectionId !== "sectionPurchases");
         if (layoutSection) layoutSection.classList.toggle("hidden", sectionId !== "sectionLayout");
         if (settingsSection) settingsSection.classList.toggle("hidden", sectionId !== "sectionSettings");
         if (sectionId === "sectionReports") setNavActive("navReports");
         else if (sectionId === "sectionOrders") setNavActive("navOrders");
+        else if (sectionId === "sectionMembers") {
+          setNavActive("navMembers");
+          if (window.MaaruMembers && typeof MaaruMembers.loadPanel === "function") {
+            MaaruMembers.loadPanel(false);
+          }
+        }
         else if (sectionId === "sectionLoyalty") {
           setNavActive("navLoyalty");
-          if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+          if (typeof window.loadPointsFromSheet === "function") {
+            window.loadPointsFromSheet()
+              .then(function () {
+                if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+              })
+              .catch(function () {
+                if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+              });
+          } else if (typeof window.renderLoyaltyPanel === "function") {
+            window.renderLoyaltyPanel();
+          }
         }
         else if (sectionId === "sectionPurchases") {
           setNavActive("navPurchases");
@@ -1763,6 +1990,7 @@
         updateReportKPI();
       });
       document.getElementById("navOrders").addEventListener("click", function(e) { e.preventDefault(); showSection("sectionOrders"); });
+      document.getElementById("navMembers").addEventListener("click", function(e) { e.preventDefault(); showSection("sectionMembers"); });
       document.getElementById("navLoyalty").addEventListener("click", function(e) { e.preventDefault(); showSection("sectionLoyalty"); });
       document.getElementById("navProducts").addEventListener("click", function(e) { e.preventDefault(); showSection("sectionProducts"); });
       document.getElementById("navLayout").addEventListener("click", function(e) { e.preventDefault(); showSection("sectionLayout"); });
@@ -4128,46 +4356,174 @@
           var el = document.getElementById("loyaltyMessage");
           if (!el) return;
           el.textContent = text;
-          el.className = "mt-3 text-sm " + (isError ? "text-red-600" : "text-slate-600");
+          el.className = "text-sm text-right max-w-sm " + (isError ? "text-red-600 font-medium" : "text-emerald-700 font-medium");
           el.classList.remove("hidden");
-          setTimeout(function() { el.classList.add("hidden"); }, 4000);
+          try { el.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (scrollErr) {}
+          if (showLoyaltyMessage._hideTimer) clearTimeout(showLoyaltyMessage._hideTimer);
+          showLoyaltyMessage._hideTimer = setTimeout(function() { el.classList.add("hidden"); }, isError ? 10000 : 8000);
         }
         window.showLoyaltyMessage = showLoyaltyMessage;
 
-        function syncPointsLedgerToSheet() {
-          if (typeof fetchWrite !== "function") return Promise.resolve();
-          var ledger = MaaruLoyalty.getLedger();
-          return fetchWrite({ action: "points_sync", ledger: ledger })
-            .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return { error: true }; } }); })
-            .then(function(res) {
-              if (res && res.error) throw new Error(res.message || "同步失敗");
-              return res;
+        function parseWriteApiResponse_(r) {
+          return r.text().then(function(t) {
+            if (!t || !String(t).trim()) return { error: true, message: "API 回傳空白" };
+            try {
+              return JSON.parse(t);
+            } catch (e) {
+              var preview = String(t).trim().slice(0, 240);
+              if (/^<!DOCTYPE|^<html/i.test(preview)) {
+                return { error: true, message: "API 回傳 HTML，請確認 Code.gs 已重新部署" };
+              }
+              return { error: true, message: "API 回傳非 JSON：" + preview };
+            }
+          });
+        }
+
+        function backfillLedgerSafe_(ledger, orders, persist) {
+          ledger = ledger || (window.MaaruLoyalty ? MaaruLoyalty.getLedger() : []);
+          orders = orders || loadAdminOrdersForLoyalty_();
+          if (window.MaaruLoyalty && typeof MaaruLoyalty.consolidateLedgerMemberCards === "function") {
+            return MaaruLoyalty.consolidateLedgerMemberCards(ledger, orders, persist);
+          }
+          if (window.MaaruLoyalty && typeof MaaruLoyalty.backfillLedgerMemberCards === "function") {
+            return MaaruLoyalty.backfillLedgerMemberCards(ledger, orders, persist);
+          }
+          if (persist !== false && window.MaaruLoyalty && typeof MaaruLoyalty.saveLedger === "function") {
+            MaaruLoyalty.saveLedger(ledger);
+          }
+          return { ledger: ledger, changed: false };
+        }
+
+        function mergeOrdersForLoyalty_(sheetOrders, localOrders) {
+          var out = [];
+          var byId = {};
+          (Array.isArray(sheetOrders) ? sheetOrders : []).forEach(function (o) {
+            var id = (o && o.id != null) ? String(o.id).trim() : "";
+            if (!id) return;
+            byId[id.toUpperCase()] = o;
+          });
+          Object.keys(byId).forEach(function (k) { out.push(byId[k]); });
+          (Array.isArray(localOrders) ? localOrders : []).forEach(function (o) {
+            var id = (o && o.id != null) ? String(o.id).trim() : "";
+            if (!id) return;
+            var key = id.toUpperCase();
+            var idx = out.findIndex(function (x) { return String(x.id || "").trim().toUpperCase() === key; });
+            if (idx >= 0) out[idx] = o;
+            else out.push(o);
+          });
+          return out;
+        }
+
+        function fetchOrdersForLoyalty_() {
+          var local = loadAdminOrdersForLoyalty_();
+          if (typeof fetchWrite !== "function") return Promise.resolve(local);
+          return fetchWrite({ action: "order_list" })
+            .then(parseWriteApiResponse_)
+            .then(function (res) {
+              if (res && res.error) throw new Error(res.message || "載入訂單失敗");
+              return mergeOrdersForLoyalty_(res.orders || [], local);
+            })
+            .catch(function () { return local; });
+        }
+
+        function preparePointsLedgerForSync_(orders) {
+          if (!window.MaaruLoyalty) return [];
+          orders = orders || loadAdminOrdersForLoyalty_();
+          return backfillLedgerSafe_(MaaruLoyalty.getLedger(), orders, true).ledger;
+        }
+
+        function syncPointsLedgerToSheet(orders, onProgress) {
+          if (typeof fetchWrite !== "function") {
+            return Promise.reject(new Error("API 寫入功能未就緒"));
+          }
+          var report = function (msg) {
+            if (typeof onProgress === "function") onProgress(msg);
+          };
+          try {
+            var prep = function (ordList, remoteRows) {
+              ordList = ordList || loadAdminOrdersForLoyalty_();
+              report("合併本機紅利…");
+              var remote = window.MaaruLoyalty
+                ? MaaruLoyalty.normalizeLedgerFromApi(remoteRows || [])
+                : [];
+              var local = preparePointsLedgerForSync_(ordList);
+              var merged = window.MaaruLoyalty
+                ? MaaruLoyalty.mergeLedgers(local, remote)
+                : (remote.length ? remote : local);
+              var bf = backfillLedgerSafe_(merged, ordList, true);
+              if (window.MaaruLoyalty) MaaruLoyalty.saveLedger(bf.ledger);
+              if (!bf.ledger.length) return Promise.resolve({ skipped: true, message: "尚無紅利紀錄" });
+              report("上傳至試算表（共 " + bf.ledger.length + " 筆）…");
+              return fetchWrite({ action: "points_sync", ledger: bf.ledger })
+                .then(parseWriteApiResponse_)
+                .then(function (res) {
+                  if (res && res.error) throw new Error(res.message || "同步失敗");
+                  return res;
+                });
+            };
+            report("修復試算表紅利欄位…");
+            return fetchWrite({ action: "points_sheet_repair" })
+              .then(parseWriteApiResponse_)
+              .catch(function () { return {}; })
+              .then(function () {
+            report("讀取試算表紅利…");
+            var loadRemote = fetchWrite({ action: "points_list" })
+              .then(parseWriteApiResponse_)
+              .then(function (res) {
+                if (res && res.error) throw new Error(res.message || "讀取紅利失敗");
+                return res.ledger || [];
+              })
+              .catch(function () { return []; });
+            var loadOrders = Array.isArray(orders)
+              ? Promise.resolve(orders)
+              : (function () {
+                report("讀取訂單…");
+                return fetchOrdersForLoyalty_();
+              })();
+            if (Array.isArray(orders)) {
+              return loadRemote.then(function (remote) { return prep(orders, remote); });
+            }
+            return Promise.all([loadOrders, loadRemote]).then(function (pair) {
+              return prep(pair[0], pair[1]);
             });
+            });
+          } catch (err) {
+            return Promise.reject(err);
+          }
         }
 
         function loadPointsFromSheet() {
           if (typeof fetchWrite !== "function") return Promise.resolve();
-          return fetchWrite({ action: "points_list" })
-            .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return { error: true }; } }); })
-            .then(function(res) {
-              if (res && res.error) throw new Error(res.message || "載入失敗");
-              var remote = MaaruLoyalty.normalizeLedgerFromApi(res.ledger || []);
-              var merged = MaaruLoyalty.mergeLedgers(MaaruLoyalty.getLedger(), remote);
-              MaaruLoyalty.saveLedger(merged);
-              return merged;
-            });
+          return fetchOrdersForLoyalty_().then(function(orders) {
+            return fetchWrite({ action: "points_list" })
+              .then(parseWriteApiResponse_)
+              .then(function(res) {
+                if (res && res.error) throw new Error(res.message || "載入失敗");
+                var remote = MaaruLoyalty.normalizeLedgerFromApi(res.ledger || []);
+                var cleaned = MaaruLoyalty.normalizeLedgerForDisplay(remote, orders);
+                var bf = backfillLedgerSafe_(cleaned, orders, true);
+                MaaruLoyalty.saveLedger(bf.ledger);
+                return { ledger: bf.ledger, orders: orders };
+              });
+          });
         }
 
         function loadAdminOrdersForLoyalty_() {
+          var list = [];
           try {
             var saved = localStorage.getItem("adminOrders");
             if (saved) {
-              var list = JSON.parse(saved);
-              return Array.isArray(list) ? list : [];
+              list = JSON.parse(saved);
             }
           } catch (e) {}
-          return [];
+          if (!Array.isArray(list)) list = [];
+          if (typeof window.getAdminOrdersSnapshot_ === "function") {
+            var live = window.getAdminOrdersSnapshot_();
+            if (Array.isArray(live) && live.length >= list.length) list = live;
+          }
+          return list;
         }
+        window.loadAdminOrdersForLoyalty_ = loadAdminOrdersForLoyalty_;
 
         function customerMatchesLoyaltyQuery_(c, q, qDigits) {
           if (!q) return true;
@@ -4192,7 +4548,11 @@
           var orders = loadAdminOrdersForLoyalty_();
           var rows = [];
           if (window.MaaruMemberCard && MaaruMemberCard.lookupMembersByQuery) {
-            rows = MaaruMemberCard.lookupMembersByQuery(orders, query);
+            rows = MaaruMemberCard.lookupMembersByQuery(
+              orders,
+              query,
+              window.MaaruLoyalty ? MaaruLoyalty.getLedger() : []
+            );
           }
           if (!rows.length) {
             box.classList.remove("hidden");
@@ -4211,7 +4571,7 @@
             "</tr></thead><tbody>" +
             rows.map(function(row) {
               var card = row.memberCardNo || "";
-              var balance = card && MaaruLoyalty ? MaaruLoyalty.getBalance(card, row.customerName, row.phone, row.lineId) : 0;
+              var balance = card && MaaruLoyalty ? MaaruLoyalty.getBalance(card, row.customerName, row.phone, row.lineId, orders) : 0;
               var cardHtml = card
                 ? "<span class=\"font-mono text-xs tracking-wider text-slate-800\">" + escapeHtmlLoyalty(card) + "</span>"
                 : "<span class=\"text-amber-700 text-xs\">尚無卡號（請至訂單編輯並儲存以自動產生）</span>";
@@ -4243,11 +4603,15 @@
           });
         }
 
-        function renderLoyaltyPanel() {
-          MaaruLoyalty.runGlobalExpiry();
+        function renderLoyaltyPanel(orders) {
+          orders = orders || loadAdminOrdersForLoyalty_();
+          if (window.MaaruLoyalty && typeof MaaruLoyalty.normalizeLedgerForDisplay === "function") {
+            var cleaned = MaaruLoyalty.normalizeLedgerForDisplay(MaaruLoyalty.getLedger(), orders);
+            MaaruLoyalty.saveLedger(cleaned);
+          }
+          MaaruLoyalty.runGlobalExpiry(orders);
           var q = (document.getElementById("loyaltySearchInput") && document.getElementById("loyaltySearchInput").value || "").trim().toLowerCase();
           var qDigits = q.replace(/\D/g, "");
-          var orders = loadAdminOrdersForLoyalty_();
           var customers = MaaruLoyalty.summarizeCustomersWithOrders(MaaruLoyalty.getLedger(), orders);
           if (q) {
             customers = customers.filter(function(c) {
@@ -4292,21 +4656,64 @@
         window.renderLoyaltyPanel = renderLoyaltyPanel;
         window.syncPointsLedgerToSheet = syncPointsLedgerToSheet;
         window.loadPointsFromSheet = loadPointsFromSheet;
+        window.backfillLedgerSafe_ = backfillLedgerSafe_;
 
         var btnSync = document.getElementById("btnSyncPointsSheet");
         if (btnSync) btnSync.addEventListener("click", function() {
-          syncPointsLedgerToSheet().then(function() {
-            showLoyaltyMessage("已同步至試算表「紅利紀錄」");
+          var prevLabel = btnSync.textContent;
+          btnSync.disabled = true;
+          btnSync.textContent = "同步中…";
+          showLoyaltyMessage("正在同步至試算表「紅利點數」…", false);
+          syncPointsLedgerToSheet(null, function(step) {
+            showLoyaltyMessage(step, false);
+          }).then(function(res) {
+            return fetchOrdersForLoyalty_().then(function(orders) {
+              renderLoyaltyPanel(orders);
+              if (res && res.skipped) {
+                showLoyaltyMessage("尚無紅利紀錄可同步（請先將訂單改為「已確認」，或按「補處理未發點訂單」）", true);
+              } else {
+                var extra = (res && res.message && String(res.message).indexOf("OK") < 0) ? (" " + res.message) : "";
+                var count = res && res.ledgerCount != null ? ("（共 " + res.ledgerCount + " 筆）") : "";
+                showLoyaltyMessage("已同步至試算表「紅利點數」" + count + extra, false);
+              }
+            });
           }).catch(function(err) {
-            showLoyaltyMessage("同步失敗：" + (err.message || ""), true);
+            renderLoyaltyPanel();
+            showLoyaltyMessage("同步失敗：" + formatNetworkError(err), true);
+          }).finally(function() {
+            btnSync.disabled = false;
+            btnSync.textContent = prevLabel;
           });
         });
         var btnExpire = document.getElementById("btnLoyaltyExpireAll");
         if (btnExpire) btnExpire.addEventListener("click", function() {
-          MaaruLoyalty.runGlobalExpiry();
+          MaaruLoyalty.runGlobalExpiry(loadAdminOrdersForLoyalty_());
           renderLoyaltyPanel();
           syncPointsLedgerToSheet().catch(function() {});
           showLoyaltyMessage("已完成到期失效檢查");
+        });
+        var btnMergeDupEarn = document.getElementById("btnLoyaltyMergeDupEarn");
+        if (btnMergeDupEarn) btnMergeDupEarn.addEventListener("click", function() {
+          if (!confirm("合併試算表「紅利點數」中同一訂單編號的重複「發放」列？\n（保留較早／後台集點那一筆，刪除 order_upsert 重複列）")) return;
+          var prevLabel = btnMergeDupEarn.textContent;
+          btnMergeDupEarn.disabled = true;
+          btnMergeDupEarn.textContent = "合併中…";
+          fetchWrite({ action: "points_merge_duplicate_earn" })
+            .then(parseWriteApiResponse_)
+            .then(function(res) {
+              if (res && res.error) throw new Error(res.message || "合併失敗");
+              return loadPointsFromSheet().then(function() {
+                renderLoyaltyPanel();
+                showLoyaltyMessage(res.message || "已合併重複發放");
+              });
+            })
+            .catch(function(err) {
+              showLoyaltyMessage((err && err.message) || "合併失敗", true);
+            })
+            .finally(function() {
+              btnMergeDupEarn.disabled = false;
+              btnMergeDupEarn.textContent = prevLabel;
+            });
         });
         var btnProcessOrders = document.getElementById("btnLoyaltyProcessOrders");
         if (btnProcessOrders) btnProcessOrders.addEventListener("click", function() {
@@ -4317,12 +4724,15 @@
         });
         var btnReload = document.getElementById("btnLoyaltyReload");
         if (btnReload) btnReload.addEventListener("click", function() {
-          loadPointsFromSheet().then(function() {
-            renderLoyaltyPanel();
-            showLoyaltyMessage("已重新載入");
+          btnReload.disabled = true;
+          loadPointsFromSheet().then(function(result) {
+            renderLoyaltyPanel(result && result.orders ? result.orders : null);
+            showLoyaltyMessage("已重新載入並合併會員資料");
           }).catch(function(err) {
             renderLoyaltyPanel();
             showLoyaltyMessage("載入失敗：" + (err.message || ""), true);
+          }).finally(function() {
+            btnReload.disabled = false;
           });
         });
         var searchInp = document.getElementById("loyaltySearchInput");
@@ -4376,7 +4786,11 @@
           }
         });
 
-        loadPointsFromSheet().then(renderLoyaltyPanel).catch(renderLoyaltyPanel);
+        loadPointsFromSheet().then(function(result) {
+          renderLoyaltyPanel(result && result.orders ? result.orders : null);
+        }).catch(function() {
+          renderLoyaltyPanel();
+        });
       })();
 
       (function initOrderSection() {
@@ -4402,21 +4816,120 @@
           var saved = localStorage.getItem(ORDER_STORAGE_KEY);
           if (saved) orders = JSON.parse(saved);
           if (!Array.isArray(orders)) orders = [];
+          orders.forEach(function(o) { enrichOrderCombineShipPrevFee_(o); normalizeOrderFieldsForAdmin_(o); });
         } catch (err) { orders = []; }
 
         function saveOrders() {
           try { localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orders)); } catch (err) {}
         }
+        window.getAdminOrdersSnapshot_ = function () { return orders; };
 
-        function upsertOrderToSheet(ord) {
+        function buildPointsLedgerPayload_() {
+          if (!window.MaaruLoyalty) return null;
+          var ordList = getOrdersForLoyaltyLookup_();
+          var backfill = typeof window.backfillLedgerSafe_ === "function"
+            ? window.backfillLedgerSafe_
+            : function (ledger, ords, persist) {
+                if (window.MaaruLoyalty && typeof MaaruLoyalty.consolidateLedgerMemberCards === "function") {
+                  return MaaruLoyalty.consolidateLedgerMemberCards(ledger, ords, persist);
+                }
+                if (window.MaaruLoyalty && typeof MaaruLoyalty.backfillLedgerMemberCards === "function") {
+                  return MaaruLoyalty.backfillLedgerMemberCards(ledger, ords, persist);
+                }
+                return { ledger: ledger || [], changed: false };
+              };
+          return backfill(MaaruLoyalty.getLedger(), ordList, true).ledger;
+        }
+
+        function upsertOrderToSheet(ord, opts) {
           if (ORDER_LOCAL_ONLY) return Promise.resolve({ localOnly: true, message: "local only" });
           if (!ord || !ord.id) return Promise.resolve(null);
-          return fetchWrite({ action: "order_upsert", order: ord })
-            .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return { error: true, message: "回應非 JSON" }; } }); })
+          opts = opts || {};
+          var body = { action: "order_upsert", order: ord };
+          if (opts.syncPoints) {
+            var ledger = buildPointsLedgerPayload_();
+            if (ledger && ledger.length) body.ledger = ledger;
+          }
+          return fetchWrite(body)
+            .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return { error: true, message: "回應非 JSON（可能 API 未支援 order_upsert，請確認 GAS 部署在 ProductManagement2 試算表）" }; } }); })
             .then(function(res) {
               if (res && res.error) throw new Error(res.message || "寫入訂單失敗");
+              if (res.spreadsheetId && res.spreadsheetId !== EXPECTED_SHOP_SPREADSHEET_ID) {
+                throw new Error("API 綁定錯誤試算表（" + (res.spreadsheetName || res.spreadsheetId) + "），請改用 ProductManagement2 試算表部署的 GAS URL");
+              }
               return res;
             });
+        }
+
+        function verifyShopApiBinding_() {
+          var url = API_BASE + (API_BASE.indexOf("?") >= 0 ? "&" : "?") + "action=spreadsheet_info&_t=" + Date.now();
+          return fetch(url, { cache: "no-store" })
+            .then(function(r) { return r.json(); })
+            .then(function(meta) {
+              if (!meta || !meta.spreadsheetId) {
+                showOrderMessage("⚠ 無法辨識 API 試算表。請確認 GAS 已從 ProductManagement2 試算表部署，且 URL 貼在 admin.html 的 API_BASE。", true);
+                return false;
+              }
+              if (meta.spreadsheetId !== EXPECTED_SHOP_SPREADSHEET_ID) {
+                showOrderMessage("⚠ API 綁定在「" + (meta.spreadsheetName || meta.spreadsheetId) + "」，不是 ProductManagement2。訂單改「已確認」不會寫入「歷史訂單」。請改用 ProductManagement2 試算表（14dqpe...）部署的 GAS URL。", true);
+                return false;
+              }
+              if (!meta.postRoutes || meta.postRoutes.indexOf("order_upsert") < 0) {
+                showOrderMessage("⚠ 此 API 未啟用 order_upsert（可能部署錯誤專案）。請在 ProductManagement2 試算表貼最新 Code.gs 並重新部署。", true);
+                return false;
+              }
+              return true;
+            })
+            .catch(function() {
+              showOrderMessage("⚠ 無法連線 API，請檢查 API_BASE 與網路。", true);
+              return false;
+            });
+        }
+
+        function repairOrderSheetOnServer_() {
+          return fetchWrite({ action: "order_sheet_repair" })
+            .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return {}; } }); })
+            .catch(function() { return {}; });
+        }
+
+        function syncAllLocalOrdersToSheet() {
+          if (ORDER_LOCAL_ONLY) {
+            showOrderMessage("目前為本機模式，無法同步試算表", true);
+            return Promise.resolve();
+          }
+          if (!orders.length) {
+            showOrderMessage("沒有訂單可同步", true);
+            return Promise.resolve();
+          }
+          showOrderMessage("修復試算表欄位並同步 " + orders.length + " 筆訂單至「歷史訂單」…");
+          return repairOrderSheetOnServer_().then(function(repairRes) {
+            if (repairRes && repairRes.repaired) {
+              showOrderMessage("已修復「歷史訂單」表頭（原表頭混用紅利欄位），開始寫入訂單…");
+            }
+          }).then(function() {
+          showOrderMessage("同步 " + orders.length + " 筆訂單至試算表「歷史訂單」…");
+          var chain = Promise.resolve();
+          var ok = 0;
+          var fail = 0;
+          orders.forEach(function(ord) {
+            chain = chain.then(function() {
+              return upsertOrderToSheet(ord).then(function(res) {
+                ok++;
+                return res;
+              }).catch(function() {
+                fail++;
+                return null;
+              });
+            });
+          });
+          return chain.then(function() {
+            if (fail > 0) {
+              showOrderMessage("同步完成：成功 " + ok + " 筆、失敗 " + fail + " 筆。若失敗請檢查 API 是否綁定 ProductManagement2 試算表。", true);
+            } else {
+              showOrderMessage("已同步 " + ok + " 筆訂單至試算表「歷史訂單」");
+            }
+          });
+          });
         }
 
         function deleteOrderFromSheet(id) {
@@ -4437,6 +4950,7 @@
             return Promise.resolve({ localOnly: true, orders: orders });
           }
           showOrderMessage("載入訂單中...");
+          return repairOrderSheetOnServer_().catch(function () { return {}; }).then(function () {
           return fetchWrite({ action: "order_list" })
             .then(function(r) { return r.text().then(function(t) { try { return t ? JSON.parse(t) : {}; } catch (e) { return { error: true, message: "回應非 JSON" }; } }); })
             .then(function(res) {
@@ -4444,11 +4958,12 @@
               var list = res.orders || [];
               var sheetOrders = Array.isArray(list) ? list : [];
               orders = mergeOrdersPreferLocal_(sheetOrders, orders);
+              orders.forEach(function(o) { normalizeOrderFieldsForAdmin_(o); });
               saveOrders();
               backfillMissingMemberCards_({ syncSheet: true, silent: true });
               processPendingLoyaltyOrders_(true);
-              if (typeof window.syncPointsLedgerToSheet === "function") {
-                window.syncPointsLedgerToSheet().catch(function() {});
+              if (typeof window.loadPointsFromSheet === "function") {
+                window.loadPointsFromSheet().catch(function() {});
               }
               renderOrders();
               showOrderMessage("已從試算表載入訂單");
@@ -4457,8 +4972,42 @@
             })
             .catch(function(err) {
               showOrderMessage("載入失敗：" + formatNetworkError(err), true);
+              renderOrders();
               throw err;
             });
+          });
+        }
+
+        function normalizeOrderFieldsForAdmin_(ord) {
+          if (!ord) return ord;
+          if ((!ord.customerName || String(ord.customerName).trim() === "") && ord.name != null && String(ord.name).trim() !== "") {
+            ord.customerName = String(ord.name).trim();
+          }
+          if ((!ord.linkedOrderIds || String(ord.linkedOrderIds).trim() === "") && ord.linkedOrders != null) {
+            ord.linkedOrderIds = String(ord.linkedOrders).trim();
+          }
+          if ((!ord.lineId || String(ord.lineId).trim() === "") && ord.LineID != null) {
+            ord.lineId = String(ord.LineID).trim();
+          }
+          enrichOrderCombineShipPrevFee_(ord);
+          return ord;
+        }
+
+        function mergeOrderRecordPreferComplete_(sheetOrd, localOrd) {
+          if (!localOrd) return normalizeOrderFieldsForAdmin_(sheetOrd);
+          if (!sheetOrd) return normalizeOrderFieldsForAdmin_(localOrd);
+          // 以試算表為底，本機僅覆寫「有值」欄位，避免空的本機快取蓋掉姓名等資料
+          var out = Object.assign({}, sheetOrd);
+          Object.keys(localOrd).forEach(function (key) {
+            var lv = localOrd[key];
+            if (lv === "" || lv == null || lv === undefined) return;
+            if (key === "items") {
+              if (Array.isArray(lv) && lv.length) out.items = lv;
+              return;
+            }
+            out[key] = lv;
+          });
+          return normalizeOrderFieldsForAdmin_(out);
         }
 
         function mergeOrdersPreferLocal_(sheetOrders, localOrders) {
@@ -4467,17 +5016,16 @@
           (Array.isArray(sheetOrders) ? sheetOrders : []).forEach(function(o) {
             var id = (o && o.id != null) ? String(o.id).trim() : "";
             if (!id) return;
-            byId[id.toUpperCase()] = o;
+            byId[id.toUpperCase()] = normalizeOrderFieldsForAdmin_(o);
           });
-          // 先放雲端，再用本機覆蓋同 ID（避免本機新建/未同步資料消失）
           Object.keys(byId).forEach(function(k) { out.push(byId[k]); });
           (Array.isArray(localOrders) ? localOrders : []).forEach(function(o) {
             var id = (o && o.id != null) ? String(o.id).trim() : "";
             if (!id) return;
             var key = id.toUpperCase();
             var idx = out.findIndex(function(x) { return String(x.id || "").trim().toUpperCase() === key; });
-            if (idx >= 0) out[idx] = o;
-            else out.push(o);
+            if (idx >= 0) out[idx] = mergeOrderRecordPreferComplete_(out[idx], o);
+            else out.push(normalizeOrderFieldsForAdmin_(o));
           });
           out.sort(function(a, b) {
             var ad = a && a.date ? new Date(a.date).getTime() : 0;
@@ -4536,6 +5084,802 @@
           if (st && st.indexOf("免運") >= 0) return 0;
           return fee;
         }
+
+        var DEFAULT_COMBINE_SHIP_FEE = 38;
+        var COMBINE_SHIP_REMARK_PREFIX = "併箱免運";
+
+        function orderHasCombineShipRemark_(ord) {
+          var r = String(ord && ord.remark || "");
+          return r.indexOf(COMBINE_SHIP_REMARK_PREFIX) >= 0 || (r.indexOf("併箱") >= 0 && r.indexOf("運費") >= 0);
+        }
+
+        function parseCombineShipPrevFeeFromRemark_(remark) {
+          var m = String(remark || "").match(/原運費\s*NT?\$?\s*(\d+)/i);
+          if (!m) return null;
+          var n = parseInt(m[1], 10);
+          return (isFinite(n) && n >= 0) ? n : null;
+        }
+
+        function enrichOrderCombineShipPrevFee_(ord) {
+          if (!ord) return ord;
+          if (ord.combineShipPrevFee != null && ord.combineShipPrevFee !== "" && !isNaN(Number(ord.combineShipPrevFee))) {
+            ord.combineShipPrevFee = Math.max(0, Math.floor(Number(ord.combineShipPrevFee)));
+            return ord;
+          }
+          var fromRemark = parseCombineShipPrevFeeFromRemark_(ord.remark);
+          if (fromRemark != null) ord.combineShipPrevFee = fromRemark;
+          return ord;
+        }
+
+        function captureCombineShipPrevFee_(ord) {
+          if (!ord) return DEFAULT_COMBINE_SHIP_FEE;
+          enrichOrderCombineShipPrevFee_(ord);
+          if (ord.combineShipPrevFee != null && ord.combineShipPrevFee !== "" && !isNaN(Number(ord.combineShipPrevFee))) {
+            return Math.max(0, Math.floor(Number(ord.combineShipPrevFee)));
+          }
+          var fromRemark = parseCombineShipPrevFeeFromRemark_(ord.remark);
+          if (fromRemark != null) return fromRemark;
+          var eff = orderEffectiveShippingForOrder(ord);
+          if (eff > 0) return Math.max(0, Math.floor(eff));
+          var raw = ord.shippingFee != null && ord.shippingFee !== "" ? Number(ord.shippingFee) : NaN;
+          if (isFinite(raw) && raw > 0) return Math.max(0, Math.floor(raw));
+          return DEFAULT_COMBINE_SHIP_FEE;
+        }
+
+        function captureCombineShipPrevFeeFromForm_() {
+          var remarkEl = document.getElementById("orderRemark");
+          var fromRemark = parseCombineShipPrevFeeFromRemark_(remarkEl && remarkEl.value);
+          var feeEl = document.getElementById("orderShippingFee");
+          var couponEl = document.getElementById("orderShippingStatusCoupon");
+          if (couponEl && couponEl.checked) {
+            return fromRemark != null ? fromRemark : DEFAULT_COMBINE_SHIP_FEE;
+          }
+          var raw = feeEl && feeEl.value !== "" ? Number(feeEl.value) : NaN;
+          if (isFinite(raw) && raw > 0) return Math.max(0, Math.floor(raw));
+          return fromRemark != null ? fromRemark : DEFAULT_COMBINE_SHIP_FEE;
+        }
+
+        function saveCombineShipPrevFee_(ord, prevFee) {
+          if (!ord) return;
+          ord.combineShipPrevFee = Math.max(0, Math.floor(Number(prevFee) || 0));
+        }
+
+        function clearCombineShipPrevFee_(ord) {
+          if (!ord) return;
+          ord.combineShipPrevFee = "";
+        }
+
+        function restoreCombineShipFee_(ord) {
+          if (!ord) return DEFAULT_COMBINE_SHIP_FEE;
+          enrichOrderCombineShipPrevFee_(ord);
+          var prev = ord.combineShipPrevFee != null && ord.combineShipPrevFee !== "" ? Number(ord.combineShipPrevFee) : null;
+          if (prev == null || isNaN(prev)) prev = parseCombineShipPrevFeeFromRemark_(ord.remark);
+          if (prev == null || isNaN(prev)) prev = DEFAULT_COMBINE_SHIP_FEE;
+          ord.shippingFee = Math.max(0, Math.floor(prev));
+          clearCombineShipPrevFee_(ord);
+          return ord.shippingFee;
+        }
+
+        function formatCombineShipRestoreFeeLabel_(ord) {
+          enrichOrderCombineShipPrevFee_(ord || {});
+          var prev = ord && ord.combineShipPrevFee != null && ord.combineShipPrevFee !== "" ? Number(ord.combineShipPrevFee) : null;
+          if (prev == null || isNaN(prev)) prev = parseCombineShipPrevFeeFromRemark_(ord && ord.remark);
+          if (prev == null || isNaN(prev)) return "NT$" + DEFAULT_COMBINE_SHIP_FEE;
+          return "NT$" + Math.max(0, Math.floor(prev));
+        }
+
+        function restoreCombineShipFeeIfNeeded_(ord) {
+          if (!ord) return null;
+          var shipSt = ord.shippingStatus != null ? String(ord.shippingStatus).trim() : "";
+          if (shipSt && shipSt.indexOf("免運") >= 0) return null;
+          if (orderEffectiveShippingForOrder(ord) > 0) return null;
+          var fee = restoreCombineShipFee_(ord);
+          recalcOrderTotalFromFields_(ord);
+          return fee;
+        }
+
+        function describeSlaveRestoreFees_(slaveIds, group) {
+          group = group || [];
+          return (slaveIds || []).map(function(id) {
+            var ord = group.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
+            return id + "→" + formatCombineShipRestoreFeeLabel_(ord || {});
+          }).join("、");
+        }
+
+        function getActiveCustomerOrders_(customerName, phone, excludeId) {
+          var ex = normalizeOrderIdToken_(excludeId);
+          return getOrdersByCustomer_(customerName, phone).filter(function(o) {
+            if (!o) return false;
+            if (ex && normalizeOrderIdToken_(o.id) === ex) return false;
+            return o.status !== "已取消";
+          });
+        }
+
+        function pickCombineShipMasterId_(orderRows) {
+          orderRows = (orderRows || []).filter(function(o) { return o && !o._missing && o.status !== "已取消" && o.status !== "已完成"; });
+          if (!orderRows.length) return "";
+          var withFee = orderRows.filter(function(o) { return orderEffectiveShippingForOrder(o) > 0; });
+          if (withFee.length === 1) return normalizeOrderIdToken_(withFee[0].id);
+          if (withFee.length > 1) {
+            withFee.sort(function(a, b) {
+              var ma = String(a.id || "").match(/^ORD(\d+)$/i);
+              var mb = String(b.id || "").match(/^ORD(\d+)$/i);
+              return (ma ? parseInt(ma[1], 10) : 0) - (mb ? parseInt(mb[1], 10) : 0);
+            });
+            return normalizeOrderIdToken_(withFee[0].id);
+          }
+          return normalizeOrderIdToken_(orderRows[0].id);
+        }
+
+        function analyzeCombineShipForOrders_(orderRows) {
+          orderRows = (orderRows || []).filter(function(o) { return o && !o._missing; });
+          var active = orderRows.filter(function(o) { return o.status !== "已取消" && o.status !== "已完成"; });
+          var chargedOrders = active.filter(function(o) { return orderEffectiveShippingForOrder(o) > 0; });
+          var totalShippingCharged = active.reduce(function(sum, o) { return sum + orderEffectiveShippingForOrder(o); }, 0);
+          var masterId = pickCombineShipMasterId_(active);
+          var expectedOnce = DEFAULT_COMBINE_SHIP_FEE;
+          if (masterId) {
+            var master = active.find(function(o) { return normalizeOrderIdToken_(o.id) === masterId; });
+            if (master && orderEffectiveShippingForOrder(master) > 0) expectedOnce = orderEffectiveShippingForOrder(master);
+          }
+          return {
+            activeCount: active.length,
+            chargedCount: chargedOrders.length,
+            totalShippingCharged: totalShippingCharged,
+            expectedOnceFee: expectedOnce,
+            recommendedMasterId: masterId,
+            shouldChargeOnce: active.length > 1,
+            ok: active.length <= 1 || chargedOrders.length <= 1,
+            warning: (active.length > 1 && chargedOrders.length > 1)
+              ? ("目前有 " + chargedOrders.length + " 筆訂單各收運費（合計 NT$" + totalShippingCharged + "），併箱出貨應只收 1 次")
+              : ""
+          };
+        }
+
+        function appendCombineShipRemark_(remark, masterId, prevFee) {
+          masterId = normalizeOrderIdToken_(masterId);
+          remark = stripCombineShipRemark_(remark, masterId);
+          var prevPart = "";
+          if (prevFee != null && isFinite(Number(prevFee))) {
+            prevPart = "，原運費 NT$" + Math.max(0, Math.floor(Number(prevFee)));
+          }
+          var tag = COMBINE_SHIP_REMARK_PREFIX + "，運費併入 " + masterId + prevPart;
+          remark = String(remark || "").trim();
+          return remark ? (remark + "\n" + tag) : tag;
+        }
+
+        function stripCombineShipRemark_(remark, masterId) {
+          masterId = normalizeOrderIdToken_(masterId);
+          var lines = String(remark || "").split(/\r?\n/);
+          var kept = lines.filter(function(line) {
+            var t = String(line || "").trim();
+            if (!t) return false;
+            if (t.indexOf(COMBINE_SHIP_REMARK_PREFIX) >= 0) return false;
+            if (masterId && t.indexOf("運費併入 " + masterId) >= 0) return false;
+            if (t.indexOf("併箱") >= 0 && t.indexOf("運費") >= 0 && t.indexOf("併入") >= 0) return false;
+            return true;
+          });
+          return kept.join("\n").trim();
+        }
+
+        function groupHasCombineShipSetup_(group) {
+          if (!group || group.length <= 1) return false;
+          return group.some(function(o) {
+            return orderHasCombineShipRemark_(o) || parseLinkedOrderIds_(o && o.linkedOrderIds).length > 0;
+          });
+        }
+
+        function findCombineShipGroupsInRows_(rows) {
+          rows = (rows || []).filter(function(o) { return o && !o._missing && o.status !== "已取消"; });
+          var processedIds = {};
+          var groups = [];
+          rows.forEach(function(o) {
+            var id = normalizeOrderIdToken_(o.id);
+            if (!id || processedIds[id]) return;
+            var group = resolveCombineShipPdfOrders_(o).filter(function(g) {
+              return g && !g._missing && g.status !== "已取消";
+            });
+            if (group.length <= 1 || !groupHasCombineShipSetup_(group)) return;
+            group.forEach(function(g) {
+              var gid = normalizeOrderIdToken_(g.id);
+              if (gid) processedIds[gid] = true;
+            });
+            groups.push(group);
+          });
+          return groups;
+        }
+
+        function pickPrimaryCombineShipGroupFromRows_(rows, focusOrderId) {
+          var groups = findCombineShipGroupsInRows_(rows);
+          if (!groups.length) return null;
+          var focusNorm = normalizeOrderIdToken_(focusOrderId);
+          if (focusNorm) {
+            for (var i = 0; i < groups.length; i++) {
+              if (groups[i].some(function(o) { return normalizeOrderIdToken_(o.id) === focusNorm; })) {
+                return groups[i];
+              }
+            }
+          }
+          groups.sort(function(a, b) { return b.length - a.length; });
+          return groups[0];
+        }
+
+        function validateUncombineShipGroup_(group) {
+          var blocked = [];
+          var warned = [];
+          (group || []).forEach(function(o) {
+            if (!o || o._missing) return;
+            var st = String(o.status || "").trim();
+            var id = normalizeOrderIdToken_(o.id);
+            if (!id) return;
+            if (st === "已完成") blocked.push(id);
+            else if (st === "出貨中") warned.push(id);
+          });
+          var message = "";
+          if (blocked.length) {
+            message = "以下訂單已「已完成」，無法取消併箱：" + blocked.join("、");
+          } else if (warned.length) {
+            message = "以下訂單為「出貨中」。若已產生併箱 PDF，取消後請自行作廢舊 PDF：\n" + warned.join("、");
+          }
+          return { ok: blocked.length === 0, blocked: blocked, warned: warned, message: message };
+        }
+
+        function buildUncombineShipConfirmMessage_(group, masterId) {
+          masterId = normalizeOrderIdToken_(masterId || pickCombineShipMasterId_(group));
+          var idList = (group || []).map(function(o) { return normalizeOrderIdToken_(o.id); }).filter(Boolean);
+          var slaveIds = idList.filter(function(id) { return id !== masterId; });
+          return [
+            "將解除整組併箱關聯：",
+            idList.join("、"),
+            "",
+            "· 副單運費恢復：" + (slaveIds.length ? describeSlaveRestoreFees_(slaveIds, group) : ("NT$" + DEFAULT_COMBINE_SHIP_FEE)),
+            "· 主單 " + masterId + " 運費不變",
+            "· 清除併箱備註與「關聯訂單」欄",
+            "",
+            "確定？"
+          ].join("\n");
+        }
+
+        function getCombineShipGroupForOrder_(ord) {
+          if (!ord) return [];
+          return resolveCombineShipPdfOrders_(ord).filter(function(g) {
+            return g && !g._missing && g.status !== "已取消";
+          });
+        }
+
+        function orderIsInActiveCombineShipGroup_(ord) {
+          var group = getCombineShipGroupForOrder_(ord);
+          return group.length > 1 && groupHasCombineShipSetup_(group);
+        }
+
+        function validateUncombineShipOrder_(ord, group) {
+          if (!ord || ord._missing) return { ok: false, message: "找不到訂單" };
+          group = group || getCombineShipGroupForOrder_(ord);
+          var id = normalizeOrderIdToken_(ord.id);
+          if (!id) return { ok: false, message: "無效的訂單編號" };
+          if (group.length <= 1 || !groupHasCombineShipSetup_(group)) {
+            return { ok: false, message: id + " 不在併箱群組中" };
+          }
+          var st = String(ord.status || "").trim();
+          if (st === "已完成") return { ok: false, message: id + " 已「已完成」，無法移出併箱群組" };
+          if (st === "已取消") return { ok: false, message: id + " 已取消，無法移出併箱群組" };
+          if (st === "出貨中") {
+            return {
+              ok: true,
+              warned: true,
+              message: id + " 為「出貨中」。若已產生併箱 PDF，移出後請自行作廢舊 PDF。"
+            };
+          }
+          return { ok: true, warned: false, message: "" };
+        }
+
+        function buildUncombineSingleConfirmMessage_(targetId, group, masterId) {
+          targetId = normalizeOrderIdToken_(targetId);
+          masterId = normalizeOrderIdToken_(masterId || pickCombineShipMasterId_(group));
+          var isSlave = targetId !== masterId;
+          var remaining = (group || []).map(function(o) { return normalizeOrderIdToken_(o.id); }).filter(function(id) {
+            return id && id !== targetId;
+          });
+          var lines = [
+            "將 " + targetId + " 移出併箱群組。",
+            "",
+            "· 本單清除與群組的「關聯訂單」與併箱備註"
+          ];
+          var targetOrd = (group || []).find(function(o) { return normalizeOrderIdToken_(o.id) === targetId; });
+          if (isSlave) lines.push("· 本單運費恢復 " + formatCombineShipRestoreFeeLabel_(targetOrd || {}));
+          else lines.push("· 本單（主單）運費不變");
+          if (remaining.length > 1) {
+            lines.push("· 其餘 " + remaining.join("、") + " 仍保持彼此併箱關聯");
+          } else if (remaining.length === 1) {
+            lines.push("· " + remaining[0] + " 將不再與其他訂單併箱");
+          }
+          lines.push("", "確定？");
+          return lines.join("\n");
+        }
+
+        function persistUncombineShipOrders_(updated) {
+          if (!updated.length) {
+            showOrderMessage("沒有可更新的訂單", true);
+            return Promise.resolve({ count: 0 });
+          }
+          saveOrders();
+          renderOrders();
+          var chain = Promise.resolve();
+          updated.forEach(function(ord) {
+            chain = chain.then(function() {
+              return upsertOrderToSheet(ord).catch(function() { return null; });
+            });
+          });
+          return chain.then(function() { return { count: updated.length }; });
+        }
+
+        function uncombineShipSingleOrder_(targetId, group, masterId) {
+          targetId = normalizeOrderIdToken_(targetId);
+          group = (group || []).filter(function(o) { return o && !o._missing && o.status !== "已取消"; });
+          masterId = normalizeOrderIdToken_(masterId || pickCombineShipMasterId_(group));
+          if (!targetId || group.length <= 1) {
+            showOrderMessage("找不到可移出的併箱群組", true);
+            return Promise.resolve({ count: 0 });
+          }
+          var groupIdSet = {};
+          group.forEach(function(o) {
+            var id = normalizeOrderIdToken_(o.id);
+            if (id) groupIdSet[id] = true;
+          });
+          if (!groupIdSet[targetId]) {
+            showOrderMessage(targetId + " 不在此併箱群組中", true);
+            return Promise.resolve({ count: 0 });
+          }
+          var targetRow = group.find(function(o) { return normalizeOrderIdToken_(o.id) === targetId; });
+          var isSlave = targetId !== masterId;
+          var restoreTargetFee = isSlave && targetRow && (
+            orderHasCombineShipRemark_(targetRow) ||
+            parseLinkedOrderIds_(targetRow.linkedOrderIds).indexOf(masterId) >= 0 ||
+            (orderEffectiveShippingForOrder(targetRow) <= 0 && parseLinkedOrderIds_(targetRow.linkedOrderIds).length > 0)
+          );
+          var updated = [];
+          var updatedSeen = {};
+          group.forEach(function(row) {
+            if (row.status === "已完成" || row.status === "已取消") return;
+            var id = normalizeOrderIdToken_(row.id);
+            var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
+            if (!ord) return;
+            if (id === targetId) {
+              ord.linkedOrderIds = parseLinkedOrderIds_(ord.linkedOrderIds).filter(function(lid) {
+                return !groupIdSet[lid];
+              }).join(", ");
+              ord.remark = stripCombineShipRemark_(ord.remark, masterId);
+              if (restoreTargetFee) restoreCombineShipFeeIfNeeded_(ord);
+              if (!updatedSeen[id]) { updatedSeen[id] = true; updated.push(ord); }
+              return;
+            }
+            var before = parseLinkedOrderIds_(ord.linkedOrderIds);
+            if (before.indexOf(targetId) < 0) return;
+            ord.linkedOrderIds = before.filter(function(lid) { return lid !== targetId; }).join(", ");
+            if (!updatedSeen[id]) { updatedSeen[id] = true; updated.push(ord); }
+          });
+          return persistUncombineShipOrders_(updated).then(function(res) {
+            res.targetId = targetId;
+            res.masterId = masterId;
+            return res;
+          });
+        }
+
+        function runUncombineShipSingleFlow_(targetId, group, masterId, onSuccess) {
+          var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === normalizeOrderIdToken_(targetId); });
+          var validation = validateUncombineShipOrder_(ord, group);
+          if (!validation.ok) {
+            alert(validation.message);
+            return Promise.resolve({ count: 0 });
+          }
+          if (validation.warned && !confirm(validation.message + "\n\n仍要移出併箱群組？")) {
+            return Promise.resolve({ count: 0, cancelled: true });
+          }
+          if (!confirm(buildUncombineSingleConfirmMessage_(targetId, group, masterId))) {
+            return Promise.resolve({ count: 0, cancelled: true });
+          }
+          return uncombineShipSingleOrder_(targetId, group, masterId).then(function(res) {
+            if (res && res.count > 0) {
+              showOrderMessage("已將 " + normalizeOrderIdToken_(targetId) + " 移出併箱群組");
+              if (typeof onSuccess === "function") onSuccess(res);
+            }
+            return res;
+          });
+        }
+
+        function recalcOrderTotalFromFields_(ord) {
+          if (!ord || !orderHasAmountBreakdown(ord)) return ord;
+          var dep = ord.depositAmount != null && ord.depositAmount !== "" ? Number(ord.depositAmount) : 0;
+          if (isNaN(dep) || dep < 0) dep = 0;
+          var gross = orderGrossBeforeDeposit(ord);
+          ord.total = dep > 0 ? Math.max(0, gross - dep) : gross;
+          return ord;
+        }
+
+        function uncombineShipGroup_(group, masterId) {
+          group = (group || []).filter(function(o) { return o && !o._missing && o.status !== "已取消"; });
+          masterId = normalizeOrderIdToken_(masterId || pickCombineShipMasterId_(group));
+          if (!masterId || group.length <= 1) {
+            showOrderMessage("找不到可解除的併箱群組", true);
+            return Promise.resolve({ count: 0 });
+          }
+          var groupIdSet = {};
+          group.forEach(function(o) {
+            var id = normalizeOrderIdToken_(o.id);
+            if (id) groupIdSet[id] = true;
+          });
+          var slaveBefore = {};
+          group.forEach(function(o) {
+            var id = normalizeOrderIdToken_(o.id);
+            if (!id || id === masterId) return;
+            slaveBefore[id] = (
+              orderHasCombineShipRemark_(o) ||
+              parseLinkedOrderIds_(o.linkedOrderIds).indexOf(masterId) >= 0 ||
+              (orderEffectiveShippingForOrder(o) <= 0 && parseLinkedOrderIds_(o.linkedOrderIds).length > 0)
+            );
+          });
+          var updated = [];
+          var updatedSeen = {};
+          group.forEach(function(row) {
+            if (row.status === "已完成") return;
+            var id = normalizeOrderIdToken_(row.id);
+            var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
+            if (!ord) return;
+            ord.linkedOrderIds = parseLinkedOrderIds_(ord.linkedOrderIds).filter(function(lid) {
+              return !groupIdSet[lid];
+            }).join(", ");
+            ord.remark = stripCombineShipRemark_(ord.remark, masterId);
+            if (id !== masterId && slaveBefore[id]) restoreCombineShipFeeIfNeeded_(ord);
+            if (!updatedSeen[id]) {
+              updatedSeen[id] = true;
+              updated.push(ord);
+            }
+          });
+          if (!updated.length) {
+            showOrderMessage("沒有可更新的訂單", true);
+            return Promise.resolve({ count: 0 });
+          }
+          return persistUncombineShipOrders_(updated).then(function(res) {
+            res.masterId = masterId;
+            res.ids = group.map(function(o) { return normalizeOrderIdToken_(o.id); }).filter(Boolean);
+            return res;
+          });
+        }
+
+        function applyCombineShipFreeToForm_(masterId, otherOrders) {
+          masterId = normalizeOrderIdToken_(masterId);
+          if (!masterId) return;
+          var feeEl = document.getElementById("orderShippingFee");
+          var combineEl = document.getElementById("orderCombineShipFree");
+          var linkedEl = document.getElementById("orderLinkedOrderIds");
+          var remarkEl = document.getElementById("orderRemark");
+          var couponEl = document.getElementById("orderShippingStatusCoupon");
+          if (combineEl) combineEl.checked = true;
+          if (feeEl) feeEl.value = "0";
+          if (couponEl) couponEl.checked = false;
+          if (linkedEl) {
+            var merged = parseLinkedOrderIds_(linkedEl.value);
+            if (merged.indexOf(masterId) < 0) merged.unshift(masterId);
+            (otherOrders || []).forEach(function(o) {
+              var id = normalizeOrderIdToken_(o && o.id);
+              if (id && id !== masterId && merged.indexOf(id) < 0) merged.push(id);
+            });
+            linkedEl.value = merged.join(", ");
+          }
+          var prevFee = captureCombineShipPrevFeeFromForm_();
+          if (remarkEl) remarkEl.value = appendCombineShipRemark_(remarkEl.value, masterId, prevFee);
+          updateOrderTotal();
+          refreshCombineShipPanel_();
+        }
+
+        var combineShipUncheckGuard_ = false;
+
+        function parseCombineShipMasterFromRemark_(remark) {
+          var m = String(remark || "").match(/併箱免運[，,]\s*運費併入\s*(ORD\d+)/i);
+          return m ? normalizeOrderIdToken_(m[1]) : "";
+        }
+
+        function setCombineShipCheckboxChecked_(checked) {
+          var combineEl = document.getElementById("orderCombineShipFree");
+          if (!combineEl) return;
+          combineShipUncheckGuard_ = true;
+          combineEl.checked = !!checked;
+          combineShipUncheckGuard_ = false;
+        }
+
+        function applyUncombineShipToFormFields_(masterId, groupIdSet) {
+          masterId = normalizeOrderIdToken_(masterId);
+          var feeEl = document.getElementById("orderShippingFee");
+          var linkedEl = document.getElementById("orderLinkedOrderIds");
+          var remarkEl = document.getElementById("orderRemark");
+          var couponEl = document.getElementById("orderShippingStatusCoupon");
+          var shipCouponOn = !!(couponEl && couponEl.checked);
+          var prevFee = parseCombineShipPrevFeeFromRemark_(remarkEl && remarkEl.value);
+          if (prevFee == null) prevFee = DEFAULT_COMBINE_SHIP_FEE;
+          if (feeEl && !shipCouponOn && Number(feeEl.value) === 0) {
+            feeEl.value = String(prevFee);
+          }
+          if (linkedEl) {
+            var linked = parseLinkedOrderIds_(linkedEl.value);
+            if (groupIdSet) {
+              linked = linked.filter(function(lid) { return !groupIdSet[lid]; });
+            } else if (masterId) {
+              linked = linked.filter(function(lid) { return lid !== masterId; });
+            }
+            linkedEl.value = linked.join(", ");
+          }
+          if (remarkEl) remarkEl.value = stripCombineShipRemark_(remarkEl.value, masterId);
+          updateOrderTotal();
+        }
+
+        function resolveCombineShipMasterForForm_(selfId, selfOrd, group) {
+          group = group || (selfOrd ? getCombineShipGroupForOrder_(selfOrd) : []);
+          var masterId = pickCombineShipMasterId_(group);
+          if (masterId) return masterId;
+          var remarkEl = document.getElementById("orderRemark");
+          var linkedEl = document.getElementById("orderLinkedOrderIds");
+          masterId = parseCombineShipMasterFromRemark_(remarkEl && remarkEl.value);
+          if (masterId) return masterId;
+          var linked = parseLinkedOrderIds_(linkedEl && linkedEl.value);
+          if (linked.length) return linked[0];
+          var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
+          var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
+          var others = getActiveCustomerOrders_(customerName, phone, selfId).filter(function(o) { return o.status !== "已完成"; });
+          return pickCombineShipMasterId_(others) || "";
+        }
+
+        function handleCombineShipUnchecked_(combineEl) {
+          var editId = (document.getElementById("orderForm") && document.getElementById("orderForm").getAttribute("data-edit-id")) || "";
+          var selfId = normalizeOrderIdToken_((document.getElementById("orderId") && document.getElementById("orderId").value) || editId);
+          var selfOrd = selfId ? orders.find(function(o) { return normalizeOrderIdToken_(o.id) === selfId; }) : null;
+          var group = selfOrd ? getCombineShipGroupForOrder_(selfOrd) : [];
+          var inSavedGroup = !!(selfOrd && orderIsInActiveCombineShipGroup_(selfOrd));
+          var masterId = resolveCombineShipMasterForForm_(selfId, selfOrd, group);
+          var remarkEl = document.getElementById("orderRemark");
+          var linkedEl = document.getElementById("orderLinkedOrderIds");
+          var feeEl = document.getElementById("orderShippingFee");
+          var hasFormCombine = (
+            orderHasCombineShipRemark_({ remark: remarkEl && remarkEl.value }) ||
+            parseLinkedOrderIds_(linkedEl && linkedEl.value).length > 0
+          );
+
+          if (inSavedGroup) {
+            var validation = validateUncombineShipOrder_(selfOrd, group);
+            if (!validation.ok) {
+              alert(validation.message);
+              setCombineShipCheckboxChecked_(true);
+              return;
+            }
+            if (validation.warned && !confirm(validation.message + "\n\n仍要取消併箱並移出群組？")) {
+              setCombineShipCheckboxChecked_(true);
+              return;
+            }
+            if (!confirm(buildUncombineSingleConfirmMessage_(selfId, group, masterId))) {
+              setCombineShipCheckboxChecked_(true);
+              return;
+            }
+            combineEl.disabled = true;
+            uncombineShipSingleOrder_(selfId, group, masterId).then(function(res) {
+              if (res && res.count > 0) {
+                showOrderMessage("已將 " + selfId + " 移出併箱群組");
+                var updated = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === selfId; });
+                if (updated) setFormFromOrder(updated);
+                else applyUncombineShipToFormFields_(masterId);
+                refreshCombineShipPanel_();
+              }
+            }).finally(function() { combineEl.disabled = false; });
+            return;
+          }
+
+          if (hasFormCombine || (feeEl && Number(feeEl.value) === 0)) {
+            var formRestoreFee = captureCombineShipPrevFeeFromForm_();
+            if (!confirm(
+              "是否清除併箱關聯與備註" +
+              (masterId ? ("（運費併入 " + masterId + "）") : "") +
+              "，並恢復運費 NT$" + formRestoreFee +
+              "？\n\n（尚未儲存，僅更新表單）"
+            )) {
+              setCombineShipCheckboxChecked_(true);
+              return;
+            }
+            applyUncombineShipToFormFields_(masterId);
+            refreshCombineShipPanel_();
+            return;
+          }
+
+          if (feeEl && Number(feeEl.value) === 0) feeEl.value = String(DEFAULT_COMBINE_SHIP_FEE);
+          updateOrderTotal();
+          refreshCombineShipPanel_();
+        }
+
+        function refreshCombineShipPanel_() {
+          var banner = document.getElementById("orderCombineShipBanner");
+          var combineEl = document.getElementById("orderCombineShipFree");
+          if (!banner) return;
+          var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
+          var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
+          var editId = (document.getElementById("orderForm") && document.getElementById("orderForm").getAttribute("data-edit-id")) || "";
+          var selfId = normalizeOrderIdToken_((document.getElementById("orderId") && document.getElementById("orderId").value) || editId);
+          var others = getActiveCustomerOrders_(customerName, phone, selfId).filter(function(o) { return o.status !== "已完成"; });
+          if (!others.length) {
+            banner.classList.add("hidden");
+            banner.innerHTML = "";
+            return;
+          }
+          var masterId = pickCombineShipMasterId_(others.concat([{ id: selfId }].filter(function(x) { return x.id; })));
+          var stats = analyzeCombineShipForOrders_(others);
+          var lines = [
+            "此客戶另有 <strong>" + others.length + "</strong> 筆訂單。若<strong>併箱一起寄</strong>，通常只收一次運費（NT$" + DEFAULT_COMBINE_SHIP_FEE + "）。"
+          ];
+          if (masterId) lines.push("建議出貨主單：<strong class=\"font-mono\">" + escapeHtml(masterId) + "</strong>");
+          if (stats.warning) lines.push("<span class=\"text-amber-800\">⚠ " + escapeHtml(stats.warning) + "</span>");
+          if (combineEl && combineEl.checked) {
+            lines.push("本單已設為<strong>併箱免運</strong>（運費 0，併入主單）。");
+          } else {
+            lines.push("<button type=\"button\" id=\"btnApplyCombineShipToForm\" class=\"mt-1 px-2 py-1 rounded border border-sky-300 bg-white text-sky-800 hover:bg-sky-100\">套用併箱免運（本單運費改 0）</button>");
+          }
+          var selfOrd = selfId ? orders.find(function(o) { return normalizeOrderIdToken_(o.id) === selfId; }) : null;
+          if (selfOrd && orderIsInActiveCombineShipGroup_(selfOrd)) {
+            lines.push("<button type=\"button\" id=\"btnUncombineShipFromForm\" class=\"mt-1 px-2 py-1 rounded border border-rose-300 bg-white text-rose-800 hover:bg-rose-50\">移出併箱群組（僅本單）</button>");
+          }
+          banner.innerHTML = lines.join("<br>");
+          banner.classList.remove("hidden");
+          var btn = document.getElementById("btnApplyCombineShipToForm");
+          if (btn) {
+            btn.addEventListener("click", function() {
+              applyCombineShipFreeToForm_(masterId, others);
+              showOrderMessage("已套用併箱免運：本單運費 0，已關聯 " + masterId);
+            });
+          }
+          var uncombineFormBtn = document.getElementById("btnUncombineShipFromForm");
+          if (uncombineFormBtn && selfOrd) {
+            uncombineFormBtn.addEventListener("click", function() {
+              var group = getCombineShipGroupForOrder_(selfOrd);
+              var groupMasterId = pickCombineShipMasterId_(group);
+              uncombineFormBtn.disabled = true;
+              runUncombineShipSingleFlow_(selfId, group, groupMasterId, function() {
+                var updated = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === selfId; });
+                if (updated) setFormFromOrder(updated);
+                refreshCombineShipPanel_();
+                updateOrderTotal();
+              }).finally(function() { uncombineFormBtn.disabled = false; });
+            });
+          }
+        }
+
+        function applyCombineShipFreeToStoredOrders_(rows, masterId) {
+          masterId = normalizeOrderIdToken_(masterId);
+          if (!masterId) {
+            showOrderMessage("無法判斷出貨主單", true);
+            return Promise.resolve(0);
+          }
+          var updated = [];
+          (rows || []).forEach(function(row) {
+            if (!row || row._missing) return;
+            var id = normalizeOrderIdToken_(row.id);
+            if (!id || id === masterId) return;
+            if (row.status === "已取消" || row.status === "已完成") return;
+            var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
+            if (!ord) return;
+            if (orderEffectiveShippingForOrder(ord) <= 0 && orderHasCombineShipRemark_(ord)) return;
+            var prevFee = captureCombineShipPrevFee_(ord);
+            saveCombineShipPrevFee_(ord, prevFee);
+            ord.shippingFee = 0;
+            if (ord.shippingStatus && String(ord.shippingStatus).indexOf("免運") >= 0) ord.shippingStatus = "";
+            ord.remark = appendCombineShipRemark_(ord.remark, masterId, prevFee);
+            var linked = parseLinkedOrderIds_(ord.linkedOrderIds);
+            if (linked.indexOf(masterId) < 0) linked.unshift(masterId);
+            ord.linkedOrderIds = linked.join(", ");
+            updated.push(ord);
+          });
+          var masterOrd = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === masterId; });
+          if (masterOrd) {
+            var masterLinked = parseLinkedOrderIds_(masterOrd.linkedOrderIds);
+            updated.forEach(function(slave) {
+              var sid = normalizeOrderIdToken_(slave.id);
+              if (sid && masterLinked.indexOf(sid) < 0) masterLinked.push(sid);
+            });
+            masterOrd.linkedOrderIds = masterLinked.join(", ");
+            if (updated.indexOf(masterOrd) < 0) updated.push(masterOrd);
+          }
+          if (!updated.length) {
+            showOrderMessage("沒有需要調整的副單（可能已為併箱免運）", true);
+            return Promise.resolve(0);
+          }
+          saveOrders();
+          renderOrders();
+          var chain = Promise.resolve();
+          updated.forEach(function(ord) {
+            chain = chain.then(function() {
+              return upsertOrderToSheet(ord).catch(function() { return null; });
+            });
+          });
+          return chain.then(function() { return updated.length; });
+        }
+
+        function renderCustomerOverviewShippingBanner_(rows, stats) {
+          var el = document.getElementById("customerOverviewShippingBanner");
+          if (!el) return;
+          var combineGroup = pickPrimaryCombineShipGroupFromRows_(rows, customerOverviewFocusOrderId);
+          var hasCombineSetup = combineGroup && groupHasCombineShipSetup_(combineGroup);
+          if ((!stats || stats.activeCount <= 1) && !hasCombineSetup) {
+            el.classList.add("hidden");
+            el.innerHTML = "";
+            return;
+          }
+          var masterId = (stats && stats.recommendedMasterId) || pickCombineShipMasterId_(combineGroup || rows) || "";
+          if (combineGroup && combineGroup.length) {
+            masterId = pickCombineShipMasterId_(combineGroup) || masterId;
+          }
+          var cls = stats && stats.ok ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900";
+          var statusLine = !stats || stats.activeCount <= 1
+            ? ("已設定併箱關聯" + (masterId ? " · 主單 <span class=\"font-mono font-semibold\">" + escapeHtml(masterId) + "</span>" : ""))
+            : (stats.ok
+              ? ("本批併箱<strong>應收運費 1 次</strong>（NT$" + stats.expectedOnceFee + "）· 目前 " + stats.chargedCount + " 筆含運費")
+              : ("⚠ 本批<strong>應收運費 1 次</strong>，但目前 " + stats.chargedCount + " 筆各收運費（合計 NT$" + stats.totalShippingCharged + "）"));
+          el.className = "rounded-xl border px-4 py-3 text-sm leading-relaxed " + cls;
+          el.innerHTML =
+            "<div class=\"font-semibold mb-1\">併箱運費</div>" +
+            "<p>" + statusLine + (masterId && stats && stats.activeCount > 1 ? " · 建議主單 <span class=\"font-mono font-semibold\">" + escapeHtml(masterId) + "</span>" : "") + "</p>" +
+            "<button type=\"button\" id=\"btnOverviewCombinePdf\" class=\"mt-2 mr-2 px-3 py-1.5 rounded-lg border border-sky-400 bg-white text-sky-900 text-xs hover:bg-sky-50\">產生併箱 PDF（合併明細）</button>" +
+            (stats && !stats.ok ? ("<button type=\"button\" id=\"btnOverviewApplyCombineShip\" class=\"mt-2 mr-2 px-3 py-1.5 rounded-lg border border-amber-400 bg-white text-amber-900 text-xs hover:bg-amber-100\">副單運費改 0（併箱免運）</button>") : "") +
+            (hasCombineSetup ? ("<button type=\"button\" id=\"btnOverviewUncombineShip\" class=\"mt-2 px-3 py-1.5 rounded-lg border border-rose-300 bg-white text-rose-800 text-xs hover:bg-rose-50\">取消併箱關聯（整組）</button>") : "");
+          el.classList.remove("hidden");
+          var pdfBtn = document.getElementById("btnOverviewCombinePdf");
+          if (pdfBtn) {
+            pdfBtn.addEventListener("click", function() {
+              var group = combineGroup && combineGroup.length
+                ? combineGroup.slice()
+                : (rows || []).filter(function(o) { return o && !o._missing && o.status !== "已取消"; });
+              var pending = collectCombineShipPendingItems_(group);
+              if (!pending.length) {
+                alert("沒有「待出貨」品項可產生併箱 PDF。\n\n請先把各單要出的品項設為「待出貨」並儲存。");
+                return;
+              }
+              var masterOrd = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === masterId; });
+              if (!masterOrd && group.length) masterOrd = group[0];
+              runCombineShipPdf_(masterOrd || group[0], group, pending);
+            });
+          }
+          var btn = document.getElementById("btnOverviewApplyCombineShip");
+          if (btn) {
+            btn.addEventListener("click", function() {
+              if (!confirm("將副單運費改為 0，並在備註標記「併箱免運，運費併入 " + masterId + "」？\n\n出貨主單 " + masterId + " 保留運費。")) return;
+              btn.disabled = true;
+              applyCombineShipFreeToStoredOrders_(rows, masterId).then(function(count) {
+                if (count > 0) {
+                  showOrderMessage("已更新 " + count + " 筆訂單為併箱免運");
+                  renderCustomerOverviewModal_(customerOverviewLastName_, customerOverviewLastPhone_, customerOverviewFocusOrderId);
+                }
+              }).finally(function() { btn.disabled = false; });
+            });
+          }
+          var uncombineBtn = document.getElementById("btnOverviewUncombineShip");
+          if (uncombineBtn && combineGroup) {
+            uncombineBtn.addEventListener("click", function() {
+              var validation = validateUncombineShipGroup_(combineGroup);
+              if (!validation.ok) {
+                alert(validation.message);
+                return;
+              }
+              var confirmMsg = buildUncombineShipConfirmMessage_(combineGroup, masterId);
+              if (validation.warned && validation.warned.length) {
+                if (!confirm(validation.message + "\n\n仍要繼續取消併箱關聯？")) return;
+              }
+              if (!confirm(confirmMsg)) return;
+              uncombineBtn.disabled = true;
+              uncombineShipGroup_(combineGroup, masterId).then(function(res) {
+                if (res && res.count > 0) {
+                  showOrderMessage("已取消併箱關聯（" + (res.ids || []).join("、") + "）");
+                  renderCustomerOverviewModal_(customerOverviewLastName_, customerOverviewLastPhone_, customerOverviewFocusOrderId);
+                }
+              }).finally(function() { uncombineBtn.disabled = false; });
+            });
+          }
+        }
+
+        var customerOverviewLastName_ = "";
+        var customerOverviewLastPhone_ = "";
 
         function orderHasAmountBreakdown(ord) {
           return ord.subtotal != null && ord.subtotal !== "" && !isNaN(Number(ord.subtotal));
@@ -4688,6 +6032,17 @@
           );
         }
 
+        function getOrdersForLoyaltyLookup_() {
+          try {
+            var saved = localStorage.getItem(ORDER_STORAGE_KEY);
+            if (saved) {
+              var list = JSON.parse(saved);
+              if (Array.isArray(list) && list.length) return list;
+            }
+          } catch (e) {}
+          return Array.isArray(orders) ? orders : [];
+        }
+
         function refreshOrderPointsPanel_(processedFlag, callback) {
           function doRefresh() {
             if (!window.MaaruLoyalty) {
@@ -4698,7 +6053,7 @@
             var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
             var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
             var lineId = (document.getElementById("orderLineId") && document.getElementById("orderLineId").value) || "";
-            var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId);
+            var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId, getOrdersForLoyaltyLookup_());
             var balEl = document.getElementById("orderPointsBalance");
             if (balEl) balEl.textContent = String(balance);
             var processed = processedFlag === true || processedFlag === "Y";
@@ -4753,7 +6108,7 @@
           var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
           var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
           var lineId = (document.getElementById("orderLineId") && document.getElementById("orderLineId").value) || "";
-          var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId);
+          var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId, getOrdersForLoyaltyLookup_());
           var amounts = getOrderDiscountFromForm_();
           var net = MaaruLoyalty.merchandiseNet({ subtotal: amounts.subtotal, discount: amounts.discount });
           var maxPts = getOrderPointsMaxRedeem_(balance);
@@ -4831,8 +6186,10 @@
         }
 
         function applyLoyaltyToOrder_(ord, prevOrd) {
-          if (!window.MaaruLoyalty || !ord) return ord;
-          if (ord.pointsProcessed === "Y" || ord.pointsProcessed === true) return ord;
+          if (!window.MaaruLoyalty || !ord) return { order: ord, pointsChanged: false };
+          if (ord.pointsProcessed === "Y" || ord.pointsProcessed === true) {
+            return { order: ord, pointsChanged: false };
+          }
           ord = ensureOrderMemberCardOnOrder_(ord);
           try {
             var result = MaaruLoyalty.processOrderPoints(ord, prevOrd || null);
@@ -4840,22 +6197,59 @@
               if (typeof showOrderMessage === "function") showOrderMessage("紅利：" + result.message);
               if (typeof window.showLoyaltyMessage === "function") window.showLoyaltyMessage(result.message);
             }
-            if (typeof window.syncPointsLedgerToSheet === "function") {
-              window.syncPointsLedgerToSheet().then(function() {
-                if (typeof window.showLoyaltyMessage === "function") window.showLoyaltyMessage("紅利已同步至試算表，顧客頁可查詢");
-              }).catch(function(syncErr) {
-                if (typeof window.showLoyaltyMessage === "function") {
-                  window.showLoyaltyMessage("紅利已處理，但同步試算表失敗：" + (syncErr.message || "請按「同步至試算表」"), true);
-                }
-              });
-            }
+            var pointsChanged = result.order.pointsProcessed === "Y" || result.order.pointsProcessed === true;
             if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
-            return result.order;
+            return { order: result.order, pointsChanged: pointsChanged };
           } catch (err) {
             if (typeof showOrderMessage === "function") showOrderMessage("紅利處理失敗：" + (err.message || ""), true);
             if (typeof window.showLoyaltyMessage === "function") window.showLoyaltyMessage("處理失敗：" + (err.message || ""), true);
-            return ord;
+            return { order: ord, pointsChanged: false };
           }
+        }
+
+        function orderNeedsPointsSheetSync_(ord) {
+          if (!ord) return false;
+          var st = String(ord.status || "").trim();
+          if (st !== "已確認" && st !== "已完成") return false;
+          if (ord.pointsProcessed === "Y" || ord.pointsProcessed === true) return true;
+          return Math.floor(Number(ord.pointsEarned) || 0) > 0 || Math.floor(Number(ord.pointsUsed) || 0) > 0;
+        }
+
+        function upsertOrderWithPointsSync_(ord, pointsChanged, successMsg) {
+          var syncPoints = !!(pointsChanged || orderNeedsPointsSheetSync_(ord));
+          return upsertOrderToSheet(ord, { syncPoints: syncPoints }).then(function(res) {
+            var sheetHint = (res && res.sheetName) ? ("「" + res.sheetName + "」") : "試算表";
+            var msg = successMsg || ("訂單已寫入 " + sheetHint);
+            if (pointsChanged) {
+              if (res && res.pointsSynced) msg += "；紅利已同步（" + res.pointsSynced + " 筆）";
+              else if (res && res.pointsAppended) msg += "；已補寫紅利 " + res.pointsAppended + " 筆";
+              else msg += "；紅利已同步";
+              if (typeof window.loadPointsFromSheet === "function") {
+                window.loadPointsFromSheet().then(function () {
+                  if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+                }).catch(function () {});
+              }
+              if (typeof window.showLoyaltyMessage === "function") {
+                window.showLoyaltyMessage("紅利已寫入試算表，顧客可查詢");
+              }
+            }
+            showOrderMessage(msg);
+            return res;
+          }).catch(function(err) {
+            showOrderMessage("寫入試算表失敗：" + (err.message || "網路錯誤"), true);
+            if (pointsChanged && typeof window.syncPointsLedgerToSheet === "function") {
+              window.syncPointsLedgerToSheet().then(function() {
+                if (typeof window.showLoyaltyMessage === "function") {
+                  window.showLoyaltyMessage("訂單已寫入，紅利已另行同步至試算表");
+                }
+              }).catch(function(syncErr) {
+                if (typeof window.showLoyaltyMessage === "function") {
+                  window.showLoyaltyMessage("紅利同步失敗：" + (syncErr.message || "請至紅利點數頁手動同步"), true);
+                }
+              });
+            }
+            throw err;
+          });
         }
 
         function processPendingLoyaltyOrders_(silent) {
@@ -4864,18 +6258,26 @@
           var result = MaaruLoyalty.processPendingOrders(orders);
           if (result.processed > 0) {
             saveOrders();
+            var chain = Promise.resolve();
             orders.forEach(function (ord) {
               if (ord.pointsProcessed === "Y" || ord.pointsProcessed === true) {
-                upsertOrderToSheet(ord).catch(function() {});
+                chain = chain.then(function () {
+                  return upsertOrderToSheet(ord, { syncPoints: true }).catch(function () { return null; });
+                });
               }
             });
-            if (typeof window.syncPointsLedgerToSheet === "function") {
-              window.syncPointsLedgerToSheet().catch(function() {});
-            }
-            if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
-            if (!silent && typeof showOrderMessage === "function") {
-              showOrderMessage("已補處理 " + result.processed + " 筆訂單紅利並同步試算表");
-            }
+            chain = chain.then(function () {
+              if (typeof window.syncPointsLedgerToSheet === "function") {
+                return window.syncPointsLedgerToSheet().catch(function () { return null; });
+              }
+              return null;
+            });
+            chain.then(function () {
+              if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+              if (!silent && typeof showOrderMessage === "function") {
+                showOrderMessage("已補處理 " + result.processed + " 筆訂單紅利並同步試算表");
+              }
+            });
           } else if (!silent && typeof showOrderMessage === "function") {
             showOrderMessage("沒有需要補處理的訂單（需為已確認／已完成、有會員卡號且尚未發點）", true);
           }
@@ -4922,9 +6324,13 @@
           return parseLinkedOrderIds_(raw).filter(function(id) { return !selfNorm || id !== selfNorm; }).join(", ");
         }
 
+        function orderCustomerName_(ord) {
+          return String((ord && (ord.customerName || ord.name)) || "").trim();
+        }
+
         function orderMatchesCustomer_(ord, customerName, phone) {
           var n = normalizeCustomerNameForOrders_(customerName);
-          if (n) return normalizeCustomerNameForOrders_(ord && ord.customerName) === n;
+          if (n) return normalizeCustomerNameForOrders_(orderCustomerName_(ord)) === n;
           var p = String(phone || "").replace(/\D/g, "");
           if (p) return String(ord && ord.phone || "").replace(/\D/g, "") === p;
           return false;
@@ -4945,6 +6351,56 @@
             var found = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
             return found || { id: id, _missing: true };
           });
+        }
+
+        function resolveCombineShipPdfOrders_(ord) {
+          if (!ord) return [];
+          var idSet = {};
+          function addOrder(o) {
+            if (!o || o._missing || o.status === "已取消") return;
+            var id = normalizeOrderIdToken_(o.id);
+            if (id) idSet[id] = o;
+          }
+          addOrder(ord);
+          var guard = 0;
+          while (guard < 20) {
+            guard++;
+            var changed = false;
+            Object.keys(idSet).slice().forEach(function(k) {
+              parseLinkedOrderIds_(idSet[k].linkedOrderIds).forEach(function(lid) {
+                if (!idSet[lid]) {
+                  var found = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === lid; });
+                  if (found) { addOrder(found); changed = true; }
+                }
+              });
+            });
+            orders.forEach(function(o) {
+              if (!o || o.status === "已取消") return;
+              var oid = normalizeOrderIdToken_(o.id);
+              if (idSet[oid]) return;
+              var links = parseLinkedOrderIds_(o.linkedOrderIds);
+              for (var i = 0; i < links.length; i++) {
+                if (idSet[links[i]]) { addOrder(o); changed = true; break; }
+              }
+            });
+            if (!changed) break;
+          }
+          return Object.keys(idSet).map(function(k) { return idSet[k]; }).sort(function(a, b) {
+            var ma = String((a && a.id) || "").match(/^ORD(\d+)$/i);
+            var mb = String((b && b.id) || "").match(/^ORD(\d+)$/i);
+            return (ma ? parseInt(ma[1], 10) : 0) - (mb ? parseInt(mb[1], 10) : 0);
+          });
+        }
+
+        function collectCombineShipPendingItems_(orderGroup) {
+          var itemsByOrder = [];
+          (orderGroup || []).forEach(function(o) {
+            if (!o || o._missing) return;
+            var itemsAll = normalizeOrderItems_(o.items || []);
+            var toShip = itemsAll.filter(function(it) { return getOrderItemShipStatus_(it) === "待出貨"; });
+            if (toShip.length) itemsByOrder.push({ ord: o, items: toShip, itemsAll: itemsAll });
+          });
+          return itemsByOrder;
         }
 
         function getCustomerOverviewRows_(customerName, phone, focusOrderId) {
@@ -4988,7 +6444,7 @@
               lineId = rows[0].lineId || "";
               memberCardNo = rows[0].memberCardNo || "";
             }
-            balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId);
+            balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId, rows);
           }
           var totalDue = 0;
           var activeCount = 0;
@@ -5015,8 +6471,12 @@
           var tbody = document.getElementById("customerOverviewTableBody");
           if (!modal || !tbody) return;
           customerOverviewFocusOrderId = focusOrderId || null;
+          customerOverviewLastName_ = customerName || "";
+          customerOverviewLastPhone_ = phone || "";
           var rows = getCustomerOverviewRows_(customerName, phone, focusOrderId);
           var stats = buildCustomerOverviewStats_(rows, customerName, phone);
+          var shipStats = analyzeCombineShipForOrders_(rows);
+          renderCustomerOverviewShippingBanner_(rows, shipStats);
           if (subtitle) {
             var parts = [customerName || "（未填姓名）"];
             if (phone) parts.push(phone);
@@ -5030,7 +6490,7 @@
               "<div class=\"rounded-lg border border-slate-200 bg-slate-50 px-3 py-2\"><p class=\"text-[10px] text-slate-500\">累計獲得紅利</p><p class=\"text-lg font-bold text-slate-800\">" + stats.earnedPts + " 點</p></div>";
           }
           if (!rows.length) {
-            tbody.innerHTML = "<tr><td colspan=\"5\" class=\"py-8 text-center text-slate-500\">找不到此顧客的訂單</td></tr>";
+            tbody.innerHTML = "<tr><td colspan=\"6\" class=\"py-8 text-center text-slate-500\">找不到此顧客的訂單</td></tr>";
           } else {
             var focusNorm = normalizeOrderIdToken_(focusOrderId);
             tbody.innerHTML = rows.map(function(o) {
@@ -5041,17 +6501,35 @@
               var rowClass = (focusNorm && id === focusNorm) ? " bg-sky-50" : (missing ? " bg-rose-50/40" : "");
               var status = missing ? "（不存在）" : (o.status || "—");
               var due = missing ? "—" : ("NT$ " + orderAmountDue(o));
+              var shipCell = missing ? "—" : formatOrderShippingOverviewCell_(o);
+              var inCombineGroup = !missing && orderIsInActiveCombineShipGroup_(o);
+              var canUncombine = inCombineGroup && o.status !== "已完成" && o.status !== "已取消";
               return "<tr class=\"border-b border-slate-100" + rowClass + "\" data-overview-order-id=\"" + escapeHtml(id) + "\">" +
                 "<td class=\"py-2.5 px-3 font-mono text-slate-800\">" + escapeHtml(id) + (missing ? " <span class=\"text-rose-600 text-xs\">未找到</span>" : "") + "</td>" +
                 "<td class=\"py-2.5 px-3 text-slate-600\">" + escapeHtml(status) + "</td>" +
                 "<td class=\"py-2.5 px-3 font-medium text-slate-800\">" + escapeHtml(due) + "</td>" +
+                "<td class=\"py-2.5 px-3 text-slate-600\">" + escapeHtml(shipCell) + "</td>" +
                 "<td class=\"py-2.5 px-3 text-xs text-slate-500\">" + escapeHtml(linkedText) + "</td>" +
                 "<td class=\"py-2.5 px-3 whitespace-nowrap\">" +
                 (missing ? "<span class=\"text-xs text-slate-400\">—</span>" :
+                  (canUncombine ? "<button type=\"button\" class=\"customer-overview-uncombine-btn text-rose-700 hover:underline text-xs mr-2\">移出併箱</button>" : "") +
                   "<button type=\"button\" class=\"customer-overview-edit-btn text-rose-600 hover:underline text-xs mr-2\">編輯</button>" +
                   "<button type=\"button\" class=\"customer-overview-filter-btn text-sky-700 hover:underline text-xs\">篩選</button>") +
                 "</td></tr>";
             }).join("");
+            tbody.querySelectorAll(".customer-overview-uncombine-btn").forEach(function(btn) {
+              btn.addEventListener("click", function() {
+                var id = this.closest("tr").getAttribute("data-overview-order-id");
+                var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === id; });
+                if (!ord) return;
+                var group = getCombineShipGroupForOrder_(ord);
+                var masterId = pickCombineShipMasterId_(group);
+                btn.disabled = true;
+                runUncombineShipSingleFlow_(id, group, masterId, function() {
+                  renderCustomerOverviewModal_(customerOverviewLastName_, customerOverviewLastPhone_, customerOverviewFocusOrderId);
+                }).finally(function() { btn.disabled = false; });
+              });
+            });
             tbody.querySelectorAll(".customer-overview-edit-btn").forEach(function(btn) {
               btn.addEventListener("click", function() {
                 var id = this.closest("tr").getAttribute("data-overview-order-id");
@@ -5072,6 +6550,16 @@
             });
           }
           modal.classList.remove("hidden");
+        }
+
+        function formatOrderShippingOverviewCell_(ord) {
+          var fee = orderEffectiveShippingForOrder(ord);
+          if (fee <= 0) {
+            if (orderHasCombineShipRemark_(ord)) return "0（併箱）";
+            if (ord.shippingStatus && String(ord.shippingStatus).indexOf("免運") >= 0) return "0（免運券）";
+            return "0";
+          }
+          return "NT$ " + fee;
         }
 
         function openCustomerOverviewModal_(customerName, phone, focusOrderId) {
@@ -5307,7 +6795,7 @@
           var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
           var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
           var lineId = (document.getElementById("orderLineId") && document.getElementById("orderLineId").value) || "";
-          var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId);
+          var balance = MaaruLoyalty.getBalance(memberCardNo, customerName, phone, lineId, getOrdersForLoyaltyLookup_());
           var maxPts = MaaruLoyalty.calcMaxRedeemPoints(
             { subtotal: subtotal, discount: discount, pointsUsed: 0 },
             balance
@@ -5373,7 +6861,7 @@
           if (linkedEl) linkedEl.value = formatLinkedOrderIds_(o.linkedOrderIds || "");
           var cardEl = document.getElementById("orderMemberCardNo");
           if (cardEl) cardEl.value = (o.memberCardNo || "");
-          document.getElementById("orderCustomerName").value = o.customerName || "";
+          document.getElementById("orderCustomerName").value = o.customerName || o.name || "";
           document.getElementById("orderPhone").value = o.phone || "";
           document.getElementById("orderEmail").value = o.email || "";
           document.getElementById("orderLineId").value = o.lineId || "";
@@ -5388,6 +6876,11 @@
           document.getElementById("orderShippingFee").value = String(o.shippingFee != null && o.shippingFee !== "" ? o.shippingFee : 38);
           var shipStatusEl = document.getElementById("orderShippingStatusCoupon");
           if (shipStatusEl) shipStatusEl.checked = (o.shippingStatus && String(o.shippingStatus).indexOf("免運") >= 0);
+          var combineEl = document.getElementById("orderCombineShipFree");
+          if (combineEl) {
+            var effShip = orderEffectiveShippingForOrder(o);
+            combineEl.checked = effShip <= 0 && (orderHasCombineShipRemark_(o) || parseLinkedOrderIds_(o.linkedOrderIds).length > 0);
+          }
           document.getElementById("orderRemark").value = o.remark || "";
           document.getElementById("orderDepositRemark").value = o.depositRemark || "";
           var depEl = document.getElementById("orderDepositAmount");
@@ -5403,6 +6896,7 @@
           refreshOrderPointsPanel_(o.pointsProcessed === "Y" || o.pointsProcessed === true);
           updateOrderTotal();
           refreshOrderMemberCardHint_();
+          refreshCombineShipPanel_();
         }
 
         function openOrderModal(editOrder) {
@@ -5427,6 +6921,10 @@
             document.getElementById("orderShippingFee").value = "38";
             var shipStatusEl = document.getElementById("orderShippingStatusCoupon");
             if (shipStatusEl) shipStatusEl.checked = false;
+            var combineElNew = document.getElementById("orderCombineShipFree");
+            if (combineElNew) combineElNew.checked = false;
+            var combineBannerNew = document.getElementById("orderCombineShipBanner");
+            if (combineBannerNew) { combineBannerNew.classList.add("hidden"); combineBannerNew.innerHTML = ""; }
             var cardElNew = document.getElementById("orderMemberCardNo");
             if (cardElNew) cardElNew.value = "";
             document.getElementById("orderCustomerName").value = "";
@@ -5454,6 +6952,7 @@
             updateOrderTotal();
             refreshOrderMemberCardHint_();
           }
+          refreshCombineShipPanel_();
         }
 
         function closeOrderModal() {
@@ -5508,7 +7007,7 @@
           var list = orders.filter(function(ord) {
             if (filterStatus && ord.status !== filterStatus) return false;
             if (searchQ) {
-              var text = (ord.id || "") + (ord.customerName || "") + (ord.phone || "") + (ord.email || "") + (ord.linkedOrderIds || "");
+              var text = (ord.id || "") + orderCustomerName_(ord) + (ord.phone || "") + (ord.email || "") + (ord.linkedOrderIds || "");
               if (text.toLowerCase().indexOf(searchQ) < 0) return false;
             }
             return true;
@@ -5529,7 +7028,7 @@
           }
           orderTableBody.innerHTML = list.map(function(ord) {
             var dateStr = ord.date ? new Date(ord.date).toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
-            var customerNameOnly = (ord.customerName || "").trim() || "—";
+            var customerNameOnly = orderCustomerName_(ord) || "—";
             var customerSub = ord.phone ? ("<span class=\"block text-xs text-slate-500\">" + escapeHtml(ord.phone) + "</span>") : "";
             return "<tr class=\"border-b border-slate-100 hover:bg-slate-50\" data-order-id=\"" + escapeHtml(ord.id) + "\">" +
               "<td class=\"py-3 px-4 font-medium text-slate-800\"><span class=\"font-mono\">" + escapeHtml(ord.id) + "</span>" + renderLinkedOrderBadge_(ord) + "</td>" +
@@ -5544,7 +7043,7 @@
               "<td class=\"py-3 px-4 text-slate-700\">" +
               "<div class=\"flex flex-wrap items-center gap-2\">" +
               "<span>" + escapeHtml(customerNameOnly) + "</span>" +
-              "<button type=\"button\" class=\"order-customer-overview-btn px-2 py-0.5 rounded border border-sky-200 bg-sky-50 text-sky-800 text-[11px] hover:bg-sky-100\" data-customer-name=\"" + escapeHtml(ord.customerName || "") + "\" data-customer-phone=\"" + escapeHtml(ord.phone || "") + "\" data-order-id=\"" + escapeHtml(ord.id) + "\">總覽</button>" +
+              "<button type=\"button\" class=\"order-customer-overview-btn px-2 py-0.5 rounded border border-sky-200 bg-sky-50 text-sky-800 text-[11px] hover:bg-sky-100\" data-customer-name=\"" + escapeHtml(orderCustomerName_(ord)) + "\" data-customer-phone=\"" + escapeHtml(ord.phone || "") + "\" data-order-id=\"" + escapeHtml(ord.id) + "\">總覽</button>" +
               "</div>" + customerSub + "</td>" +
               "<td class=\"py-3 px-4 text-slate-600\">" + escapeHtml(ord.shippingMethod || "-") + "</td>" +
               "<td class=\"py-3 px-4 font-medium text-slate-800\">NT$ " + orderAmountDue(ord) + "</td>" +
@@ -5566,15 +7065,12 @@
                 ord.status = this.value;
                 ord.pointsUsed = ord.pointsUsed != null ? ord.pointsUsed : 0;
                 ord = ensureOrderMemberCardOnOrder_(ord);
-                ord = applyLoyaltyToOrder_(ord, { status: prevStatus, pointsProcessed: prevProcessed });
+                var loyaltyResult = applyLoyaltyToOrder_(ord, { status: prevStatus, pointsProcessed: prevProcessed });
+                ord = loyaltyResult.order;
                 saveOrders();
                 renderOrders();
                 selectEl.disabled = true;
-                upsertOrderToSheet(ord).then(function() {
-                  showOrderMessage("訂單狀態已寫入試算表");
-                }).catch(function(err) {
-                  showOrderMessage("寫入試算表失敗：" + (err.message || "網路錯誤"), true);
-                }).finally(function() {
+                upsertOrderWithPointsSync_(ord, loyaltyResult.pointsChanged, "訂單狀態已寫入").finally(function() {
                   selectEl.disabled = false;
                 });
               }
@@ -5591,12 +7087,27 @@
             btn.addEventListener("click", function() {
               var id = this.closest("tr").getAttribute("data-order-id");
               var name = this.getAttribute("data-name") || "此訂單";
-              if (!confirm("確定要刪除訂單「" + name + "」嗎？")) return;
+              if (!confirm("確定要刪除訂單「" + name + "」嗎？\n\n此訂單編號的紅利發放／折抵紀錄也會一併從本機移除（避免重開同編號時餘額加倍）。")) return;
               orders = orders.filter(function(o) { return o.id !== id; });
+              var ledgerMsg = "";
+              if (window.MaaruLoyalty && typeof MaaruLoyalty.removeLedgerEntriesForOrderId === "function") {
+                var lr = MaaruLoyalty.removeLedgerEntriesForOrderId(MaaruLoyalty.getLedger(), id);
+                if (lr.removed > 0) {
+                  MaaruLoyalty.saveLedger(lr.ledger);
+                  ledgerMsg = "，已移除 " + lr.removed + " 筆紅利紀錄";
+                }
+              }
               saveOrders();
               renderOrders();
               deleteOrderFromSheet(id).then(function() {
-                showOrderMessage("已刪除訂單（試算表已同步）");
+                var syncChain = Promise.resolve();
+                if (ledgerMsg && typeof window.syncPointsLedgerToSheet === "function") {
+                  syncChain = window.syncPointsLedgerToSheet().catch(function() { return null; });
+                }
+                syncChain.then(function() {
+                  showOrderMessage("已刪除訂單（試算表已同步）" + ledgerMsg);
+                  if (typeof window.renderLoyaltyPanel === "function") window.renderLoyaltyPanel();
+                });
               }).catch(function(err) {
                 showOrderMessage("刪除試算表訂單失敗：" + (err.message || "網路錯誤"), true);
               });
@@ -5632,6 +7143,45 @@
           return st;
         }
 
+        function getOrderPdfBaseStyles_() {
+          return "@page{size:A4 portrait;margin:10mm 10mm 22mm 10mm;} " +
+            "*{-webkit-print-color-adjust:exact;print-color-adjust:exact;} " +
+            "body{font-family:'Microsoft JhengHei',sans-serif;padding:10px 10px 26mm 10px;max-width:760px;margin:0 auto;color:#1e293b;font-size:15px;line-height:1.45;} " +
+            ".pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:8px;flex-wrap:nowrap;} " +
+            ".pdf-header-left{flex:1;min-width:200px;} .pdf-header-right{text-align:center;min-width:240px;} " +
+            ".pdf-logo-wrap{margin-bottom:8px;text-align:center;} .pdf-logo{max-width:280px;max-height:120px;width:100%;object-fit:contain;display:block;margin:0 auto;} " +
+            ".pdf-logo-placeholder,.pdf-logo-fallback{width:280px;height:110px;margin:0 auto;border:1px dashed #cbd5e1;border-radius:8px;background:#f8fafc;color:#94a3b8;font-size:14px;display:flex;align-items:center;justify-content:center;} " +
+            ".pdf-dates-box{border:2px solid #64748b;border-radius:6px;padding:8px 12px;display:inline-block;margin:0 auto;} " +
+            ".pdf-date-row{display:flex;align-items:center;margin:6px 0;} .pdf-date-row:first-child{margin-top:0;} .pdf-date-row:last-child{margin-bottom:0;} .pdf-date-row .label{color:#64748b;font-size:15px;flex:0 0 auto;width:4.5em;} .pdf-date-row .value{font-weight:600;font-size:17px;flex:1;min-width:0;text-align:right;} " +
+            "h1{font-size:18px;border-bottom:2px solid #334155;padding-bottom:5px;margin:0 0 6px 0;} h2{font-size:14px;margin:12px 0 6px 0;} .row{margin:5px 0;} .label{color:#64748b;font-size:12px;} .value{margin-top:1px;font-size:15px;} " +
+            ".pdf-title-box{display:block;background:#4b5563;color:#ffffff;border-radius:4px;padding:10px 14px;font-size:22px;font-weight:700;letter-spacing:1px;margin:0 0 10px 0;} " +
+            "table{width:100%;border-collapse:collapse;margin:8px 0;} table th,table td{border:1px solid #e2e8f0;padding:6px;text-align:left;font-size:14px;} table th{background:#f1f5f9;} " +
+            "table.pdf-items-table{page-break-inside:auto;} table.pdf-items-table tr{page-break-inside:avoid;break-inside:avoid;} " +
+            "table.pdf-amount-table,.pdf-amount-block{page-break-inside:avoid;break-inside:avoid;} " +
+            ".pdf-deposit-box{border:2px solid #64748b;border-radius:6px;padding:10px 12px;margin-top:6px;min-height:1.2em;background:#f8fafc;white-space:pre-wrap;font-size:15px;line-height:1.55;page-break-inside:auto;} " +
+            ".pdf-page-deposit{page-break-before:always;break-before:page;padding-top:0;} .pdf-page-deposit h2{page-break-after:avoid;break-after:avoid;} " +
+            ".pdf-page-deposit-inline{margin-top:8px;} " +
+            ".pdf-two-cols{display:flex;gap:12px;margin-top:6px;flex-wrap:nowrap;} .pdf-two-cols .pdf-col{flex:1;min-width:0;} " +
+            ".pdf-page-footer{position:fixed;bottom:6mm;right:12mm;left:auto;font-size:12px;color:#000;z-index:9999;} " +
+            ".pdf-printed-at{text-align:right;white-space:nowrap;} " +
+            ".total{font-size:16px;font-weight:bold;margin-top:12px;}";
+        }
+
+        function orderPdfHasDepositContent_(innerHtml) {
+          if (innerHtml == null) return false;
+          var t = String(innerHtml).replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+          return t !== "" && t !== "—" && t !== "-";
+        }
+
+        function buildOrderPdfFooterHtml_(printedAtStr) {
+          return "<div class=\"pdf-page-footer\"><span class=\"pdf-printed-at\">印單時間：" + escapeHtml(printedAtStr) + "</span></div>";
+        }
+
+        function buildOrderPdfDepositPageHtml_(innerHtml) {
+          var pageCls = orderPdfHasDepositContent_(innerHtml) ? "pdf-page-deposit" : "pdf-page-deposit-inline";
+          return "<div class=\"" + pageCls + "\"><h2>收訂金歷程記錄</h2><div class=\"pdf-deposit-box\">" + innerHtml + "</div></div>";
+        }
+
         function buildOrderPdfHtml_(ord, itemsForPdf, shipmentBatch, options) {
           options = options || {};
           var printedAtStr = new Date().toLocaleString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -5641,7 +7191,7 @@
             var itemsTitle = batchNum != null
               ? "本次出貨商品（出貨第 " + escapeHtml(String(batchNum)) + " 次）"
               : "購買商品";
-            itemsRows = "<h2 style=\"font-size:14px;margin-top:12px;margin-bottom:6px;\">" + itemsTitle + "</h2><table><tr><th>商品名稱／規格</th><th>單價</th><th>數量</th><th>金額</th></tr>";
+            itemsRows = "<h2 style=\"font-size:14px;margin-top:12px;margin-bottom:6px;\">" + itemsTitle + "</h2><table class=\"pdf-items-table\"><tr><th>商品名稱／規格</th><th>單價</th><th>數量</th><th>金額</th></tr>";
             for (var i = 0; i < itemsForPdf.length; i++) {
               var it = itemsForPdf[i];
               var name = (it.lineName != null ? String(it.lineName).trim() : "") || (it.name || "") + (it.variant ? " " + it.variant : "");
@@ -5711,21 +7261,9 @@
           var batchRowHtml = batchNum != null
             ? "<div class=\"row\"><span class=\"label\">出貨批次</span><div class=\"value\">出貨第 " + escapeHtml(String(batchNum)) + " 次</div></div>"
             : "";
+          var depositInner = (ord.depositRemark != null && String(ord.depositRemark).trim() !== "" ? escapeHtml(ord.depositRemark).replace(/\n/g, "<br>") : "—");
           var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>" + escapeHtml(fileNameBase) + "</title>" +
-            "<style>@page{size:A4 portrait;margin:10mm;} *{-webkit-print-color-adjust:exact;print-color-adjust:exact;} body{font-family:'Microsoft JhengHei',sans-serif;padding:10px;max-width:760px;margin:0 auto;color:#1e293b;font-size:15px;line-height:1.45;} " +
-            ".pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:8px;flex-wrap:nowrap;} " +
-            ".pdf-header-left{flex:1;min-width:200px;} .pdf-header-right{text-align:center;min-width:240px;} " +
-            ".pdf-logo-wrap{margin-bottom:8px;text-align:center;} .pdf-logo{max-width:280px;max-height:120px;width:100%;object-fit:contain;display:block;margin:0 auto;} " +
-            ".pdf-logo-placeholder,.pdf-logo-fallback{width:280px;height:110px;margin:0 auto;border:1px dashed #cbd5e1;border-radius:8px;background:#f8fafc;color:#94a3b8;font-size:14px;display:flex;align-items:center;justify-content:center;} " +
-            ".pdf-dates-box{border:2px solid #64748b;border-radius:6px;padding:8px 12px;display:inline-block;margin:0 auto;} " +
-            ".pdf-dates{font-size:17px;} .pdf-date-row{display:flex;align-items:center;margin:6px 0;} .pdf-date-row:first-child{margin-top:0;} .pdf-date-row:last-child{margin-bottom:0;} .pdf-date-row .label{color:#64748b;font-size:15px;flex:0 0 auto;width:4.5em;} .pdf-date-row .value{font-weight:600;font-size:17px;flex:1;min-width:0;text-align:right;} " +
-            "h1{font-size:18px;border-bottom:2px solid #334155;padding-bottom:5px;margin:0 0 6px 0;} h2{font-size:14px;margin:12px 0 6px 0;} .row{margin:5px 0;} .label{color:#64748b;font-size:12px;} .value{margin-top:1px;font-size:15px;} " +
-            ".pdf-title-box{display:block;background:#4b5563;color:#ffffff;border-radius:4px;padding:10px 14px;font-size:22px;font-weight:700;letter-spacing:1px;margin:0 0 10px 0;} " +
-            "table{width:100%;border-collapse:collapse;margin:8px 0;page-break-inside:avoid;} th,td{border:1px solid #e2e8f0;padding:6px;text-align:left;font-size:14px;} th{background:#f1f5f9;} " +
-            ".pdf-deposit-box{border:2px solid #64748b;border-radius:6px;padding:8px 10px;margin-top:6px;min-height:1.2em;background:#f8fafc;white-space:pre-wrap;font-size:15px;line-height:1.5;} " +
-            ".pdf-two-cols{display:flex;gap:12px;margin-top:6px;flex-wrap:nowrap;} .pdf-two-cols .pdf-col{flex:1;min-width:0;} " +
-            ".pdf-printed-at{position:fixed;right:12mm;bottom:8mm;color:#000000;font-size:12px;background:#ffffff;padding:2px 6px;border-radius:4px;} " +
-            ".total{font-size:16px;font-weight:bold;margin-top:12px;}</style></head><body>" +
+            "<style>" + getOrderPdfBaseStyles_() + "</style></head><body>" +
             "<div class=\"pdf-header\"><div class=\"pdf-header-left\">" +
             "<div class=\"pdf-title-box\">訂單明細</div>" +
             "<div class=\"row\"><span class=\"label\">訂單編號</span><div class=\"value\">" + escapeHtml(ord.id) + "</div></div>" +
@@ -5740,8 +7278,8 @@
             "<div class=\"row\"><span class=\"label\">地址</span><div class=\"value\">" + escapeHtml(ord.address || "") + "</div></div></div>" +
             "</div>" +
             itemsRows +
-            "<h2>金額</h2>" +
-            "<table><tr><th>項目</th><th>金額</th></tr>" +
+            "<div class=\"pdf-amount-block\"><h2>金額</h2>" +
+            "<table class=\"pdf-amount-table\"><tr><th>項目</th><th>金額</th></tr>" +
             "<tr><td>商品小計</td><td>NT$ " + (ord.subtotal != null ? ord.subtotal : 0) + "</td></tr>" +
             "<tr><td>折扣</td><td>- NT$ " + (ord.discount != null ? ord.discount : 0) + "</td></tr>" +
             pdfPointsRows +
@@ -5749,11 +7287,219 @@
             ((ord.shippingStatus != null && String(ord.shippingStatus).trim() !== "") ? "<tr><td>運費折抵</td><td>- NT$ " + (ord.shippingFee != null ? ord.shippingFee : 38) + "（" + escapeHtml(String(ord.shippingStatus).trim()) + "）</td></tr>" : "") +
             pdfAmountCloseRows +
             (showRemark ? "<div class=\"row\"><span class=\"label\">備註</span><div class=\"value\">" + escapeHtml(displayRemark) + "</div></div>" : "") +
-            "<h2>收訂金歷程記錄</h2>" +
-            "<div class=\"pdf-deposit-box\">" + (ord.depositRemark != null && String(ord.depositRemark).trim() !== "" ? escapeHtml(ord.depositRemark).replace(/\n/g, "<br>") : "—") + "</div>" +
-            "<div class=\"pdf-printed-at\">印單時間：" + escapeHtml(printedAtStr) + "</div>" +
+            "</div>" +
+            buildOrderPdfDepositPageHtml_(depositInner) +
+            buildOrderPdfFooterHtml_(printedAtStr) +
             "</body></html>";
           return { html: html, fileNameBase: fileNameBase };
+        }
+
+        function buildCombineShipPdfFileName_(masterOrd, orderGroup, shipmentBatch) {
+          var fileDate = new Date().toISOString().slice(0, 10);
+          var custPart = (masterOrd.customerName && String(masterOrd.customerName).trim() !== "") ? String(masterOrd.customerName).trim() : (masterOrd.lineId || masterOrd.id);
+          var ids = (orderGroup || []).map(function(o) { return normalizeOrderIdToken_(o.id); }).filter(Boolean);
+          var idPart = ids.length > 1 ? (normalizeOrderIdToken_(masterOrd.id) + "_併箱" + ids.filter(function(id) { return id !== normalizeOrderIdToken_(masterOrd.id); }).join("_")) : normalizeOrderIdToken_(masterOrd.id);
+          if (shipmentBatch != null) {
+            return sanitizePdfFileName_(idPart + "_" + custPart + "_出貨" + shipmentBatch + "_" + fileDate);
+          }
+          return sanitizePdfFileName_(idPart + "_" + custPart + "_" + fileDate);
+        }
+
+        function buildCombineShipPdfHtml_(orderGroup, masterOrd, itemsByOrder, shipmentBatch, options) {
+          options = options || {};
+          var printedAtStr = new Date().toLocaleString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+          var batchNum = shipmentBatch != null ? shipmentBatch : null;
+          var ids = (orderGroup || []).map(function(o) { return normalizeOrderIdToken_(o.id); }).filter(Boolean);
+          var masterId = normalizeOrderIdToken_(masterOrd && masterOrd.id);
+          var slaveIds = ids.filter(function(id) { return id !== masterId; });
+          var orderIdLabel = slaveIds.length
+            ? (masterId + "（併箱：" + slaveIds.join("、") + "）")
+            : ids.join("、");
+          var itemsRows = "";
+          if (itemsByOrder && itemsByOrder.length > 0) {
+            itemsRows = "<h2 style=\"font-size:14px;margin-top:12px;margin-bottom:6px;\">" +
+              (batchNum != null ? ("本次出貨商品（出貨第 " + escapeHtml(String(batchNum)) + " 次 · 併箱）") : "本次出貨商品（併箱）") +
+              "</h2>";
+            itemsByOrder.forEach(function(entry) {
+              var oid = normalizeOrderIdToken_(entry.ord && entry.ord.id);
+              itemsRows += "<h3 style=\"font-size:13px;margin:10px 0 4px;color:#475569;\">" + escapeHtml(oid) + "</h3>";
+              itemsRows += "<table class=\"pdf-items-table\"><tr><th>商品名稱／規格</th><th>單價</th><th>數量</th><th>金額</th></tr>";
+              (entry.items || []).forEach(function(it) {
+                var name = (it.lineName != null ? String(it.lineName).trim() : "") || (it.name || "") + (it.variant ? " " + it.variant : "");
+                var qty = (it.qty != null && !isNaN(it.qty)) ? Number(it.qty) : 0;
+                var priceNum = (it.price != null && it.price !== "" && !isNaN(Number(it.price))) ? Number(it.price) : null;
+                var priceCell = priceNum !== null ? "NT$ " + (Number.isInteger(priceNum) ? priceNum : Math.round(priceNum)) : "—";
+                var lineTotal = (priceNum !== null && qty > 0) ? (priceNum * qty) : null;
+                var lineTotalCell = lineTotal !== null ? "NT$ " + (Number.isInteger(lineTotal) ? lineTotal : Math.round(lineTotal)) : "—";
+                itemsRows += "<tr><td>" + escapeHtml(name || "—") + "</td><td>" + escapeHtml(priceCell) + "</td><td>" + escapeHtml(String(qty)) + "</td><td>" + escapeHtml(lineTotalCell) + "</td></tr>";
+              });
+              itemsRows += "</table>";
+            });
+          }
+          var sumSubtotal = 0;
+          var sumDiscount = 0;
+          var sumPointsUsed = 0;
+          var sumPointsDiscount = 0;
+          var sumPointsEarned = 0;
+          var sumDue = 0;
+          var sumDeposit = 0;
+          var subtotalRows = "";
+          (orderGroup || []).forEach(function(o) {
+            var oid = normalizeOrderIdToken_(o.id);
+            var sub = Number(o.subtotal) || 0;
+            var disc = Number(o.discount) || 0;
+            var ptsUsed = Math.floor(Number(o.pointsUsed) || 0);
+            var ptsDisc = ptsUsed > 0 ? orderPointsDiscountForOrder(o) : 0;
+            if (ptsUsed > 0 && ptsDisc <= 0) ptsDisc = ptsUsed;
+            var dep = o.depositAmount != null && o.depositAmount !== "" ? Number(o.depositAmount) : 0;
+            if (isNaN(dep) || dep < 0) dep = 0;
+            sumSubtotal += sub;
+            sumDiscount += disc;
+            sumPointsUsed += ptsUsed;
+            sumPointsDiscount += ptsDisc;
+            sumPointsEarned += Math.floor(Number(o.pointsEarned) || 0);
+            sumDue += orderAmountDue(o);
+            sumDeposit += dep;
+            if (orderGroup.length > 1) {
+              subtotalRows += "<tr><td>商品小計（" + escapeHtml(oid) + "）</td><td>NT$ " + sub + "</td></tr>";
+            }
+          });
+          var masterShip = orderEffectiveShippingForOrder(masterOrd);
+          var shipLabel = "運費（併箱出貨，僅收一次）";
+          var shipCell = "NT$ " + masterShip;
+          if (masterOrd.shippingStatus && String(masterOrd.shippingStatus).indexOf("免運") >= 0) {
+            shipCell = "NT$ 0（" + escapeHtml(String(masterOrd.shippingStatus).trim()) + "）";
+          }
+          var pdfPointsRows = "";
+          if (sumPointsUsed > 0) {
+            pdfPointsRows += "<tr><td>紅利折抵合計（" + sumPointsUsed + " 點）</td><td>- NT$ " + sumPointsDiscount + "</td></tr>";
+          }
+          if (sumPointsEarned > 0) {
+            pdfPointsRows += "<tr><td>本次獲得紅利（合計）</td><td>" + sumPointsEarned + " 點</td></tr>";
+          }
+          var pdfAmountCloseRows = "";
+          if (sumDeposit > 0) {
+            pdfAmountCloseRows += "<tr><td>預購訂金合計（已付）</td><td>- NT$ " + sumDeposit + "</td></tr>";
+          }
+          pdfAmountCloseRows += "<tr><td><strong>待結清總金額（合計）</strong></td><td><strong>NT$ " + sumDue + "</strong></td></tr></table>";
+          var pdfLogoUrl = "";
+          try { pdfLogoUrl = (localStorage.getItem("maaru_admin_pdf_logo") || "").trim(); } catch (e) {}
+          var preorderStr = (masterOrd.preorderDate != null && String(masterOrd.preorderDate).trim() !== "") ? String(masterOrd.preorderDate).trim() : "";
+          var shipStr = (masterOrd.shipDate != null && String(masterOrd.shipDate).trim() !== "") ? String(masterOrd.shipDate).trim() : "";
+          var headerRight = "<div class=\"pdf-logo-wrap\">";
+          if (pdfLogoUrl) {
+            var safeLogoUrl = String(pdfLogoUrl).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            headerRight += "<div class=\"pdf-logo-fallback\" style=\"display:none;\">品牌 Logo</div><img src=\"" + safeLogoUrl + "\" alt=\"Logo\" class=\"pdf-logo\" onerror=\"this.style.display=\\'none\\';var s=this.previousElementSibling;if(s)s.style.display=\\'flex\\';\" />";
+          } else {
+            headerRight += "<div class=\"pdf-logo-placeholder\">品牌 Logo</div>";
+          }
+          headerRight += "</div>";
+          headerRight += "<div class=\"pdf-dates-box\"><div class=\"pdf-date-row\"><span class=\"label\">預購日期</span><span class=\"value\">" + escapeHtml(preorderStr || "—") + "</span></div>";
+          headerRight += "<div class=\"pdf-date-row\"><span class=\"label\">出貨日期</span><span class=\"value\">" + escapeHtml(shipStr || "—") + "</span></div></div>";
+          var fileNameBase = options.fileNameBase || buildCombineShipPdfFileName_(masterOrd, orderGroup, shipmentBatch);
+          var batchRowHtml = batchNum != null
+            ? "<div class=\"row\"><span class=\"label\">出貨批次</span><div class=\"value\">出貨第 " + escapeHtml(String(batchNum)) + " 次（併箱）</div></div>"
+            : "";
+          var depositBlocks = (orderGroup || []).map(function(o) {
+            var dr = o.depositRemark != null ? String(o.depositRemark).trim() : "";
+            if (!dr) return "";
+            return "<div class=\"row\" style=\"margin-top:4px;\"><span class=\"label\">" + escapeHtml(normalizeOrderIdToken_(o.id)) + "</span><div class=\"value\">" + escapeHtml(dr).replace(/\n/g, "<br>") + "</div></div>";
+          }).filter(Boolean).join("");
+          var depositInnerCombine = depositBlocks || "—";
+          var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>" + escapeHtml(fileNameBase) + "</title>" +
+            "<style>" + getOrderPdfBaseStyles_() + "</style></head><body>" +
+            "<div class=\"pdf-header\"><div class=\"pdf-header-left\">" +
+            "<div class=\"pdf-title-box\">訂單明細（併箱出貨）</div>" +
+            "<div class=\"row\"><span class=\"label\">訂單編號</span><div class=\"value\">" + escapeHtml(orderIdLabel) + "</div></div>" +
+            "<div class=\"row\"><span class=\"label\">狀態</span><div class=\"value\">" + escapeHtml(masterOrd.status || "待處理") + "</div></div>" +
+            batchRowHtml +
+            "</div><div class=\"pdf-header-right\">" + headerRight + "</div></div>" +
+            "<h2>客戶資訊 / 運送方式</h2>" +
+            "<div class=\"pdf-two-cols\">" +
+            "<div class=\"pdf-col\"><div class=\"row\"><span class=\"label\">姓名</span><div class=\"value\">" + escapeHtml(masterOrd.customerName || "") + "</div></div></div>" +
+            "<div class=\"pdf-col\"><div class=\"row\"><span class=\"label\">方式</span><div class=\"value\">" + escapeHtml(masterOrd.shippingMethod || "") + "</div></div>" +
+            (masterOrd.storeName || masterOrd.storeId ? "<div class=\"row\"><span class=\"label\">門市</span><div class=\"value\">" + escapeHtml((masterOrd.storeName || "") + (masterOrd.storeId ? " (" + masterOrd.storeId + ")" : "")) + "</div></div>" : "") +
+            "<div class=\"row\"><span class=\"label\">地址</span><div class=\"value\">" + escapeHtml(masterOrd.address || "") + "</div></div></div>" +
+            "</div>" +
+            itemsRows +
+            "<div class=\"pdf-amount-block\"><h2>金額（併箱合計）</h2>" +
+            "<table class=\"pdf-amount-table\"><tr><th>項目</th><th>金額</th></tr>" +
+            subtotalRows +
+            (orderGroup.length > 1 ? ("<tr><td><strong>商品小計合計</strong></td><td><strong>NT$ " + sumSubtotal + "</strong></td></tr>") : ("<tr><td>商品小計</td><td>NT$ " + sumSubtotal + "</td></tr>")) +
+            "<tr><td>折扣合計</td><td>- NT$ " + sumDiscount + "</td></tr>" +
+            pdfPointsRows +
+            "<tr><td>" + shipLabel + "</td><td>" + shipCell + "</td></tr>" +
+            pdfAmountCloseRows +
+            "</div>" +
+            buildOrderPdfDepositPageHtml_(depositInnerCombine) +
+            buildOrderPdfFooterHtml_(printedAtStr) +
+            "</body></html>";
+          return { html: html, fileNameBase: fileNameBase };
+        }
+
+        function runCombineShipPdf_(triggerOrd, orderGroup, itemsByOrder) {
+          if (!triggerOrd || !itemsByOrder || !itemsByOrder.length) {
+            showOrderMessage("沒有可合併的待出貨品項", true);
+            return;
+          }
+          var masterId = pickCombineShipMasterId_(orderGroup);
+          var masterOrd = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === masterId; }) || triggerOrd;
+          var maxBatch = 0;
+          itemsByOrder.forEach(function(entry) {
+            (entry.itemsAll || []).forEach(function(it) {
+              var b = it && it.shipBatch != null && !isNaN(Number(it.shipBatch)) ? parseInt(Number(it.shipBatch), 10) : null;
+              if (b != null && isFinite(b) && b > maxBatch) maxBatch = b;
+            });
+          });
+          var shipmentBatch = maxBatch + 1;
+          var fileNameBase = buildCombineShipPdfFileName_(masterOrd, orderGroup, shipmentBatch);
+          var built = buildCombineShipPdfHtml_(orderGroup, masterOrd, itemsByOrder, shipmentBatch, { fileNameBase: fileNameBase });
+          try {
+            var opened = openOrderPdfPrintWindow_(built.html);
+            if (!opened) {
+              alert("無法開啟列印視窗。請在瀏覽器允許此網站的「彈出視窗」後，再按一次。");
+              showOrderMessage("請允許彈出視窗後再產生 PDF", true);
+              return;
+            }
+          } catch (err) {
+            alert("產生 PDF 失敗：" + (err && err.message ? err.message : "未知錯誤"));
+            showOrderMessage("產生 PDF 失敗", true);
+            return;
+          }
+          var prevShip = [];
+          var touchedOrders = [];
+          itemsByOrder.forEach(function(entry) {
+            var ord = orders.find(function(o) { return normalizeOrderIdToken_(o.id) === normalizeOrderIdToken_(entry.ord && entry.ord.id); });
+            if (!ord) return;
+            touchedOrders.push(ord);
+            (entry.items || []).forEach(function(it) {
+              prevShip.push({ ref: it, shipStatus: it.shipStatus, shipBatch: it.shipBatch });
+              it.shipStatus = "已出貨";
+              it.shipBatch = shipmentBatch;
+            });
+          });
+          saveOrders();
+          var chain = Promise.resolve();
+          touchedOrders.forEach(function(ord) {
+            chain = chain.then(function() {
+              return upsertOrderToSheet(ord).catch(function() { return null; });
+            });
+          });
+          chain.then(function() {
+            renderOrders();
+            var idList = orderGroup.map(function(o) { return normalizeOrderIdToken_(o.id); }).join("、");
+            showOrderMessage("已產生併箱 PDF（" + idList + "，出貨第 " + shipmentBatch + " 次）");
+          }).catch(function(err) {
+            prevShip.forEach(function(x) {
+              if (x && x.ref) {
+                x.ref.shipStatus = x.shipStatus;
+                x.ref.shipBatch = x.shipBatch;
+              }
+            });
+            saveOrders();
+            renderOrders();
+            showOrderMessage("PDF 已開啟，但寫入試算表失敗：" + (err && err.message ? err.message : "網路錯誤"), true);
+          });
         }
 
         function sanitizePdfFileName_(s) {
@@ -5787,6 +7533,24 @@
 
         function generateOrderPdf(ord) {
           if (!ord) return;
+          var pdfGroup = resolveCombineShipPdfOrders_(ord).filter(function(o) { return o.status !== "已取消"; });
+          if (pdfGroup.length > 1) {
+            var pendingCombine = collectCombineShipPendingItems_(pdfGroup);
+            if (pendingCombine.length > 0) {
+              var idList = pdfGroup.map(function(o) { return normalizeOrderIdToken_(o.id); }).join("、");
+              if (confirm(
+                "此訂單與其他訂單已設定併箱關聯：\n" + idList + "\n\n" +
+                "是否產生「併箱 PDF」？\n" +
+                "· 合併所有「待出貨」品項\n" +
+                "· 金額加總，運費只列 1 次\n" +
+                "· 各單品項會標記為已出貨\n\n" +
+                "按「取消」則只產生本單 PDF。"
+              )) {
+                runCombineShipPdf_(ord, pdfGroup, pendingCombine);
+                return;
+              }
+            }
+          }
           var itemsAll = normalizeOrderItems_(ord.items || []);
           var hasItemList = itemsAll.length > 0;
           var itemsToShip = hasItemList ? itemsAll.filter(function(it) { return getOrderItemShipStatus_(it) === "待出貨"; }) : [];
@@ -6032,6 +7796,7 @@
               if (subEl2) subEl2.value = String(parsed.subtotal || 0);
               if (remarkEl2) remarkEl2.value = parsed.remark || "";
               updateOrderTotal();
+              refreshCombineShipPanel_();
               showOrderMessage("已解析 " + (parsed.itemsCount || 0) + " 筆商品，已帶入小計與備註");
             }, 50);
           });
@@ -6052,8 +7817,37 @@
         }
         ["orderCustomerName", "orderPhone"].forEach(function(id) {
           var el = document.getElementById(id);
-          if (el) el.addEventListener("input", refreshOrderMemberCardHint_);
+          if (el) {
+            el.addEventListener("input", refreshOrderMemberCardHint_);
+            el.addEventListener("blur", refreshCombineShipPanel_);
+          }
         });
+        var orderCombineShipFreeEl = document.getElementById("orderCombineShipFree");
+        if (orderCombineShipFreeEl) {
+          orderCombineShipFreeEl.addEventListener("change", function() {
+            if (combineShipUncheckGuard_) return;
+            if (this.checked) {
+              var customerName = (document.getElementById("orderCustomerName") && document.getElementById("orderCustomerName").value) || "";
+              var phone = (document.getElementById("orderPhone") && document.getElementById("orderPhone").value) || "";
+              var editId = (document.getElementById("orderForm") && document.getElementById("orderForm").getAttribute("data-edit-id")) || "";
+              var selfId = normalizeOrderIdToken_((document.getElementById("orderId") && document.getElementById("orderId").value) || editId);
+              var others = getActiveCustomerOrders_(customerName, phone, selfId).filter(function(o) { return o.status !== "已完成"; });
+              var masterId = pickCombineShipMasterId_(others);
+              if (!masterId && others.length) masterId = normalizeOrderIdToken_(others[0].id);
+              if (masterId) applyCombineShipFreeToForm_(masterId, others);
+              else {
+                var feeEl = document.getElementById("orderShippingFee");
+                if (feeEl) feeEl.value = "0";
+                var couponEl = document.getElementById("orderShippingStatusCoupon");
+                if (couponEl) couponEl.checked = false;
+                updateOrderTotal();
+                refreshCombineShipPanel_();
+              }
+            } else {
+              handleCombineShipUnchecked_(this);
+            }
+          });
+        }
         var btnGenMemberCard = document.getElementById("btnGenerateMemberCard");
         if (btnGenMemberCard) {
           btnGenMemberCard.addEventListener("click", function() {
@@ -6181,20 +7975,32 @@
               ord.shipDate = data.shipDate;
               ord.linkedOrderIds = data.linkedOrderIds || "";
               ord.items = normalizeOrderItems_(orderItemsState).filter(function(it) { return String(it.lineName || "").trim() !== ""; });
-              ord = applyLoyaltyToOrder_(ord, null);
+              var loyaltyResult = applyLoyaltyToOrder_(ord, null);
+              ord = loyaltyResult.order;
               saveOrders();
               renderOrders();
               closeOrderModal();
               showOrderMessage("訂單已更新（含 " + ord.items.length + " 筆品項）");
-              upsertOrderToSheet(ord).then(function() {
-                showOrderMessage("訂單已更新（試算表已同步）");
-              }).catch(function(err) {
-                showOrderMessage("寫入試算表失敗：" + (err.message || "網路錯誤"), true);
-              }).finally(function() {
+              upsertOrderWithPointsSync_(ord, loyaltyResult.pointsChanged, "訂單已更新（試算表已同步）").finally(function() {
                 if (submitBtn) submitBtn.disabled = false;
               });
             }
           } else {
+            var selfIdDraft = normalizeOrderIdToken_((document.getElementById("orderId") && document.getElementById("orderId").value) || "");
+            var othersNew = getActiveCustomerOrders_(data.customerName, data.phone, selfIdDraft).filter(function(o) { return o.status !== "已完成"; });
+            var combineCheckEl = document.getElementById("orderCombineShipFree");
+            var shippingEff = data.shippingStatus ? 0 : (Number(data.shippingFee) || 0);
+            if (othersNew.length > 0 && !(combineCheckEl && combineCheckEl.checked) && shippingEff > 0) {
+              var masterForPrompt = pickCombineShipMasterId_(othersNew);
+              if (confirm(
+                "此客戶已有 " + othersNew.length + " 筆訂單。\n\n若併箱一起寄，通常只收一次運費（NT$" + DEFAULT_COMBINE_SHIP_FEE + "）。\n\n" +
+                "按「確定」＝本單改併箱免運（運費 0" + (masterForPrompt ? "，併入 " + masterForPrompt : "") + "）\n" +
+                "按「取消」＝維持本單運費 NT$" + shippingEff
+              )) {
+                applyCombineShipFreeToForm_(masterForPrompt, othersNew);
+                data = getOrderFromForm();
+              }
+            }
             var orderIdInput = (document.getElementById("orderId") && document.getElementById("orderId").value) ? document.getElementById("orderId").value.trim() : "";
             var newId = orderIdInput || getNextOrderId();
             if (/^\d+$/.test(newId)) newId = "ORD" + ("00000" + newId).slice(-5);
@@ -6301,7 +8107,9 @@
           btnSaveOrders.addEventListener("click", function() { loadOrdersFromSheet(); });
         }
         if (window.location.protocol === "file:") {
-          showOrderMessage("目前為 file:// 模式，系統會自動嘗試直連/代理 API。", false);
+          showOrderMessage("file:// 無法同步試算表。請執行 start.bat，改用 http://localhost:3000/admin.html", true);
+        } else {
+          checkApiConnectivity_();
         }
         if (btnOrderSearch) btnOrderSearch.addEventListener("click", function() { renderOrders(); });
         if (orderSearchInput) orderSearchInput.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); renderOrders(); } });
@@ -6312,10 +8120,22 @@
         if (customerOverviewBackdrop) customerOverviewBackdrop.addEventListener("click", closeCustomerOverviewModal_);
         var btnOrderLinkSuggest = document.getElementById("btnOrderLinkSuggest");
         if (btnOrderLinkSuggest) btnOrderLinkSuggest.addEventListener("click", suggestLinkedOrdersForCurrentForm_);
+        if (typeof window.init711StorePicker === "function") {
+          window.init711StorePicker({
+            shippingMethodEl: document.getElementById("orderShippingMethod"),
+            storeNameEl: document.getElementById("orderStoreName"),
+            storeIdEl: document.getElementById("orderStoreId"),
+            addressEl: document.getElementById("orderAddress"),
+            notify: showOrderMessage
+          });
+        }
         renderOrders();
         processPendingLoyaltyOrders_(true);
         if (!ORDER_LOCAL_ONLY) {
-          loadOrdersFromSheet().catch(function() {
+          verifyShopApiBinding_().then(function(ok) {
+            if (!ok) return;
+            return loadOrdersFromSheet();
+          }).catch(function() {}).finally(function() {
             processPendingLoyaltyOrders_(true);
           });
         }
