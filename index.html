@@ -699,7 +699,7 @@
 
     .mode-tabs {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin-bottom: 14px;
     }
@@ -729,11 +729,6 @@
     #tabCard.is-active {
       background: linear-gradient(135deg, var(--jp-matcha) 0%, var(--jp-matcha-deep) 100%);
       box-shadow: 0 4px 12px rgba(95, 133, 116, 0.25);
-    }
-
-    #tabPoints.is-active {
-      background: linear-gradient(135deg, var(--jp-amber) 0%, var(--jp-amber-deep) 100%);
-      box-shadow: 0 4px 12px rgba(196, 137, 47, 0.28);
     }
 
     .mode-panel { display: block; }
@@ -991,6 +986,10 @@
       max-width: 960px;
     }
 
+    .container.has-member-result {
+      max-width: 560px;
+    }
+
     .btn-search:disabled {
       opacity: 0.65;
       cursor: wait;
@@ -1033,11 +1032,39 @@
       background: linear-gradient(180deg, rgba(125, 157, 140, 0.08) 0%, #fff 100%);
     }
 
+    .member-result-head {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--jp-border);
+    }
+
+    .member-result-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--jp-matcha-deep);
+      text-transform: uppercase;
+    }
+
+    .member-result-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .member-result-card .order-list-id {
+      font-size: 15px;
+    }
+
     .card-summary-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .card-summary-item {
@@ -1082,6 +1109,23 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+    }
+
+    @media (min-width: 520px) {
+      .order-list-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .order-list-filters {
+        flex: 1 1 auto;
+      }
+
+      .order-list-search {
+        flex: 0 1 220px;
+        min-width: 160px;
+      }
     }
 
     .order-list-filters {
@@ -1865,12 +1909,12 @@
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
-          <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">
-            會員卡號
-            <span class="card-no-row">
+          <div class="member-result-head">
+            <div class="member-result-label">會員卡號</div>
+            <div class="member-result-card">
               <span id="rCardNo" class="order-list-id"></span>
               <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
-            </span>
+            </div>
           </div>
           <div class="card-summary-grid">
             <div class="card-summary-item">
@@ -2311,13 +2355,14 @@
     if (isCard) {
       pageTitle.innerText = "會員中心";
       pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢過往交易訂單與配送進度</span>';
-      container.classList.toggle(
-        "has-wide-result",
-        cachedCardOrders.length > 0 || document.getElementById("cardResultBox").style.display !== "none"
-      );
+      const hasMemberResult = cachedCardOrders.length > 0
+        || document.getElementById("cardResultBox").style.display !== "none";
+      container.classList.remove("has-wide-result");
+      container.classList.toggle("has-member-result", hasMemberResult);
     } else {
       pageTitle.innerText = "訂單查詢";
       pageSub.innerHTML = '<span class="page-sub-key">輸入訂單編號</span><span class="page-sub-desc"> 讀取試算表「工作表1」配送進度與商品狀態</span>';
+      container.classList.remove("has-member-result");
       container.classList.remove("has-wide-result");
     }
 
@@ -2352,6 +2397,7 @@
     document.getElementById("resultBox").style.display = "block";
     document.getElementById("errorBox").style.display = "none";
     document.getElementById("resultBackWrap").style.display = opts.showBack ? "block" : "none";
+    document.querySelector(".container").classList.remove("has-member-result");
     document.querySelector(".container").classList.add("has-wide-result");
   }
 
@@ -2641,6 +2687,7 @@
 
     resultBox.style.display = "none";
     errorBox.style.display = "none";
+    document.querySelector(".container").classList.remove("has-member-result");
 
     if (!isValidMemberCardNo(card)) {
       errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（純數字）";
@@ -2688,7 +2735,7 @@
         errorBox.innerText = "⚠ " + hint + "。請確認後台已「同步試算表」，且 " + colHint + " 為 13 碼（建議前加 '）。";
         errorBox.style.display = "block";
         resultBox.style.display = "none";
-        document.querySelector(".container").classList.remove("has-wide-result");
+        document.querySelector(".container").classList.remove("has-member-result");
         return;
       }
 
@@ -2699,7 +2746,8 @@
       history.replaceState(null, "", "?" + params.toString());
 
       resultBox.style.display = "block";
-      document.querySelector(".container").classList.add("has-wide-result");
+      document.querySelector(".container").classList.remove("has-wide-result");
+      document.querySelector(".container").classList.add("has-member-result");
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "查詢失敗";
       if (/至少.*姓名|客戶姓名/.test(msg)) {
