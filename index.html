@@ -1291,10 +1291,189 @@
 
     .points-summary {
       margin-top: 18px;
-      padding: 16px;
+      padding: 0;
       border-radius: var(--jp-radius);
-      border: 1px solid rgba(228, 181, 106, 0.45);
-      background: linear-gradient(180deg, var(--jp-amber-soft) 0%, #fff 100%);
+      border: 1px solid rgba(228, 181, 106, 0.35);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .points-summary-inner {
+      padding: 16px 16px 0;
+    }
+
+    .pt-subtabs {
+      display: flex;
+      border-bottom: 1px solid #ece7e1;
+      margin-top: 14px;
+      background: #fff;
+    }
+
+    .pt-subtab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 14px 10px 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #b0a89e;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .pt-subtab.is-active {
+      color: #3f3a36;
+      border-bottom-color: #3f3a36;
+    }
+
+    .pt-subpanel {
+      background: #f3f0eb;
+      min-height: 120px;
+    }
+
+    .pt-subpanel.is-hidden {
+      display: none;
+    }
+
+    .pt-ledger-list,
+    .pt-lots-list {
+      max-height: min(62vh, 520px);
+      overflow-y: auto;
+    }
+
+    .pt-ledger-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ece7e1;
+      background: #fff;
+      text-align: left;
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .pt-ledger-item:hover {
+      background: #faf8f5;
+    }
+
+    .pt-ledger-item.is-static {
+      cursor: default;
+    }
+
+    .pt-ledger-item.is-static:hover {
+      background: #fff;
+    }
+
+    .pt-ledger-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pt-ledger-top-date {
+      font-size: 12px;
+      color: #9a9288;
+      margin-bottom: 6px;
+    }
+
+    .pt-ledger-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #3f3a36;
+      line-height: 1.35;
+    }
+
+    .pt-ledger-order,
+    .pt-ledger-note {
+      font-size: 13px;
+      color: #6f6a63;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .pt-ledger-sub {
+      font-size: 12px;
+      color: #9a9288;
+      margin-top: 3px;
+    }
+
+    .pt-ledger-amt {
+      font-size: 20px;
+      font-weight: 700;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .pt-ledger-amt.positive {
+      color: #3f3a36;
+    }
+
+    .pt-ledger-amt.negative {
+      color: #e04545;
+    }
+
+    .pt-ledger-chevron {
+      color: #5b9bd5;
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      padding-left: 2px;
+    }
+
+    .pt-lot-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid #ece7e1;
+      background: #fff;
+    }
+
+    .pt-lot-main {
+      min-width: 0;
+    }
+
+    .pt-lot-label {
+      font-size: 12px;
+      color: #9a9288;
+    }
+
+    .pt-lot-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: #3f3a36;
+      margin-top: 4px;
+    }
+
+    .pt-lot-expire {
+      font-size: 12px;
+      color: #6f6a63;
+      margin-top: 2px;
+    }
+
+    .pt-lot-remain {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--jp-amber-deep);
+      white-space: nowrap;
+    }
+
+    .pt-empty {
+      padding: 28px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--jp-ink-soft);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    .points-summary-footer {
+      padding: 12px 16px 16px;
+      background: linear-gradient(180deg, #fff 0%, var(--jp-amber-soft) 100%);
     }
 
     .points-hero {
@@ -1746,55 +1925,46 @@
         </div>
 
         <div class="points-summary" id="pointsResultBox" style="display:none;">
-          <div class="points-hero">
-            <div class="points-hero-label">可用紅利點數</div>
-            <div class="points-hero-value" id="rPointsBalance">0</div>
-            <div class="points-hero-sub" id="rPointsDiscount">可折抵 NT$0</div>
+          <div class="points-summary-inner">
+            <div class="points-meta">
+              <span class="card-no-row">
+                會員卡號 <span id="rPointsCardNo" class="order-list-id"></span>
+                <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultPoints" title="複製 13 碼卡號">複製</button>
+              </span>
+              <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
+            </div>
+
+            <div class="pt-subtabs" role="tablist" aria-label="紅利檢視">
+              <button type="button" id="ptTabHistory" class="pt-subtab is-active" role="tab" aria-selected="true">點數紀錄</button>
+              <button type="button" id="ptTabAvailable" class="pt-subtab" role="tab" aria-selected="false">可用點數</button>
+            </div>
           </div>
-          <div class="points-meta">
-            <span class="card-no-row">
-              會員卡號 <span id="rPointsCardNo" class="order-list-id"></span>
-              <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultPoints" title="複製 13 碼卡號">複製</button>
-            </span>
-            <span class="points-expire-warn" id="rPointsExpire" style="display:none;"></span>
+
+          <div id="ptPanelHistory" class="pt-subpanel" role="tabpanel">
+            <div class="pt-ledger-list" id="ptHistoryList"></div>
+            <div class="pt-empty" id="pointsEmptyHistory" style="display:none;">目前尚無點數異動紀錄</div>
           </div>
-          <div class="points-lots-wrap" id="pointsLotsWrap" style="display:none;">
-            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">有效點數批次</div>
-            <table class="points-lots-table">
-              <thead>
-                <tr>
-                  <th>發放日期</th>
-                  <th>剩餘點數</th>
-                  <th>到期日</th>
-                </tr>
-              </thead>
-              <tbody id="rPointsLotsBody"></tbody>
-            </table>
+
+          <div id="ptPanelAvailable" class="pt-subpanel is-hidden" role="tabpanel">
+            <div class="points-hero" style="margin:12px 12px 0;border-radius:12px;">
+              <div class="points-hero-label">可用紅利點數</div>
+              <div class="points-hero-value" id="rPointsBalance">0</div>
+              <div class="points-hero-sub" id="rPointsDiscount">可折抵 NT$0</div>
+            </div>
+            <div class="pt-lots-list" id="ptLotsList"></div>
+            <div class="pt-empty" id="pointsEmptyLots" style="display:none;">
+              目前尚無有效點數批次。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
+            </div>
           </div>
-          <div class="points-history-wrap" id="pointsHistoryWrap" style="display:none;">
-            <div class="card-title" style="font-size:14px;font-weight:700;color:#3f3a36;">紅利異動歷程</div>
-            <table class="points-lots-table points-history-table">
-              <thead>
-                <tr>
-                  <th>日期</th>
-                  <th>類型</th>
-                  <th>點數</th>
-                  <th>訂單</th>
-                  <th>備註</th>
-                </tr>
-              </thead>
-              <tbody id="rPointsHistoryBody"></tbody>
-            </table>
-          </div>
-          <div class="points-empty-lots" id="pointsEmptyLots" style="display:none;">
-            目前尚無紅利異動紀錄。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。
-          </div>
-          <details class="points-rules">
-            <summary>紅利規則說明</summary>
-            <ul id="rPointsRules"></ul>
-          </details>
-          <div class="card-links">
-            <a href="#" id="linkToCardTabFromResult">查看此卡號的歷史訂單 →</a>
+
+          <div class="points-summary-footer">
+            <details class="points-rules">
+              <summary>紅利規則說明</summary>
+              <ul id="rPointsRules"></ul>
+            </details>
+            <div class="card-links">
+              <a href="#" id="linkToCardTabFromResult">查看此卡號的歷史訂單 →</a>
+            </div>
           </div>
         </div>
 
@@ -1826,6 +1996,8 @@
   let orderListFilter = "all";
   let orderListSearchQuery = "";
   let orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+  let cachedPointsData = null;
+  let pointsSubMode = "history";
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -2328,71 +2500,175 @@
     return text || "—";
   }
 
+  function formatLedgerDisplayDate(dateStr) {
+    const raw = String(dateStr || "").trim();
+    if (!raw) return "—";
+    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+    if (!m) return raw;
+    if (m[4] != null) {
+      return m[1] + "/" + m[2] + "/" + m[3] + " " + m[4] + ":" + m[5];
+    }
+    return m[1] + "/" + m[2] + "/" + m[3];
+  }
+
+  function pointLedgerTypeLabel(type) {
+    const t = String(type || "").trim();
+    if (t === "發放") return "消費給點";
+    if (t === "折抵") return "紅利折抵";
+    if (t === "失效") return "點數失效";
+    if (t === "調整") return "點數調整";
+    return t || "點數異動";
+  }
+
+  function formatPointAmountDisplay(pts) {
+    const n = Math.floor(Number(pts) || 0);
+    if (n > 0) return "+" + n.toLocaleString("zh-TW");
+    return n.toLocaleString("zh-TW");
+  }
+
+  function setPointsSubMode(mode) {
+    pointsSubMode = mode === "available" ? "available" : "history";
+    const isHistory = pointsSubMode === "history";
+    document.getElementById("ptTabHistory").classList.toggle("is-active", isHistory);
+    document.getElementById("ptTabAvailable").classList.toggle("is-active", !isHistory);
+    document.getElementById("ptTabHistory").setAttribute("aria-selected", isHistory ? "true" : "false");
+    document.getElementById("ptTabAvailable").setAttribute("aria-selected", !isHistory ? "true" : "false");
+    document.getElementById("ptPanelHistory").classList.toggle("is-hidden", !isHistory);
+    document.getElementById("ptPanelAvailable").classList.toggle("is-hidden", isHistory);
+  }
+
+  function bindPointsSubTabs() {
+    document.getElementById("ptTabHistory").addEventListener("click", function() {
+      setPointsSubMode("history");
+    });
+    document.getElementById("ptTabAvailable").addEventListener("click", function() {
+      setPointsSubMode("available");
+    });
+  }
+
   function renderPointsHistory(history) {
-    const tbody = document.getElementById("rPointsHistoryBody");
-    const wrap = document.getElementById("pointsHistoryWrap");
-    if (!tbody || !wrap) return;
-    tbody.innerHTML = "";
+    const listEl = document.getElementById("ptHistoryList");
+    const emptyEl = document.getElementById("pointsEmptyHistory");
+    if (!listEl || !emptyEl) return;
+    listEl.innerHTML = "";
+
     if (!Array.isArray(history) || !history.length) {
-      wrap.style.display = "none";
+      emptyEl.style.display = "block";
       return;
     }
-    wrap.style.display = "block";
+
+    emptyEl.style.display = "none";
     history.forEach(function(rec) {
-      const tr = document.createElement("tr");
-      const tdDate = document.createElement("td");
-      tdDate.innerText = rec.date || "—";
-      const tdType = document.createElement("td");
-      const pill = document.createElement("span");
-      pill.className = "points-type-pill " + pointsTypePillClass(rec.type);
-      pill.innerText = rec.type || "—";
-      tdType.appendChild(pill);
-      const tdPts = document.createElement("td");
-      tdPts.className = "points-col-num " + ((Number(rec.points) || 0) >= 0 ? "positive" : "negative");
-      tdPts.innerText = rec.pointsDisplay != null ? rec.pointsDisplay : String(rec.points != null ? rec.points : 0);
-      const tdOrder = document.createElement("td");
-      tdOrder.innerText = rec.orderId || "—";
-      const tdNote = document.createElement("td");
-      tdNote.innerText = formatPointHistoryNote(rec.note);
-      tr.appendChild(tdDate);
-      tr.appendChild(tdType);
-      tr.appendChild(tdPts);
-      tr.appendChild(tdOrder);
-      tr.appendChild(tdNote);
-      tbody.appendChild(tr);
+      const pts = Math.floor(Number(rec.points) || 0);
+      const orderId = String(rec.orderId || "").trim();
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "pt-ledger-item" + (orderId ? "" : " is-static");
+      item.setAttribute("aria-label", pointLedgerTypeLabel(rec.type) + " " + formatPointAmountDisplay(pts) + " 點");
+
+      const main = document.createElement("div");
+      main.className = "pt-ledger-main";
+
+      const topDate = document.createElement("div");
+      topDate.className = "pt-ledger-top-date";
+      topDate.innerText = formatLedgerDisplayDate(rec.date);
+
+      const title = document.createElement("div");
+      title.className = "pt-ledger-title";
+      title.innerText = pointLedgerTypeLabel(rec.type);
+
+      const orderLine = document.createElement("div");
+      orderLine.className = "pt-ledger-order";
+      orderLine.innerText = "訂單編號：" + (orderId || "—");
+
+      main.appendChild(topDate);
+      main.appendChild(title);
+      main.appendChild(orderLine);
+
+      const noteText = formatPointHistoryNote(rec.note);
+      if (noteText && noteText !== "—") {
+        const noteLine = document.createElement("div");
+        noteLine.className = "pt-ledger-note";
+        noteLine.innerText = noteText;
+        main.appendChild(noteLine);
+      }
+
+      if (rec.expireDate && pts > 0 && String(rec.type || "").trim() === "發放") {
+        const sub = document.createElement("div");
+        sub.className = "pt-ledger-sub";
+        sub.innerText = "到期：" + formatLedgerDisplayDate(rec.expireDate);
+        main.appendChild(sub);
+      }
+
+      const amt = document.createElement("div");
+      amt.className = "pt-ledger-amt " + (pts >= 0 ? "positive" : "negative");
+      amt.innerText = formatPointAmountDisplay(pts);
+
+      item.appendChild(main);
+      item.appendChild(amt);
+
+      if (orderId) {
+        const chev = document.createElement("span");
+        chev.className = "pt-ledger-chevron";
+        chev.setAttribute("aria-hidden", "true");
+        chev.innerText = "›";
+        item.appendChild(chev);
+        item.addEventListener("click", function() {
+          openOrderDetail(orderId, false);
+        });
+      }
+
+      listEl.appendChild(item);
     });
   }
 
   function renderPointsLots(lots) {
-    const tbody = document.getElementById("rPointsLotsBody");
-    const wrap = document.getElementById("pointsLotsWrap");
-    const empty = document.getElementById("pointsEmptyLots");
-    tbody.innerHTML = "";
+    const listEl = document.getElementById("ptLotsList");
+    const emptyEl = document.getElementById("pointsEmptyLots");
+    if (!listEl || !emptyEl) return;
+    listEl.innerHTML = "";
 
     if (!Array.isArray(lots) || !lots.length) {
-      wrap.style.display = "none";
-      empty.style.display = "block";
+      emptyEl.style.display = "block";
       return;
     }
 
-    empty.style.display = "none";
-    wrap.style.display = "block";
+    emptyEl.style.display = "none";
     lots.forEach(function(lot) {
-      const tr = document.createElement("tr");
-      const tdDate = document.createElement("td");
-      tdDate.innerText = lot.date || "—";
-      const tdRemain = document.createElement("td");
-      tdRemain.innerText = String(lot.remaining != null ? lot.remaining : 0);
-      const tdExpire = document.createElement("td");
-      tdExpire.innerText = lot.expireDate || "—";
-      tr.appendChild(tdDate);
-      tr.appendChild(tdRemain);
-      tr.appendChild(tdExpire);
-      tbody.appendChild(tr);
+      const row = document.createElement("div");
+      row.className = "pt-lot-item";
+
+      const main = document.createElement("div");
+      main.className = "pt-lot-main";
+
+      const label = document.createElement("div");
+      label.className = "pt-lot-label";
+      label.innerText = "發放日期";
+
+      const value = document.createElement("div");
+      value.className = "pt-lot-value";
+      value.innerText = formatLedgerDisplayDate(lot.date);
+
+      const expire = document.createElement("div");
+      expire.className = "pt-lot-expire";
+      expire.innerText = "到期 " + formatLedgerDisplayDate(lot.expireDate);
+
+      main.appendChild(label);
+      main.appendChild(value);
+      main.appendChild(expire);
+
+      const remain = document.createElement("div");
+      remain.className = "pt-lot-remain";
+      remain.innerText = String(lot.remaining != null ? lot.remaining : 0);
+
+      row.appendChild(main);
+      row.appendChild(remain);
+      listEl.appendChild(row);
     });
   }
 
   function showPointsResult(data) {
+    cachedPointsData = data || null;
     const balance = Math.max(0, Math.floor(Number(data.balance) || 0));
     const discount = Math.max(0, Math.floor(Number(data.discountAmount != null ? data.discountAmount : balance) || 0));
     const card = normalizeMemberCardInput(data.memberCardNo || resolveCardForPoints());
@@ -2414,13 +2690,17 @@
     renderPointsLots(data.lots);
     renderPointsHistory(data.history);
     renderPointsRules(data.rules);
+    setPointsSubMode("history");
 
-    const emptyEl = document.getElementById("pointsEmptyLots");
+    const emptyHistory = document.getElementById("pointsEmptyHistory");
+    const emptyLots = document.getElementById("pointsEmptyLots");
     const hasHistory = Array.isArray(data.history) && data.history.length > 0;
-    if (emptyEl && balance <= 0 && !hasHistory) {
+    const hasLots = Array.isArray(data.lots) && data.lots.length > 0;
+
+    if (emptyHistory && !hasHistory) {
       const apiMsg = String(data.message || "").trim();
       const dbg = data.debug || {};
-      let hint = apiMsg && apiMsg !== "OK" ? apiMsg : "目前尚無可用紅利點數";
+      let hint = apiMsg && apiMsg !== "OK" ? apiMsg : "目前尚無點數異動紀錄";
       if (dbg.pointsSheetName) {
         hint += "（試算表「" + dbg.pointsSheetName + "」共 " + (dbg.ledgerRowCount || 0) + " 筆";
         if (dbg.ledgerForCard != null) hint += "，與此卡號相關 " + dbg.ledgerForCard + " 筆";
@@ -2433,7 +2713,11 @@
       } else if ((dbg.ledgerRowCount || 0) > 0 && (dbg.ledgerForCard || 0) === 0) {
         hint += "。試算表有資料但未對應此卡號，請確認卡號是否正確。";
       }
-      emptyEl.innerText = hint;
+      emptyHistory.innerText = hint;
+    }
+
+    if (emptyLots && balance <= 0 && !hasLots && !hasHistory) {
+      emptyLots.innerText = "目前尚無可用點數。若訂單剛改為「已確認」，請稍候或聯絡闆闆確認是否已同步試算表。";
     }
 
     document.getElementById("pointsResultBox").style.display = "block";
@@ -2484,8 +2768,9 @@
 
     resultBox.style.display = "none";
     errorBox.style.display = "none";
-    document.getElementById("pointsLotsWrap").style.display = "none";
-    document.getElementById("pointsHistoryWrap").style.display = "none";
+    document.getElementById("ptHistoryList").innerHTML = "";
+    document.getElementById("ptLotsList").innerHTML = "";
+    document.getElementById("pointsEmptyHistory").style.display = "none";
     document.getElementById("pointsEmptyLots").style.display = "none";
 
     if (!isValidMemberCardNo(card)) {
@@ -3015,6 +3300,7 @@
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
     bindOrderListControls();
+    bindPointsSubTabs();
     bindCardClipboardActions();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
