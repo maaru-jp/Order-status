@@ -1077,19 +1077,134 @@
       overflow: hidden;
     }
 
+    .order-list-toolbar {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .order-list-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .order-filter-chip {
+      border: 1px solid var(--jp-border);
+      background: #fff;
+      color: var(--jp-ink-soft);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+
+    .order-filter-chip:hover {
+      border-color: var(--jp-matcha);
+    }
+
+    .order-filter-chip.is-active {
+      border-color: var(--jp-matcha-deep);
+      background: rgba(125, 157, 140, 0.12);
+      color: var(--jp-matcha-deep);
+    }
+
+    .order-list-search {
+      width: 100%;
+      border: 1px solid var(--jp-border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--jp-ink);
+    }
+
+    .order-list-count-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--jp-ink-soft);
+    }
+
+    .btn-order-load-more {
+      width: 100%;
+      margin-top: 10px;
+      border: 1px dashed var(--jp-border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--jp-matcha-deep);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .btn-order-load-more:hover {
+      border-color: var(--jp-matcha);
+      background: rgba(125, 157, 140, 0.06);
+    }
+
     .order-list {
       margin-top: 8px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
+      max-height: min(62vh, 520px);
+      overflow-y: auto;
+      padding-right: 2px;
     }
 
     .order-list-item {
       border: 1px solid var(--jp-border);
       border-radius: 14px;
       background: #fff;
-      padding: 14px;
+      padding: 12px 14px;
       cursor: pointer;
       transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+      text-align: left;
+    }
+
+    .order-list-item.is-compact .order-list-action {
+      display: none;
+    }
+
+    .order-list-compact-summary {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--jp-ink);
+      line-height: 1.5;
+    }
+
+    .order-list-compact-tags {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .order-list-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #f5f0ea;
+      color: var(--jp-ink-soft);
+      border: 1px solid var(--jp-border);
+    }
+
+    .order-list-tag.warn {
+      background: #fffaf0;
+      color: #8a6d3b;
+      border-color: #ead9b0;
+    }
+
+    .order-list-tag.ok {
+      background: rgba(125, 157, 140, 0.1);
+      color: var(--jp-matcha-deep);
+      border-color: rgba(125, 157, 140, 0.35);
     }
 
     .order-list-item:hover {
@@ -1598,7 +1713,17 @@
             </div>
           </div>
           <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（含每筆紅利）</div>
+          <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
+            <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
+              <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
+              <button type="button" class="order-filter-chip" data-filter="active">進行中</button>
+              <button type="button" class="order-filter-chip" data-filter="done">已完成</button>
+            </div>
+            <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
+          </div>
+          <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
           <div class="order-list" id="rOrderList"></div>
+          <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
           <div class="card-links">
             <a href="#" id="linkToPointsTab">查看紅利異動歷程 →</a>
           </div>
@@ -1697,6 +1822,10 @@
   let cachedCardOrders = [];
   let cachedCardNo = "";
   let openedFromCardList = false;
+  const ORDER_LIST_PAGE_SIZE = 6;
+  let orderListFilter = "all";
+  let orderListSearchQuery = "";
+  let orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -2078,7 +2207,13 @@
         }
         return JSON.parse(text);
       } catch (err) {
-        lastError = err;
+        if (err && err.name === "AbortError") {
+          lastError = new Error("查詢逾時（超過 " + Math.round(timeoutMs / 1000) + " 秒），請稍後再試");
+        } else if (err && /aborted without reason/i.test(String(err.message || ""))) {
+          lastError = new Error("查詢逾時，請稍後再試");
+        } else {
+          lastError = err;
+        }
         if (options.skipProxy) break;
       } finally {
         clearTimeout(timer);
@@ -2293,6 +2428,10 @@
       }
       if (dbg.ledgerRowCount === 0) {
         hint += "。請至後台「紅利點數」按「同步至試算表」。";
+      } else if ((dbg.ledgerForCard || 0) === 0 && (dbg.ordersForCard || 0) > 0) {
+        hint += "。歷史訂單有點數但紅利分頁尚未對應此卡，請再查詢一次或請店家後台按「同步至試算表」。";
+      } else if ((dbg.ledgerRowCount || 0) > 0 && (dbg.ledgerForCard || 0) === 0) {
+        hint += "。試算表有資料但未對應此卡號，請確認卡號是否正確。";
       }
       emptyEl.innerText = hint;
     }
@@ -2360,7 +2499,10 @@
     btn.innerText = "查詢中…";
 
     try {
-      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card), { skipProxy: true });
+      const data = await fetchJsonWithCorsFallback(buildPointsBalanceUrl(card), {
+        skipProxy: true,
+        timeoutMs: 55000
+      });
       if (data.error) {
         throw new Error(data.message || "查詢失敗");
       }
@@ -2434,17 +2576,88 @@
     document.getElementById("errorBox").style.display = "none";
     if (cachedCardOrders.length) {
       document.getElementById("cardResultBox").style.display = "block";
+      renderOrderList(cachedCardOrders);
     }
     document.getElementById("cardResultBox").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function normalizeOrderIdQuery(value) {
+    return String(value || "").trim().replace(/\s+/g, "").toUpperCase();
+  }
+
+  function orderMatchesListFilter(ord, filter) {
+    const st = String(ord && ord.status || "").trim();
+    if (filter === "active") {
+      return st !== "已完成" && st !== "已取消";
+    }
+    if (filter === "done") {
+      return st === "已完成";
+    }
+    return true;
+  }
+
+  function orderMatchesListSearch(ord, query) {
+    const q = normalizeOrderIdQuery(query);
+    if (!q) return true;
+    const id = normalizeOrderIdQuery(ord && ord.id);
+    const digits = q.replace(/\D/g, "");
+    if (id.indexOf(q) >= 0) return true;
+    if (digits.length >= 2 && id.replace(/\D/g, "").indexOf(digits) >= 0) return true;
+    return false;
+  }
+
+  function summarizeOrderItemsForList(ord) {
+    const items = Array.isArray(ord && ord.items) ? ord.items : [];
+    let pendingArrival = 0;
+    let pendingShip = 0;
+    let shipped = 0;
+    items.forEach(function(it) {
+      const ship = String(it && it.shipStatus || "待出貨").trim() || "待出貨";
+      if (ship === "待到貨") pendingArrival += 1;
+      else if (ship === "已出貨") shipped += 1;
+      else pendingShip += 1;
+    });
+    return {
+      total: items.length,
+      pendingArrival: pendingArrival,
+      pendingShip: pendingShip,
+      shipped: shipped,
+      firstName: items.length ? String(items[0].lineName || "").trim() : "",
+      productText: String(ord && ord.product || "").trim()
+    };
+  }
+
+  function getFilteredCardOrders() {
+    return (cachedCardOrders || []).filter(function(ord) {
+      return orderMatchesListFilter(ord, orderListFilter)
+        && orderMatchesListSearch(ord, orderListSearchQuery);
+    });
+  }
+
+  function resetOrderListViewState() {
+    orderListFilter = "all";
+    orderListSearchQuery = "";
+    orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+    const searchEl = document.getElementById("orderListSearch");
+    if (searchEl) searchEl.value = "";
+    document.querySelectorAll(".order-filter-chip").forEach(function(btn) {
+      btn.classList.toggle("is-active", btn.getAttribute("data-filter") === "all");
+    });
   }
 
   function renderOrderList(orders) {
     const listEl = document.getElementById("rOrderList");
     const titleEl = document.getElementById("rOrderListTitle");
+    const toolbarEl = document.getElementById("orderListToolbar");
+    const hintEl = document.getElementById("orderListCountHint");
+    const loadMoreBtn = document.getElementById("btnOrderListLoadMore");
     listEl.innerHTML = "";
 
     if (!orders.length) {
       if (titleEl) titleEl.style.display = "none";
+      if (toolbarEl) toolbarEl.style.display = "none";
+      if (hintEl) hintEl.style.display = "none";
+      if (loadMoreBtn) loadMoreBtn.style.display = "none";
       const empty = document.createElement("div");
       empty.className = "card-empty";
       empty.innerText = "目前尚無訂單紀錄";
@@ -2453,11 +2666,39 @@
     }
 
     if (titleEl) titleEl.style.display = "block";
+    if (toolbarEl) toolbarEl.style.display = orders.length >= 2 ? "flex" : "none";
 
-    orders.forEach(function(ord) {
+    const filtered = getFilteredCardOrders();
+    const visible = filtered.slice(0, orderListVisibleCount);
+    const useCompact = orders.length >= 3;
+
+    if (hintEl) {
+      if (filtered.length !== orders.length || orderListVisibleCount < filtered.length) {
+        hintEl.style.display = "block";
+        hintEl.innerText = "顯示 " + visible.length + " / " + filtered.length + " 筆"
+          + (filtered.length !== orders.length ? "（共 " + orders.length + " 筆）" : "")
+          + " · 點選查看配送進度";
+      } else {
+        hintEl.style.display = "block";
+        hintEl.innerText = "共 " + orders.length + " 筆 · 點選查看配送進度";
+      }
+    }
+
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "card-empty";
+      empty.innerText = orderListSearchQuery
+        ? "找不到符合「" + orderListSearchQuery + "」的訂單"
+        : "此篩選條件下沒有訂單";
+      listEl.appendChild(empty);
+      if (loadMoreBtn) loadMoreBtn.style.display = "none";
+      return;
+    }
+
+    visible.forEach(function(ord) {
       const item = document.createElement("button");
       item.type = "button";
-      item.className = "order-list-item";
+      item.className = "order-list-item" + (useCompact ? " is-compact" : "");
       item.setAttribute("aria-label", "查看訂單 " + ord.id + " 配送進度");
 
       const top = document.createElement("div");
@@ -2482,60 +2723,125 @@
 
       const earned = Math.max(0, Math.floor(Number(ord.pointsEarned) || 0));
       const used = Math.max(0, Math.floor(Number(ord.pointsUsed) || 0));
-      let pointsParts = [];
-      if (earned > 0) pointsParts.push("獲得 " + earned + " 點");
-      if (used > 0) pointsParts.push("折抵 " + used + " 點");
-
-      const meta = document.createElement("div");
-      meta.className = "order-list-meta";
-      const itemCount = Array.isArray(ord.items) ? ord.items.length : 0;
-      const productText = String(ord.product || "").trim();
-      meta.innerHTML = "<span>" + (itemCount ? itemCount + " 項商品" : (productText ? "商品摘要" : "訂單明細")) + "</span>"
-        + (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0
-          ? "<span>待結清 NT$" + ord.amountDue + "</span>"
-          : (ord.status === "已完成" ? "<span>已完成</span>" : ""));
-
-      const action = document.createElement("div");
-      action.className = "order-list-action";
-      action.innerText = "點擊查看配送進度 →";
+      const summary = summarizeOrderItemsForList(ord);
+      const productText = summary.productText;
+      const itemCount = summary.total;
 
       item.appendChild(top);
-      if (itemCount > 0) {
-        const preview = document.createElement("ul");
-        preview.className = "order-list-items";
-        ord.items.slice(0, 3).forEach(function(it) {
-          const li = document.createElement("li");
-          const name = String(it.lineName || "").trim();
-          const ship = String(it.shipStatus || "").trim();
-          li.innerText = name + (ship && ship !== "待出貨" ? "（" + ship + "）" : "");
-          preview.appendChild(li);
-        });
-        if (ord.items.length > 3) {
-          const more = document.createElement("li");
-          more.innerText = "…另有 " + (ord.items.length - 3) + " 項";
-          preview.appendChild(more);
+
+      if (useCompact) {
+        const compact = document.createElement("div");
+        compact.className = "order-list-compact-summary";
+        let line = itemCount
+          ? (itemCount + " 項商品")
+          : (productText ? "商品摘要" : "訂單明細");
+        if (summary.firstName) {
+          line += " · " + summary.firstName + (itemCount > 1 ? " 等" : "");
         }
-        item.appendChild(preview);
-      } else if (productText) {
-        const preview = document.createElement("div");
-        preview.className = "order-list-product-preview";
-        preview.innerText = productText;
-        item.appendChild(preview);
+        compact.innerText = line;
+        item.appendChild(compact);
+
+        const tags = document.createElement("div");
+        tags.className = "order-list-compact-tags";
+        if (summary.pendingArrival > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag warn";
+          t.innerText = "待到貨 " + summary.pendingArrival;
+          tags.appendChild(t);
+        }
+        if (summary.pendingShip > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag warn";
+          t.innerText = "待出貨 " + summary.pendingShip;
+          tags.appendChild(t);
+        }
+        if (summary.shipped > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag ok";
+          t.innerText = "已出貨 " + summary.shipped;
+          tags.appendChild(t);
+        }
+        if (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag warn";
+          t.innerText = "待結清 NT$" + ord.amountDue;
+          tags.appendChild(t);
+        }
+        if (earned > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag ok";
+          t.innerText = "＋" + earned + " 點";
+          tags.appendChild(t);
+        }
+        if (used > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag";
+          t.innerText = "折抵 " + used + " 點";
+          tags.appendChild(t);
+        }
+        if (tags.childNodes.length) item.appendChild(tags);
+      } else {
+        let pointsParts = [];
+        if (earned > 0) pointsParts.push("獲得 " + earned + " 點");
+        if (used > 0) pointsParts.push("折抵 " + used + " 點");
+
+        if (itemCount > 0) {
+          const preview = document.createElement("ul");
+          preview.className = "order-list-items";
+          ord.items.slice(0, 3).forEach(function(it) {
+            const li = document.createElement("li");
+            const name = String(it.lineName || "").trim();
+            const ship = String(it.shipStatus || "").trim();
+            li.innerText = name + (ship && ship !== "待出貨" ? "（" + ship + "）" : "");
+            preview.appendChild(li);
+          });
+          if (ord.items.length > 3) {
+            const more = document.createElement("li");
+            more.innerText = "…另有 " + (ord.items.length - 3) + " 項";
+            preview.appendChild(more);
+          }
+          item.appendChild(preview);
+        } else if (productText) {
+          const preview = document.createElement("div");
+          preview.className = "order-list-product-preview";
+          preview.innerText = productText;
+          item.appendChild(preview);
+        }
+        if (pointsParts.length) {
+          const pointsEl = document.createElement("div");
+          pointsEl.className = "order-list-points";
+          pointsEl.innerText = "⭐ " + pointsParts.join(" · ");
+          item.appendChild(pointsEl);
+        }
+        const meta = document.createElement("div");
+        meta.className = "order-list-meta";
+        meta.innerHTML = "<span>" + (itemCount ? itemCount + " 項商品" : (productText ? "商品摘要" : "訂單明細")) + "</span>"
+          + (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0
+            ? "<span>待結清 NT$" + ord.amountDue + "</span>"
+            : (ord.status === "已完成" ? "<span>已完成</span>" : ""));
+        item.appendChild(meta);
+        const action = document.createElement("div");
+        action.className = "order-list-action";
+        action.innerText = "點擊查看配送進度 →";
+        item.appendChild(action);
       }
-      if (pointsParts.length) {
-        const pointsEl = document.createElement("div");
-        pointsEl.className = "order-list-points";
-        pointsEl.innerText = "⭐ " + pointsParts.join(" · ");
-        item.appendChild(pointsEl);
-      }
-      item.appendChild(meta);
-      item.appendChild(action);
+
       item.addEventListener("click", function() {
         openOrderDetail(ord.id, true);
       });
 
       listEl.appendChild(item);
     });
+
+    if (loadMoreBtn) {
+      const remain = filtered.length - visible.length;
+      if (remain > 0) {
+        loadMoreBtn.style.display = "block";
+        loadMoreBtn.innerText = "載入更多（還有 " + remain + " 筆）";
+      } else {
+        loadMoreBtn.style.display = "none";
+      }
+    }
   }
 
   async function searchByCard() {
@@ -2573,6 +2879,7 @@
       document.getElementById("rTotalDue").innerText = "NT$" + (data.totalDue || 0);
       document.getElementById("rTotalPointsEarned").innerText = String(data.totalPointsEarned || 0);
       document.getElementById("rTotalPointsUsed").innerText = String(data.totalPointsUsed || 0);
+      resetOrderListViewState();
       renderOrderList(cachedCardOrders);
 
       if (!cachedCardOrders.length) {
@@ -2620,6 +2927,42 @@
     } finally {
       btn.disabled = false;
       btn.innerText = "查詢歷史訂單";
+    }
+  }
+
+  function bindOrderListControls() {
+    document.querySelectorAll(".order-filter-chip").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        orderListFilter = btn.getAttribute("data-filter") || "all";
+        orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+        document.querySelectorAll(".order-filter-chip").forEach(function(other) {
+          other.classList.toggle("is-active", other === btn);
+        });
+        renderOrderList(cachedCardOrders);
+      });
+    });
+
+    const searchEl = document.getElementById("orderListSearch");
+    if (searchEl) {
+      let searchTimer = null;
+      searchEl.addEventListener("input", function() {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(function() {
+          orderListSearchQuery = searchEl.value || "";
+          orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+          renderOrderList(cachedCardOrders);
+        }, 200);
+      });
+    }
+
+    const loadMoreBtn = document.getElementById("btnOrderListLoadMore");
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", function() {
+        orderListVisibleCount += ORDER_LIST_PAGE_SIZE;
+        renderOrderList(cachedCardOrders);
+        const listEl = document.getElementById("rOrderList");
+        if (listEl) listEl.scrollTop = listEl.scrollHeight;
+      });
     }
   }
 
@@ -2671,6 +3014,7 @@
     document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     document.getElementById("btnSearchPoints").addEventListener("click", searchByPoints);
+    bindOrderListControls();
     bindCardClipboardActions();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
