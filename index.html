@@ -2187,6 +2187,57 @@
     });
   }
 
+  function isShippedItemLabel(label) {
+    return /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(String(label || "").trim());
+  }
+
+  /** 整單配送進度以品項 shipStatus 為準；避免整單「已完成」但品項仍待到貨時誤顯示已出貨 */
+  function deriveTrackingStatusFromItems(items, orderStatus) {
+    const list = Array.isArray(items) ? items : [];
+    if (!list.length) {
+      const st = String(orderStatus || "").trim();
+      if (st === "已完成") return "已出貨";
+      if (st === "出貨中") return "集運中";
+      if (st === "已確認") return "已採購";
+      if (st === "待處理") return "訂單成立";
+      return st || "訂單成立";
+    }
+    let shipped = 0;
+    let pendingArrival = 0;
+    let pendingShip = 0;
+    list.forEach(function(it) {
+      const label = String(it.itemStatus || "").trim() || "待出貨";
+      if (isShippedItemLabel(label)) shipped += 1;
+      else if (label === "待到貨") pendingArrival += 1;
+      else pendingShip += 1;
+    });
+    const total = list.length;
+    if (shipped === total) return "已出貨";
+    if (shipped > 0) return "部分已出貨";
+    if (pendingArrival === total || pendingArrival > 0) return "待到貨";
+    if (pendingShip === total) return "待出貨";
+    const st = String(orderStatus || "").trim();
+    if (st === "出貨中") return "集運中";
+    if (st === "已確認") return "已採購";
+    return "訂單成立";
+  }
+
+  function reconcileProgressStatus(primaryStatus, itemSummary, items) {
+    const status = String(primaryStatus || "").trim();
+    const summary = itemSummary && itemSummary.total
+      ? itemSummary
+      : (Array.isArray(items) ? buildItemSummary(normalizeProductItems("", items)) : null);
+    if (!summary || !summary.total) return status || "狀態更新";
+    const claimsShipped = /已出貨|已寄出|已完成/.test(status) && !/部分/.test(status);
+    if (claimsShipped && summary.shipped < summary.total) {
+      return deriveTrackingStatusFromItems(
+        Array.isArray(items) ? normalizeProductItems("", items) : [],
+        ""
+      );
+    }
+    return status || "狀態更新";
+  }
+
   function buildOrderStatusFromCustomerOrder(ord) {
     let items = Array.isArray(ord && ord.items) ? ord.items.map(mapCustomerOrderItem) : [];
     if (!items.length && ord && ord.product) {
@@ -2194,11 +2245,7 @@
     }
     const names = items.map(function(it) { return it.name; }).filter(Boolean);
     const statusRaw = String((ord && ord.status) || "").trim();
-    let trackingStatus = statusRaw || "訂單成立";
-    if (statusRaw === "已完成") trackingStatus = "已出貨";
-    else if (statusRaw === "出貨中") trackingStatus = "集運中";
-    else if (statusRaw === "已確認") trackingStatus = "已採購";
-    else if (statusRaw === "待處理") trackingStatus = "訂單成立";
+    const trackingStatus = deriveTrackingStatusFromItems(items, statusRaw);
 
     const history = [];
     const orderDate = String((ord && ord.date) || "").slice(0, 10);
@@ -2206,13 +2253,17 @@
     if (orderDate) {
       history.push({ time: orderDate, status: "訂單成立", note: "" });
     }
-    if (trackingStatus && trackingStatus !== "訂單成立") {
-      history.push({ time: shipDate || orderDate || "", status: trackingStatus, note: "" });
-    }
     if (items.length) {
       history.push({
-        time: shipDate || orderDate || "",
+        time: orderDate || "",
         status: items.map(function(it) { return it.name + "：" + it.itemStatus; }).join("\n"),
+        note: ""
+      });
+    }
+    if (trackingStatus && trackingStatus !== "訂單成立") {
+      history.push({
+        time: (trackingStatus === "已出貨" ? shipDate : "") || orderDate || "",
+        status: trackingStatus,
         note: ""
       });
     }
@@ -2401,7 +2452,7 @@
     document.querySelector(".container").classList.add("has-wide-result");
   }
 
-  function openOrderDetail(orderId, fromCardList) {
+  async function openOrderDetail(orderId, fromCardList) {
     const queryId = toOrderStatusQueryId(orderId);
     openedFromCardList = !!fromCardList;
     setSearchMode("order");
@@ -2415,9 +2466,39 @@
     history.replaceState(null, "", "?" + params.toString());
 
     const cached = findOrderInCardCache(queryId);
+    const resultBox = document.getElementById("resultBox");
+    const errorBox = document.getElementById("errorBox");
+    errorBox.style.display = "none";
+
+    let data = null;
+    try {
+      data = await fetchOrderStatusData(queryId);
+    } catch (err) {
+      data = null;
+    }
+
+    if (data && isValidOrderStatusResponse(data)) {
+      if (cached && Array.isArray(cached.items) && cached.items.length) {
+        const built = buildOrderStatusFromCustomerOrder(cached);
+        const apiItems = Array.isArray(data.items) ? data.items : [];
+        if (!apiItems.length || apiItems.length < built.items.length) {
+          data.items = built.items;
+          data.itemSummary = built.itemSummary;
+          data.product = built.product || data.product;
+        }
+        data.status = deriveTrackingStatusFromItems(
+          normalizeProductItems(data.product, data.items),
+          cached.status
+        );
+      }
+      showOrderResultFromData(data, { showBack: openedFromCardList });
+      resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
     if (cached) {
       showOrderResultFromData(buildOrderStatusFromCustomerOrder(cached), { showBack: openedFromCardList });
-      document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "start" });
+      resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
@@ -3004,7 +3085,8 @@
 
     historyEmpty.style.display = "none";
     const latest = sanitizeHistoryStep(history[0]);
-    const primaryStatus = extractPrimaryStatus(latest.status) || "狀態更新";
+    const rawPrimaryStatus = extractPrimaryStatus(latest.status) || "狀態更新";
+    const primaryStatus = reconcileProgressStatus(rawPrimaryStatus, itemSummary, items);
 
     currentStep.innerText = "目前進度：" + primaryStatus;
     currentStep.style.display = "inline-block";
@@ -3226,7 +3308,7 @@
     const text = String(statusText || "");
     if (!text) return -1;
 
-    if (/訂單成立|已採購|待採購|待出貨|備貨/.test(text)) return 0;
+    if (/訂單成立|已採購|待採購|待出貨|待到貨|備貨/.test(text)) return 0;
     // 日本出荷只顯示在下方貨態追蹤，不點亮上方節點
     if (/日本出荷|待出荷|出荷準備|日本端出荷/.test(text)) return -1;
     if (/集運中|轉運|物流中心|包裹配達|已收件/.test(text)) return 1;

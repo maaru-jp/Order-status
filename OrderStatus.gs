@@ -685,6 +685,37 @@ function sanitizePublicOrder_(ord) {
   };
 }
 
+/** 歷史訂單缺會員卡號時，從「紅利紀錄」依姓名／訂單編號補齊 */
+function enrichOrdersMemberCardFromLedger_(orders, ss) {
+  ss = ss || getShopSpreadsheet_();
+  var sheet = getShopPointsSheet_(ss);
+  if (!sheet) return orders;
+  var ledger = getPointsLedger(sheet);
+  var byName = {};
+  var byOrderId = {};
+  for (var i = 0; i < ledger.length; i++) {
+    var rec = ledger[i];
+    var card = normalizeMemberCardNo_(getPointRecordMemberCard_(rec));
+    if (!isValidMemberCardNo_(card)) continue;
+    var name = normalizeCustomerNameForPoints_(getPointRecordCustomerName_(rec));
+    if (name) byName[name] = card;
+    var oid = normalizeOrderId_(rec.orderId);
+    if (oid) byOrderId[oid] = card;
+  }
+  for (var j = 0; j < (orders || []).length; j++) {
+    var ord = orders[j];
+    if (isValidMemberCardNo_(ord && ord.memberCardNo)) continue;
+    var nid = normalizeOrderId_(ord && ord.id);
+    if (nid && byOrderId[nid]) {
+      ord.memberCardNo = byOrderId[nid];
+      continue;
+    }
+    var n = normalizeCustomerNameForPoints_(ord && ord.customerName);
+    if (n && byName[n]) ord.memberCardNo = byName[n];
+  }
+  return orders;
+}
+
 function getCustomerOrdersPublic_(params) {
   params = params || {};
   var card = resolvePublicMemberCardParam_(params);
@@ -699,6 +730,7 @@ function getCustomerOrdersPublic_(params) {
   var all = [];
   try {
     all = getCustomerOrdersFromShopSheet_();
+    all = enrichOrdersMemberCardFromLedger_(all, getShopSpreadsheet_());
   } catch (shopErr) {
     Logger.log("[getCustomerOrdersPublic_] " + shopErr);
     return { error: true, message: String(shopErr && shopErr.message ? shopErr.message : shopErr) };
@@ -1340,23 +1372,51 @@ function sanitizePublicOrderNote_(ord) {
   return String((ord && (ord.remark || ord["備註"])) || "").trim();
 }
 
-function derivePublicTrackingStatus_(ord, items) {
-  var parsed = parsePublicTrackingHistory_(ord);
-  if (Array.isArray(parsed) && parsed.length) {
-    return String(parsed[0].status || "").trim() || "狀態更新";
+function deriveTrackingStatusFromItemsGs_(items, orderStatus) {
+  var list = items || [];
+  if (!list.length) {
+    var st = String(orderStatus || "").trim();
+    if (st === "已完成") return "已出貨";
+    if (st === "出貨中") return "集運中";
+    if (st === "已確認") return "已採購";
+    if (st === "待處理") return "訂單成立";
+    return st || "訂單成立";
   }
   var shipped = 0;
-  for (var i = 0; i < (items || []).length; i++) {
-    if (items[i].itemStatusCode === "shipped") shipped++;
+  var pendingArrival = 0;
+  var pendingShip = 0;
+  for (var i = 0; i < list.length; i++) {
+    var label = String(list[i].itemStatus || "").trim() || "待出貨";
+    if (mapPublicStatusItemCode_(label) === "shipped") shipped++;
+    else if (label === "待到貨") pendingArrival++;
+    else pendingShip++;
   }
-  if (items && items.length && shipped === items.length) return "已出貨";
+  var total = list.length;
+  if (shipped === total) return "已出貨";
   if (shipped > 0) return "部分已出貨";
-  var st = String(ord && ord.status || "").trim();
-  if (st === "已完成") return "已出貨";
-  if (st === "出貨中") return "集運中";
-  if (st === "已確認") return "已採購";
-  if (st === "待處理") return "訂單成立";
-  return st || "訂單成立";
+  if (pendingArrival === total || pendingArrival > 0) return "待到貨";
+  if (pendingShip === total) return "待出貨";
+  var ost = String(orderStatus || "").trim();
+  if (ost === "出貨中") return "集運中";
+  if (ost === "已確認") return "已採購";
+  return "訂單成立";
+}
+
+function derivePublicTrackingStatus_(ord, items) {
+  var itemBased = deriveTrackingStatusFromItemsGs_(items, ord && ord.status);
+  var parsed = parsePublicTrackingHistory_(ord);
+  if (Array.isArray(parsed) && parsed.length) {
+    var fromHistory = String(parsed[0].status || "").trim() || "狀態更新";
+    if (/已出貨|已寄出|已完成/.test(fromHistory) && items && items.length) {
+      var shipped = 0;
+      for (var h = 0; h < items.length; h++) {
+        if (items[h].itemStatusCode === "shipped") shipped++;
+      }
+      if (shipped < items.length) return itemBased;
+    }
+    return fromHistory;
+  }
+  return itemBased;
 }
 
 function buildSyntheticTrackingHistory_(ord, items) {
@@ -1381,18 +1441,28 @@ function buildSyntheticTrackingHistory_(ord, items) {
     });
   }
   var orderStatus = String(ord && ord.status || "").trim();
-  if (orderStatus && orderStatus !== "待處理") {
-    var mapped = orderStatus;
-    if (orderStatus === "出貨中") mapped = "集運中";
-    if (orderStatus === "已完成") mapped = "已出貨";
-    steps.push({
-      time: normalizeSheetDateValue_(ord.updated || ord.shipDate || ord.date) || orderDate || "",
-      status: mapped,
-      note: ""
-    });
+  var trackingFromItems = deriveTrackingStatusFromItemsGs_(items, orderStatus);
+  if (orderStatus && orderStatus !== "待處理" && trackingFromItems !== "訂單成立") {
+    var mapped = trackingFromItems;
+    if (mapped === "已出貨" || mapped === "部分已出貨") {
+      steps.push({
+        time: normalizeSheetDateValue_(ord.updated || ord.shipDate || ord.date) || orderDate || "",
+        status: mapped,
+        note: ""
+      });
+    } else if (orderStatus !== "已完成") {
+      if (orderStatus === "出貨中") mapped = "集運中";
+      else if (orderStatus === "已確認") mapped = "已採購";
+      else mapped = orderStatus;
+      steps.push({
+        time: normalizeSheetDateValue_(ord.updated || ord.shipDate || ord.date) || orderDate || "",
+        status: mapped,
+        note: ""
+      });
+    }
   }
   var shipDate = normalizeSheetDateValue_(ord && ord.shipDate);
-  if (shipDate) {
+  if (shipDate && trackingFromItems === "已出貨") {
     steps.push({ time: shipDate, status: "已出貨", note: "" });
   }
   var depositRemark = String(ord && ord.depositRemark || "").trim();
@@ -1638,7 +1708,7 @@ function buildPointsBalanceResult_(ledger, card, allOrders) {
       spendPerPoint: 100,
       pointValue: 1,
       expireDays: 365,
-      minRedeemNet: 199
+      minRedeemNet: 350
     },
     message: balance > 0 ? "OK" : "目前尚無可用紅利點數"
   };
@@ -1703,7 +1773,7 @@ function getPointsBalancePublic_(params) {
           spendPerPoint: 100,
           pointValue: 1,
           expireDays: 365,
-          minRedeemNet: 199
+          minRedeemNet: 350
         },
         message: nameBalance > 0 ? "OK" : "目前尚無可用紅利點數"
       };
