@@ -1190,6 +1190,114 @@
       background: rgba(125, 157, 140, 0.06);
     }
 
+    .order-archive-entry {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(125, 157, 140, 0.45);
+      background: linear-gradient(180deg, rgba(125, 157, 140, 0.06) 0%, #fff 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .order-archive-entry-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #3f3a36;
+    }
+
+    .order-archive-entry-desc {
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+      line-height: 1.5;
+    }
+
+    .btn-order-archive-open {
+      width: 100%;
+      border: 1px solid var(--jp-matcha-deep);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--jp-matcha-deep);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-order-archive-open:hover {
+      background: rgba(125, 157, 140, 0.1);
+    }
+
+    .order-archive-toolbar {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--jp-border);
+      background: #fafaf8;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .order-archive-toolbar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .order-archive-toolbar-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--jp-matcha-deep);
+    }
+
+    .btn-order-archive-back {
+      border: none;
+      background: none;
+      color: var(--jp-matcha-deep);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .order-archive-date-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .order-archive-date-row select,
+    .order-archive-date-row input[type="date"] {
+      border: 1px solid var(--jp-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      background: #fff;
+      color: var(--jp-ink);
+    }
+
+    .btn-archive-date-apply {
+      border: 1px solid var(--jp-matcha-deep);
+      border-radius: 10px;
+      background: var(--jp-matcha-deep);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .order-list-section-title.is-archive {
+      color: var(--jp-matcha-deep);
+    }
+
     .order-list {
       margin-top: 8px;
       display: grid;
@@ -1903,7 +2011,7 @@
             <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
             <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
-          <p class="card-hint">輸入 13 碼會員卡號，查詢所有過往交易訂單；點選任一筆可查看配送進度與商品狀態。</p>
+          <p class="card-hint">輸入 13 碼會員卡號查詢交易紀錄。一般列表顯示近 5 年訂單；更早紀錄請至「歷史訂單專區」查詢全部。</p>
           <p class="panel-hint">已知五碼編號？可改用 <a href="#" id="linkToOrderTab">訂單編號查配送進度</a></p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
         </div>
@@ -1926,7 +2034,25 @@
               <div class="value" id="rTotalDue">NT$0</div>
             </div>
           </div>
-          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄</div>
+          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
+          <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
+            <div class="order-archive-toolbar-head">
+              <span class="order-archive-toolbar-label">歷史訂單專區 · 可查詢全部紀錄</span>
+              <button type="button" class="btn-order-archive-back" id="btnBackToRecentOrders">← 返回近期訂單</button>
+            </div>
+            <div class="order-archive-date-row">
+              <select id="orderArchiveDatePreset" aria-label="查詢期間">
+                <option value="all">全部紀錄</option>
+                <option value="custom">自訂日期區間</option>
+              </select>
+              <span id="orderArchiveCustomRange" style="display:none;">
+                <input type="date" id="orderArchiveFrom" aria-label="起始日期">
+                <span>～</span>
+                <input type="date" id="orderArchiveTo" aria-label="結束日期">
+                <button type="button" class="btn-archive-date-apply" id="btnApplyArchiveDate">套用</button>
+              </span>
+            </div>
+          </div>
           <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
             <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
               <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
@@ -1938,6 +2064,11 @@
           <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
           <div class="order-list" id="rOrderList"></div>
           <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
+          <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
+            <div class="order-archive-entry-title">歷史訂單專區</div>
+            <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
+            <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+          </div>
         </div>
 
         <div class="error error-card" id="cardErrorBox" style="display:none;">
@@ -1965,9 +2096,14 @@
   let cachedCardNo = "";
   let openedFromCardList = false;
   const ORDER_LIST_PAGE_SIZE = 6;
+  /** 一般列表：顯示近 N 年訂單（建議 3～5，目前為 5） */
+  const ORDER_LIST_RECENT_YEARS = 5;
   let orderListFilter = "all";
   let orderListSearchQuery = "";
   let orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+  let orderListScope = "recent";
+  let archiveDateFrom = "";
+  let archiveDateTo = "";
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -2098,6 +2234,79 @@
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return String(dateStr).slice(0, 10);
     return d.toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit" });
+  }
+
+  function parseOrderDateValue(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return d;
+    const m = String(dateStr).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (!m) return null;
+    return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+  }
+
+  function formatDateInputValue(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + mo + "-" + day;
+  }
+
+  function getRecentListCutoffDate() {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - ORDER_LIST_RECENT_YEARS);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function isOrderInRecentWindow(ord) {
+    const od = parseOrderDateValue(ord && ord.date);
+    if (!od) return true;
+    return od >= getRecentListCutoffDate();
+  }
+
+  function countArchiveOnlyOrders() {
+    return (cachedCardOrders || []).filter(function(ord) {
+      return !isOrderInRecentWindow(ord);
+    }).length;
+  }
+
+  function orderMatchesArchiveDateRange(ord) {
+    if (!archiveDateFrom && !archiveDateTo) return true;
+    const od = parseOrderDateValue(ord && ord.date);
+    if (!od) return false;
+    if (archiveDateFrom) {
+      const from = parseOrderDateValue(archiveDateFrom);
+      if (from) {
+        from.setHours(0, 0, 0, 0);
+        if (od < from) return false;
+      }
+    }
+    if (archiveDateTo) {
+      const to = parseOrderDateValue(archiveDateTo);
+      if (to) {
+        to.setHours(23, 59, 59, 999);
+        if (od > to) return false;
+      }
+    }
+    return true;
+  }
+
+  function getOrderListScopeLabel() {
+    if (orderListScope === "archive") return "歷史訂單專區";
+    return "交易紀錄（近 " + ORDER_LIST_RECENT_YEARS + " 年）";
+  }
+
+  function getOrderListHintSuffix() {
+    if (orderListScope === "archive") {
+      if (archiveDateFrom || archiveDateTo) {
+        return " · " + (archiveDateFrom || "最早") + "～" + (archiveDateTo || "至今");
+      }
+      return " · 全部紀錄";
+    }
+    const cutoff = getRecentListCutoffDate();
+    return " · " + formatDateInputValue(cutoff) + " 起";
   }
 
   function orderStatusPillClass(status) {
@@ -2566,8 +2775,11 @@
 
   function getFilteredCardOrders() {
     return (cachedCardOrders || []).filter(function(ord) {
-      return orderMatchesListFilter(ord, orderListFilter)
-        && orderMatchesListSearch(ord, orderListSearchQuery);
+      if (!orderMatchesListFilter(ord, orderListFilter)) return false;
+      if (!orderMatchesListSearch(ord, orderListSearchQuery)) return false;
+      if (orderListScope === "recent" && !isOrderInRecentWindow(ord)) return false;
+      if (orderListScope === "archive" && !orderMatchesArchiveDateRange(ord)) return false;
+      return true;
     });
   }
 
@@ -2575,17 +2787,52 @@
     orderListFilter = "all";
     orderListSearchQuery = "";
     orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+    orderListScope = "recent";
+    archiveDateFrom = "";
+    archiveDateTo = "";
     const searchEl = document.getElementById("orderListSearch");
     if (searchEl) searchEl.value = "";
+    const presetEl = document.getElementById("orderArchiveDatePreset");
+    if (presetEl) presetEl.value = "all";
+    const customRange = document.getElementById("orderArchiveCustomRange");
+    if (customRange) customRange.style.display = "none";
+    const fromEl = document.getElementById("orderArchiveFrom");
+    const toEl = document.getElementById("orderArchiveTo");
+    if (fromEl) fromEl.value = "";
+    if (toEl) toEl.value = "";
     document.querySelectorAll(".order-filter-chip").forEach(function(btn) {
       btn.classList.toggle("is-active", btn.getAttribute("data-filter") === "all");
     });
+  }
+
+  function openOrderArchiveView() {
+    orderListScope = "archive";
+    orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+    archiveDateFrom = "";
+    archiveDateTo = "";
+    const presetEl = document.getElementById("orderArchiveDatePreset");
+    if (presetEl) presetEl.value = "all";
+    const customRange = document.getElementById("orderArchiveCustomRange");
+    if (customRange) customRange.style.display = "none";
+    renderOrderList(cachedCardOrders);
+    const toolbar = document.getElementById("orderArchiveToolbar");
+    if (toolbar) toolbar.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function backToRecentOrderList() {
+    orderListScope = "recent";
+    orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+    archiveDateFrom = "";
+    archiveDateTo = "";
+    renderOrderList(cachedCardOrders);
   }
 
   function renderOrderList(orders) {
     const listEl = document.getElementById("rOrderList");
     const titleEl = document.getElementById("rOrderListTitle");
     const toolbarEl = document.getElementById("orderListToolbar");
+    const archiveToolbar = document.getElementById("orderArchiveToolbar");
+    const archiveEntry = document.getElementById("orderArchiveEntry");
     const hintEl = document.getElementById("orderListCountHint");
     const loadMoreBtn = document.getElementById("btnOrderListLoadMore");
     listEl.innerHTML = "";
@@ -2593,6 +2840,8 @@
     if (!orders.length) {
       if (titleEl) titleEl.style.display = "none";
       if (toolbarEl) toolbarEl.style.display = "none";
+      if (archiveToolbar) archiveToolbar.style.display = "none";
+      if (archiveEntry) archiveEntry.style.display = "none";
       if (hintEl) hintEl.style.display = "none";
       if (loadMoreBtn) loadMoreBtn.style.display = "none";
       const empty = document.createElement("div");
@@ -2602,33 +2851,55 @@
       return;
     }
 
-    if (titleEl) titleEl.style.display = "block";
+    const isArchive = orderListScope === "archive";
+    const archiveOnlyCount = countArchiveOnlyOrders();
+
+    if (titleEl) {
+      titleEl.style.display = "block";
+      titleEl.innerText = getOrderListScopeLabel();
+      titleEl.classList.toggle("is-archive", isArchive);
+    }
+    if (archiveToolbar) archiveToolbar.style.display = isArchive ? "flex" : "none";
     if (toolbarEl) toolbarEl.style.display = orders.length >= 2 ? "flex" : "none";
 
     const filtered = getFilteredCardOrders();
     const visible = filtered.slice(0, orderListVisibleCount);
-    const useCompact = orders.length >= 3;
+    const useCompact = filtered.length >= 3 || orders.length >= 3;
 
     if (hintEl) {
-      if (filtered.length !== orders.length || orderListVisibleCount < filtered.length) {
-        hintEl.style.display = "block";
-        hintEl.innerText = "顯示 " + visible.length + " / " + filtered.length + " 筆"
-          + (filtered.length !== orders.length ? "（共 " + orders.length + " 筆）" : "")
-          + " · 點選查看配送進度";
-      } else {
-        hintEl.style.display = "block";
-        hintEl.innerText = "共 " + orders.length + " 筆 · 點選查看配送進度";
+      hintEl.style.display = "block";
+      let hint = "顯示 " + visible.length + " / " + filtered.length + " 筆";
+      if (filtered.length !== orders.length) {
+        hint += "（帳戶共 " + orders.length + " 筆）";
       }
+      hint += getOrderListHintSuffix() + " · 點選查看配送進度";
+      hintEl.innerText = hint;
     }
 
     if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "card-empty";
-      empty.innerText = orderListSearchQuery
-        ? "找不到符合「" + orderListSearchQuery + "」的訂單"
-        : "此篩選條件下沒有訂單";
+      if (orderListSearchQuery) {
+        empty.innerText = "找不到符合「" + orderListSearchQuery + "」的訂單";
+      } else if (isArchive && (archiveDateFrom || archiveDateTo)) {
+        empty.innerText = "此日期區間沒有訂單，請調整查詢條件或改選「全部紀錄」";
+      } else if (!isArchive && archiveOnlyCount > 0) {
+        empty.innerText = "近 " + ORDER_LIST_RECENT_YEARS + " 年沒有符合條件的訂單；更早的紀錄請至「歷史訂單專區」查詢";
+      } else {
+        empty.innerText = "此篩選條件下沒有訂單";
+      }
       listEl.appendChild(empty);
       if (loadMoreBtn) loadMoreBtn.style.display = "none";
+      if (archiveEntry) {
+        archiveEntry.style.display = (!isArchive && orders.length > 0) ? "flex" : "none";
+        if (!isArchive && orders.length > 0) {
+          const desc = document.getElementById("orderArchiveEntryDesc");
+          if (desc && archiveOnlyCount > 0) {
+            desc.innerText = "另有 " + archiveOnlyCount + " 筆早於 "
+              + formatDateInputValue(getRecentListCutoffDate()) + " 的訂單；亦可在此依日期查詢全部歷史交易。";
+          }
+        }
+      }
       return;
     }
 
@@ -2755,6 +3026,23 @@
         loadMoreBtn.style.display = "none";
       }
     }
+
+    if (archiveEntry) {
+      const showEntry = !isArchive && orders.length > 0;
+      archiveEntry.style.display = showEntry ? "flex" : "none";
+      if (showEntry) {
+        const desc = document.getElementById("orderArchiveEntryDesc");
+        if (desc) {
+          if (archiveOnlyCount > 0) {
+            desc.innerText = "另有 " + archiveOnlyCount + " 筆早於 "
+              + formatDateInputValue(getRecentListCutoffDate()) + " 的訂單；亦可在此依日期查詢全部歷史交易。";
+          } else {
+            desc.innerText = "可依日期區間查詢全部 " + orders.length + " 筆交易紀錄（不限近 "
+              + ORDER_LIST_RECENT_YEARS + " 年）。";
+          }
+        }
+      }
+    }
   }
 
   async function searchByCard() {
@@ -2873,8 +3161,44 @@
       loadMoreBtn.addEventListener("click", function() {
         orderListVisibleCount += ORDER_LIST_PAGE_SIZE;
         renderOrderList(cachedCardOrders);
-        const listEl = document.getElementById("rOrderList");
-        if (listEl) listEl.scrollTop = listEl.scrollHeight;
+        loadMoreBtn.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+
+    const btnOpenArchive = document.getElementById("btnOpenOrderArchive");
+    if (btnOpenArchive) {
+      btnOpenArchive.addEventListener("click", openOrderArchiveView);
+    }
+
+    const btnBackRecent = document.getElementById("btnBackToRecentOrders");
+    if (btnBackRecent) {
+      btnBackRecent.addEventListener("click", backToRecentOrderList);
+    }
+
+    const archivePreset = document.getElementById("orderArchiveDatePreset");
+    const archiveCustomRange = document.getElementById("orderArchiveCustomRange");
+    if (archivePreset) {
+      archivePreset.addEventListener("change", function() {
+        const isCustom = archivePreset.value === "custom";
+        if (archiveCustomRange) archiveCustomRange.style.display = isCustom ? "inline" : "none";
+        if (!isCustom) {
+          archiveDateFrom = "";
+          archiveDateTo = "";
+          orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+          renderOrderList(cachedCardOrders);
+        }
+      });
+    }
+
+    const btnApplyArchiveDate = document.getElementById("btnApplyArchiveDate");
+    if (btnApplyArchiveDate) {
+      btnApplyArchiveDate.addEventListener("click", function() {
+        const fromEl = document.getElementById("orderArchiveFrom");
+        const toEl = document.getElementById("orderArchiveTo");
+        archiveDateFrom = fromEl ? fromEl.value : "";
+        archiveDateTo = toEl ? toEl.value : "";
+        orderListVisibleCount = ORDER_LIST_PAGE_SIZE;
+        renderOrderList(cachedCardOrders);
       });
     }
   }
