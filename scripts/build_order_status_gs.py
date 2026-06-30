@@ -74,40 +74,102 @@ FUNCS = [
     "sanitizePublicOrderNote_",
     "derivePublicTrackingStatus_",
     "buildSyntheticTrackingHistory_",
-    "getOrderStatusPublic_",
 ]
+
+CUSTOM_GET_ORDER_STATUS = r'''
+/**
+ * 五碼訂單編號查詢：僅讀「工作表1」+「歷程」（不讀「訂單」分頁）
+ */
+function getOrderStatusPublic_(params) {
+  params = params || {};
+  var id = resolvePublicOrderIdParam_(params);
+  if (!id) {
+    return { error: true, message: "請輸入訂單編號" };
+  }
+  var ss = getProgressSpreadsheet_();
+  var sheetName = (CONFIG.legacyProgressSheetName || "工作表1").toString().trim();
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    return {
+      error: true,
+      message: "找不到試算表分頁「" + sheetName + "」（" + (CONFIG.spreadsheetName || "") + "）"
+    };
+  }
+  var result = getSheet1OrderStatusPublic_(ss, id);
+  if (result && result.error === false) {
+    return result;
+  }
+  return {
+    error: true,
+    message: "查無此訂單編號（請確認「" + sheetName + "」A 欄訂單編號）"
+  };
+}
+'''
 
 blocks = [extract_func(fn) for fn in FUNCS]
 idx = FUNCS.index("getOrders")
 blocks[idx] = blocks[idx].replace(
     "  ensureOrderHeaderRow_(sheet);\n", "  if (!sheet) return [];\n"
 )
+for i, fn in enumerate(FUNCS):
+    if fn in ("getCustomerOrdersPublic_", "getOrderStatusPublic_"):
+        blocks[i] = blocks[i].replace(
+            "SpreadsheetApp.getActiveSpreadsheet()",
+            "getProgressSpreadsheet_()",
+        )
 
 HEADER = r'''/**
  * MAARU 訂單進度查詢 API（OrderStatus.gs）
- * 綁定試算表：MAARU 日本萌GO訂單進度資料表
+ *
+ * 資料來源試算表：MAARU 日本萌物GO訂單進度資料表
  * https://docs.google.com/spreadsheets/d/1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw/edit
  *
- * 部署：試算表 → 擴充功能 → Apps Script → 貼上本檔 → 儲存
- *       → 部署 → 管理部署 → 編輯 → 版本「新版本」→ 部署
- * 複製網頁應用程式 URL 至 Order-status-main/index.html 的 API_URL
+ * 函式庫 Script ID：12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc
+ * 函式庫網址：https://script.google.com/macros/library/d/12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc/15
  *
- * GET action：
- * - api_meta         檢查 API 版本
- * - order_status     五碼訂單編號查配送進度（讀 工作表1 + 歷程）
- * - customer_orders  13 碼會員卡號查歷史訂單
- * - （相容）?orderId=00001
+ * 用法 A（函式庫專案）：貼上本檔 → 部署 → 新增部署 → 函式庫 → 版本號遞增
+ * 用法 B（試算表綁定）：試算表 Apps Script 只貼 SpreadsheetBinding.gs，並加入上述函式庫
+ * 用法 C（單檔）：試算表 Apps Script 直接貼本檔全文 → 部署網頁應用程式
  *
- * 同步來源：ProductManagement2-main/Code.gs（apiVersion 2026-06-04-sheet1）
+ * GET（輸入訂單編號讀試算表）：
+ * - action=order_status&orderId=00083
+ * - ?orderId=00083（相容舊版）
+ * - action=customer_orders&card=13碼會員卡號
+ * - action=api_meta
+ *
+ * 函式庫對外入口：handleDoGet_(e)、handleOnEdit_(e)、lookupOrderById_(orderId)
  */
 
 var CONFIG = {
+  spreadsheetId: "1BLcUU6IpqjYIcyNKb8IjFRoQZgkSnbct0NjkFBKb4vw",
+  spreadsheetName: "MAARU 日本萌物GO訂單進度資料表",
   orderSheetName: "訂單",
   legacyProgressSheetName: "工作表1",
   legacyHistorySheetName: "歷程"
 };
 
-function doGet(e) {
+/** 固定開啟「MAARU 日本萌物GO訂單進度資料表」（函式庫未綁定試算表時也能讀） */
+function getProgressSpreadsheet_() {
+  var id = (CONFIG.spreadsheetId || "").toString().trim();
+  if (id) {
+    try {
+      return SpreadsheetApp.openById(id);
+    } catch (err) {
+      Logger.log("[getProgressSpreadsheet_] openById: " + err);
+    }
+  }
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+  throw new Error("無法開啟試算表「" + (CONFIG.spreadsheetName || id) + "」");
+}
+
+/** 依訂單編號讀取試算表（工作表1 + 歷程）；供函式庫或編輯器測試 */
+function lookupOrderById_(orderId) {
+  return getOrderStatusPublic_({ orderId: orderId });
+}
+
+/** 函式庫入口：網頁應用程式 doGet 請呼叫此函式 */
+function handleDoGet_(e) {
   try {
     var params = (e && e.parameter) ? e.parameter : {};
     var action = (params.action || "").toString().toLowerCase().trim();
@@ -115,6 +177,9 @@ function doGet(e) {
       return jsonOutput({
         ok: true,
         apiVersion: "2026-06-04-sheet1",
+        spreadsheetId: CONFIG.spreadsheetId,
+        spreadsheetName: CONFIG.spreadsheetName,
+        libraryScriptId: "12zRuG_AbPZl9OO8ArWLm8EAu1UXxhoTwHrJSxU965dAEuFlGTgcS-nEc",
         routes: ["customer_orders", "order_status", "orderId_legacy", "sheet1_progress"]
       });
     }
@@ -138,10 +203,12 @@ function doGet(e) {
   }
 }
 
-/**
- * 手動編輯「工作表1」出貨狀態或備註時，自動寫入最後更新與「歷程」
- */
-function onEdit(e) {
+function doGet(e) {
+  return handleDoGet_(e);
+}
+
+/** 函式庫入口：試算表 onEdit 觸發請呼叫此函式 */
+function handleOnEdit_(e) {
   try {
     if (!e || !e.range) return;
     var range = e.range;
@@ -172,6 +239,10 @@ function onEdit(e) {
   }
 }
 
+function onEdit(e) {
+  handleOnEdit_(e);
+}
+
 function getOrCreateHistorySheet_(ss) {
   var name = (CONFIG.legacyHistorySheetName || "歷程").toString().trim();
   var sheet = ss.getSheetByName(name);
@@ -183,5 +254,8 @@ function getOrCreateHistorySheet_(ss) {
 
 '''
 
-OUT.write_text(HEADER + "\n\n" + "\n\n".join(blocks), encoding="utf-8")
+OUT.write_text(
+    HEADER + "\n\n" + "\n\n".join(blocks) + "\n\n" + CUSTOM_GET_ORDER_STATUS.strip(),
+    encoding="utf-8",
+)
 print(f"Wrote {OUT} ({len(OUT.read_text(encoding='utf-8').splitlines())} lines)")
