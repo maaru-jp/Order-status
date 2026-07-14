@@ -395,6 +395,13 @@
       margin-bottom: 4px;
     }
 
+    .product-qty {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--jp-ink-soft);
+      margin-bottom: 6px;
+    }
+
     .item-status-badge {
       display: inline-flex;
       align-items: center;
@@ -986,12 +993,9 @@
       border-color: var(--jp-sakura);
     }
 
-    .container.has-wide-result {
-      max-width: 960px;
-    }
-
+    .container.has-wide-result,
     .container.has-member-result {
-      max-width: 560px;
+      max-width: 960px;
     }
 
     .btn-search:disabled {
@@ -2384,9 +2388,11 @@
   function mapCustomerOrderItem(it) {
     const label = String((it && (it.shipStatus || it.itemStatus)) || "待出貨").trim() || "待出貨";
     const shipped = /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(label);
+    const qty = Math.max(0, Math.floor(Number(it && (it.qty != null ? it.qty : it.quantity)) || 0));
     return {
       name: String((it && it.lineName) || "").trim() || "商品",
       image: "",
+      qty: qty > 0 ? qty : 1,
       itemStatus: label,
       itemStatusCode: shipped ? "shipped" : "pending"
     };
@@ -3478,17 +3484,38 @@
     return "pending";
   }
 
+  function parseQtyFromName(rawName) {
+    const text = String(rawName || "").trim();
+    const patterns = [
+      /[x×＊*]\s*(\d+)\s*$/i,
+      /數量\s*[:：]?\s*(\d+)/,
+      /(\d+)\s*件\s*$/
+    ];
+    for (let i = 0; i < patterns.length; i++) {
+      const m = text.match(patterns[i]);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (!isNaN(n) && n > 0) return n;
+      }
+    }
+    return 0;
+  }
+
   function normalizeProductItems(productText, items) {
     if (Array.isArray(items) && items.length > 0) {
       return items
         .map(item => {
-          const rawName = String(item.name || item.product || "").trim();
+          const rawName = String(item.name || item.lineName || item.product || "").trim();
           const image = String(item.image || item.imageUrl || "").trim();
-          const label = String(item.itemStatus || item.status || "").trim() || "待出貨";
+          const label = String(item.itemStatus || item.shipStatus || item.status || "").trim() || "待出貨";
           const code = normalizeItemStatusCode(item.itemStatusCode, label);
+          let qty = Math.max(0, Math.floor(Number(item.qty != null ? item.qty : item.quantity) || 0));
+          if (!qty) qty = parseQtyFromName(rawName);
+          if (!qty) qty = 1;
           return {
             name: isUrlLike(rawName) ? "商品" : rawName,
             image: image || (isUrlLike(rawName) ? rawName : ""),
+            qty: qty,
             itemStatus: code === "shipped" ? "已出貨" : (label || "待出貨"),
             itemStatusCode: code
           };
@@ -3502,9 +3529,12 @@
       .split(/\n|；|;/)
       .map(name => {
         const raw = name.trim().replace(/^\d+[、.．]\s*/, "");
+        let qty = parseQtyFromName(raw);
+        if (!qty) qty = 1;
         return {
           name: isUrlLike(raw) ? "商品" : raw,
           image: isUrlLike(raw) ? raw : "",
+          qty: qty,
           itemStatus: "待出貨",
           itemStatusCode: "pending"
         };
@@ -3582,6 +3612,12 @@
     name.className = "product-name";
     name.innerText = item.name;
     body.appendChild(name);
+
+    const qty = Math.max(1, Math.floor(Number(item.qty) || 1));
+    const qtyEl = document.createElement("div");
+    qtyEl.className = "product-qty";
+    qtyEl.innerText = "數量 × " + qty;
+    body.appendChild(qtyEl);
 
     const badge = document.createElement("span");
     badge.className = "item-status-badge " + (code === "shipped" ? "done" : "wait");
