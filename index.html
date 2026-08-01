@@ -1425,48 +1425,39 @@
     .order-list-toolbar {
       margin-top: 12px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 10px;
-      align-items: stretch;
-    }
-
-    @media (min-width: 520px) {
-      .order-list-toolbar {
-        flex-direction: row;
-        align-items: stretch;
-        justify-content: space-between;
-      }
-
-      .order-list-filters {
-        flex: 1 1 auto;
-      }
-
-      .order-list-search {
-        flex: 0 1 240px;
-        min-width: 180px;
-        width: auto;
-      }
     }
 
     .order-list-filters {
       display: flex;
       flex-wrap: nowrap;
+      align-items: center;
       gap: 10px;
-      width: 100%;
+      flex: 1 1 220px;
+      min-width: 0;
+      height: 45px;
     }
 
     .order-filter-chip {
       flex: 1 1 0;
-      min-height: 45px;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       height: 45px;
+      min-height: 45px;
       border: 2px solid var(--jp-border);
       background: #fff;
       color: var(--jp-ink-soft);
       border-radius: 14px;
-      padding: 0 14px;
+      padding: 0 12px;
       font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.02em;
+      line-height: 1;
       cursor: pointer;
       transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 2px 8px rgba(90, 72, 60, 0.06);
@@ -1486,18 +1477,26 @@
 
     .order-list-search {
       box-sizing: border-box;
-      width: 100%;
-      min-height: 45px;
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1 1 180px;
+      width: auto;
+      min-width: 160px;
+      max-width: 260px;
       height: 45px;
+      min-height: 45px;
+      margin: 0;
       border: 2px solid var(--jp-border);
       border-radius: 14px;
       padding: 0 14px;
       font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.02em;
+      line-height: 41px;
       background: #fff;
       color: var(--jp-ink);
       box-shadow: 0 2px 8px rgba(90, 72, 60, 0.06);
+      align-self: center;
     }
 
     .order-list-search:focus {
@@ -1509,6 +1508,15 @@
     .order-list-search::placeholder {
       color: #9a9188;
       font-weight: 600;
+      line-height: 41px;
+    }
+
+    @media (max-width: 519px) {
+      .order-list-search {
+        flex: 1 1 100%;
+        max-width: none;
+        width: 100%;
+      }
     }
 
     .order-list-count-hint {
