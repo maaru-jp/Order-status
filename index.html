@@ -329,14 +329,16 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .summary-money .money-sub {
-      display: block;
-      margin-top: 2px;
-      margin-bottom: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--jp-ink-soft);
-      line-height: 1.45;
+    .summary-money-row.is-deposit .money-value,
+    .deposit-paid-amount,
+    .deposit-paid-date {
+      color: var(--jp-amber-deep);
+      font-weight: 800;
+    }
+
+    .deposit-paid-mark {
+      color: var(--jp-amber-deep);
+      font-weight: 700;
     }
 
     .summary-money-due {
@@ -2104,11 +2106,10 @@
                   <span class="money-label">總金額</span>
                   <span class="money-value" id="rProductNet">NT$—</span>
                 </div>
-                <div class="summary-money-row" id="rDepositRow">
+                <div class="summary-money-row is-deposit" id="rDepositRow">
                   <span class="money-label">訂金</span>
                   <span class="money-value" id="rDeposit">NT$—</span>
                 </div>
-                <div class="money-sub" id="rDepositNote" style="display:none;"></div>
               </div>
 
               <div class="summary-money-block">
@@ -2708,6 +2709,58 @@
     return data;
   }
 
+  function orderStatusHasMoneyData(data) {
+    if (!data) return false;
+    const keys = ["productNet", "subtotal", "amountDue", "depositAmount", "shippingFee"];
+    return keys.some(function(k) {
+      return data[k] != null && data[k] !== "";
+    });
+  }
+
+  function mergeMoneyDataIntoOrderStatus(data, src) {
+    if (!data || !src) return data;
+    const copy = [
+      "subtotal", "discount", "pointsUsed", "shippingFee", "shippingStatus",
+      "depositAmount", "depositRemark", "amountDue", "shippingMethod",
+      "preorderDate", "shipDate", "pointsEarned"
+    ];
+    copy.forEach(function(key) {
+      if ((data[key] == null || data[key] === "") && src[key] != null && src[key] !== "") {
+        data[key] = src[key];
+      }
+    });
+    if (!data.orderDate && src.date) data.orderDate = src.date;
+    if (!data.groupTitle) {
+      const srcItems = Array.isArray(src.items) ? src.items : [];
+      const title = String(src.product || "").trim()
+        || String((srcItems[0] && (srcItems[0].lineName || srcItems[0].name)) || "").trim();
+      if (title && !isUrlLike(title)) data.groupTitle = title;
+    }
+    return data;
+  }
+
+  // 舊版 API 的 order_status 沒有金額欄位，改由 customer_orders 補齊
+  async function enrichOrderStatusMoneyData(data) {
+    if (!data || data.error || orderStatusHasMoneyData(data)) return data;
+    const targetId = data.orderIdFull || data.orderId;
+    const cached = findOrderInCardCache(targetId);
+    if (cached) return mergeMoneyDataIntoOrderStatus(data, cached);
+
+    const card = normalizeMemberCardInput(data.memberCardNo || "");
+    if (!isValidMemberCardNo(card)) return data;
+    try {
+      const res = await fetchJsonWithCorsFallback(buildCustomerOrdersUrl(card), { skipProxy: true });
+      const orders = (res && Array.isArray(res.orders)) ? res.orders : [];
+      const match = orders.find(function(o) {
+        return toOrderStatusQueryId(o.id) === toOrderStatusQueryId(targetId);
+      });
+      if (match) return mergeMoneyDataIntoOrderStatus(data, match);
+    } catch (err) {
+      console.warn("[enrichOrderStatusMoneyData]", err);
+    }
+    return data;
+  }
+
   async function fetchOrderStatusData(orderId) {
     const queryId = toOrderStatusQueryId(orderId);
     let lastError = null;
@@ -2729,7 +2782,7 @@
           continue;
         }
         if (isValidOrderStatusResponse(data)) {
-          return data;
+          return await enrichOrderStatusMoneyData(data);
         }
       } catch (err) {
         if (!isMisleadingOrderLookupError(err && err.message)) {
@@ -2901,44 +2954,59 @@
     return "—";
   }
 
+  // API 未提供金額欄位時，從配送歷程文字反推訂金與訂單成立日期
+  function deriveSummaryFallbackFromHistory(data) {
+    const out = { depositAmount: 0, depositPaidDate: "", orderDate: "" };
+    const history = Array.isArray(data && data.history) ? data.history : [];
+    for (const step of history) {
+      const text = String((step && (step.note || step.status)) || "");
+      const status = String((step && step.status) || "");
+      if (!out.depositAmount) {
+        const m = text.match(/訂金[：:]?\s*NT\$?\s*([\d,]+)/);
+        if (m) {
+          out.depositAmount = Math.max(0, Math.round(Number(m[1].replace(/,/g, "")) || 0));
+          const d = text.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+          if (d) out.depositPaidDate = d[1] + "-" + ("0" + d[2]).slice(-2) + "-" + ("0" + d[3]).slice(-2);
+        }
+      }
+      if (!out.orderDate && status.indexOf("訂單成立") >= 0 && step.time) {
+        out.orderDate = String(step.time);
+      }
+    }
+    return out;
+  }
+
   function renderOrderMoneySummary(data) {
+    const fallback = deriveSummaryFallbackFromHistory(data);
     const productNet = computeProductNet(data);
     const shippingFee = Math.max(0, Math.round(Number(data && data.shippingFee) || 0));
-    const depositAmount = Math.max(0, Math.round(Number(data && data.depositAmount) || 0));
+    let depositAmount = Math.max(0, Math.round(Number(data && data.depositAmount) || 0));
+    if (!depositAmount) depositAmount = fallback.depositAmount;
     const amountDue = computeAmountDue(data, productNet, shippingFee, depositAmount);
     const shippingMethod = String((data && data.shippingMethod) || "").trim() || "賣貨便";
     const shippingStatus = String((data && data.shippingStatus) || "").trim();
     const depositPaidDate = formatSummaryDateSlash(
-      (data && (data.depositPaidDate || data.preorderDate || data.orderDate || data.date)) || ""
+      (data && (data.depositPaidDate || data.preorderDate || data.orderDate || data.date))
+      || fallback.depositPaidDate || ""
     );
 
     document.getElementById("rOrderDate").innerText = formatSummaryDate(
-      (data && (data.orderDate || data.date || data.updated)) || ""
+      (data && (data.orderDate || data.date))
+      || fallback.orderDate
+      || (data && data.updated) || ""
     );
     document.getElementById("rGroupTitle").innerText = resolveGroupTitle(data);
     document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
 
     const depositEl = document.getElementById("rDeposit");
-    const depositNote = document.getElementById("rDepositNote");
     if (depositAmount > 0) {
-      depositEl.innerText = formatMoneyNT(depositAmount)
-        + (depositPaidDate ? "（" + depositPaidDate + "已收）" : "（已收）");
-      if (depositNote) {
-        const remark = String((data && data.depositRemark) || "").trim();
-        if (remark && remark !== depositPaidDate + "已收") {
-          depositNote.style.display = "block";
-          depositNote.innerText = remark;
-        } else {
-          depositNote.style.display = "none";
-          depositNote.innerText = "";
-        }
-      }
+      const paidMark = depositPaidDate
+        ? "（<span class=\"deposit-paid-date\">" + depositPaidDate + "</span><span class=\"deposit-paid-mark\">已收</span>）"
+        : "（<span class=\"deposit-paid-mark\">已收</span>）";
+      depositEl.innerHTML =
+        "<span class=\"deposit-paid-amount\">" + formatMoneyNT(depositAmount) + "</span>" + paidMark;
     } else {
-      depositEl.innerText = "NT$0";
-      if (depositNote) {
-        depositNote.style.display = "none";
-        depositNote.innerText = "";
-      }
+      depositEl.textContent = "NT$0";
     }
 
     const shipLabel = shippingMethod.indexOf("運費") >= 0 ? shippingMethod : (shippingMethod + "運費");
