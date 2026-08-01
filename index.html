@@ -2103,6 +2103,14 @@
             <div class="summary-money" id="rMoneyBox">
               <div class="summary-money-block">
                 <div class="summary-money-row">
+                  <span class="money-label">單價</span>
+                  <span class="money-value" id="rUnitPrice">NT$—</span>
+                </div>
+                <div class="summary-money-row">
+                  <span class="money-label">數量</span>
+                  <span class="money-value" id="rQty">—</span>
+                </div>
+                <div class="summary-money-row">
                   <span class="money-label">總金額</span>
                   <span class="money-value" id="rProductNet">NT$—</span>
                 </div>
@@ -2544,10 +2552,13 @@
     const label = String((it && (it.shipStatus || it.itemStatus)) || "待出貨").trim() || "待出貨";
     const shipped = /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(label);
     const qty = Math.max(0, Math.floor(Number(it && (it.qty != null ? it.qty : it.quantity)) || 0));
+    const priceRaw = it && it.price;
+    const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw))) ? Number(priceRaw) : null;
     return {
       name: String((it && it.lineName) || "").trim() || "商品",
       image: "",
       qty: qty > 0 ? qty : 1,
+      price: price,
       itemStatus: label,
       itemStatusCode: shipped ? "shipped" : "pending"
     };
@@ -2736,12 +2747,46 @@
         || String((srcItems[0] && (srcItems[0].lineName || srcItems[0].name)) || "").trim();
       if (title && !isUrlLike(title)) data.groupTitle = title;
     }
+    // 補齊品項單價／數量（order_status 常缺 price）
+    const srcItems = Array.isArray(src.items) ? src.items : [];
+    if (srcItems.length) {
+      const destItems = Array.isArray(data.items) ? data.items.slice() : [];
+      if (!destItems.length) {
+        data.items = srcItems.map(mapCustomerOrderItem);
+      } else {
+        for (let i = 0; i < destItems.length; i++) {
+          const srcIt = srcItems[i] || srcItems[0];
+          if (!srcIt) continue;
+          const srcPrice = srcIt.price;
+          if ((destItems[i].price == null || destItems[i].price === "")
+              && srcPrice != null && srcPrice !== "" && !isNaN(Number(srcPrice))) {
+            destItems[i].price = Number(srcPrice);
+          }
+          const srcQty = Math.max(0, Math.floor(Number(srcIt.qty != null ? srcIt.qty : srcIt.quantity) || 0));
+          if ((!destItems[i].qty || destItems[i].qty <= 0) && srcQty > 0) {
+            destItems[i].qty = srcQty;
+          }
+        }
+        data.items = destItems;
+      }
+    }
     return data;
+  }
+
+  function orderItemsHavePrice(data) {
+    const items = Array.isArray(data && data.items) ? data.items : [];
+    return items.some(function(it) {
+      return it && it.price != null && it.price !== "" && !isNaN(Number(it.price));
+    });
   }
 
   // 舊版 API 的 order_status 沒有金額欄位，改由 customer_orders 補齊
   async function enrichOrderStatusMoneyData(data) {
-    if (!data || data.error || orderStatusHasMoneyData(data)) return data;
+    if (!data || data.error) return data;
+    const needMoney = !orderStatusHasMoneyData(data);
+    const needPrice = !orderItemsHavePrice(data);
+    if (!needMoney && !needPrice) return data;
+
     const targetId = data.orderIdFull || data.orderId;
     const cached = findOrderInCardCache(targetId);
     if (cached) return mergeMoneyDataIntoOrderStatus(data, cached);
@@ -2976,6 +3021,49 @@
     return out;
   }
 
+  function resolveUnitPriceAndQty(data) {
+    const items = Array.isArray(data && data.items) ? data.items : [];
+    let totalQty = 0;
+    let priced = [];
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i] || {};
+      let qty = Math.max(0, Math.floor(Number(it.qty != null ? it.qty : it.quantity) || 0));
+      if (!qty) qty = 1;
+      totalQty += qty;
+      const priceRaw = it.price;
+      if (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw))) {
+        priced.push({ price: Number(priceRaw), qty: qty });
+      }
+    }
+    if (totalQty <= 0) totalQty = 1;
+
+    let unitPrice = null;
+    if (items.length === 1 && priced.length === 1) {
+      unitPrice = priced[0].price;
+    } else if (priced.length === 1 && items.length === 1) {
+      unitPrice = priced[0].price;
+    } else if (priced.length === items.length && priced.length > 0) {
+      const first = priced[0].price;
+      const allSame = priced.every(function(p) { return p.price === first; });
+      if (allSame) unitPrice = first;
+    }
+
+    if (unitPrice == null) {
+      const sub = Number(data && data.subtotal);
+      if (!isNaN(sub) && sub > 0) {
+        unitPrice = Math.round(sub / totalQty);
+      } else {
+        const net = computeProductNet(data);
+        if (net > 0) unitPrice = Math.round(net / totalQty);
+      }
+    }
+
+    return {
+      unitPrice: unitPrice != null && !isNaN(unitPrice) ? Math.max(0, Math.round(unitPrice)) : null,
+      qty: totalQty
+    };
+  }
+
   function renderOrderMoneySummary(data) {
     const fallback = deriveSummaryFallbackFromHistory(data);
     const productNet = computeProductNet(data);
@@ -2989,6 +3077,7 @@
       (data && (data.depositPaidDate || data.preorderDate || data.orderDate || data.date))
       || fallback.depositPaidDate || ""
     );
+    const unitInfo = resolveUnitPriceAndQty(data);
 
     document.getElementById("rOrderDate").innerText = formatSummaryDate(
       (data && (data.orderDate || data.date))
@@ -2996,6 +3085,10 @@
       || (data && data.updated) || ""
     );
     document.getElementById("rGroupTitle").innerText = resolveGroupTitle(data);
+    document.getElementById("rUnitPrice").innerText = unitInfo.unitPrice != null
+      ? formatMoneyNT(unitInfo.unitPrice)
+      : "—";
+    document.getElementById("rQty").innerText = "× " + unitInfo.qty;
     document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
 
     const depositEl = document.getElementById("rDeposit");
@@ -3875,10 +3968,13 @@
           let qty = Math.max(0, Math.floor(Number(item.qty != null ? item.qty : item.quantity) || 0));
           if (!qty) qty = parseQtyFromName(rawName);
           if (!qty) qty = 1;
+          const priceRaw = item.price;
+          const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw))) ? Number(priceRaw) : null;
           return {
             name: isUrlLike(rawName) ? "商品" : rawName,
             image: image || (isUrlLike(rawName) ? rawName : ""),
             qty: qty,
+            price: price,
             itemStatus: code === "shipped" ? "已出貨" : (label || "待出貨"),
             itemStatusCode: code
           };
