@@ -1421,12 +1421,13 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      align-items: stretch;
     }
 
     @media (min-width: 520px) {
       .order-list-toolbar {
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         justify-content: space-between;
       }
 
@@ -1435,8 +1436,9 @@
       }
 
       .order-list-search {
-        flex: 0 1 220px;
-        min-width: 160px;
+        flex: 0 1 240px;
+        min-width: 180px;
+        width: auto;
       }
     }
 
@@ -1476,13 +1478,29 @@
     }
 
     .order-list-search {
+      box-sizing: border-box;
       width: 100%;
-      border: 1px solid var(--jp-border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 13px;
+      min-height: 48px;
+      border: 2px solid var(--jp-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
       background: #fff;
       color: var(--jp-ink);
+      box-shadow: 0 2px 8px rgba(90, 72, 60, 0.06);
+    }
+
+    .order-list-search:focus {
+      outline: none;
+      border-color: var(--jp-matcha-deep);
+      box-shadow: 0 4px 12px rgba(95, 133, 116, 0.18);
+    }
+
+    .order-list-search::placeholder {
+      color: #9a9188;
+      font-weight: 600;
     }
 
     .order-list-count-hint {
