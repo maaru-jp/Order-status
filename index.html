@@ -4219,9 +4219,7 @@
     if (price != null) {
       const priceEl = document.createElement("div");
       priceEl.className = "product-price-line";
-      priceEl.innerText = "單價 " + formatMoneyNT(price)
-        + "  × " + qty
-        + " ＝ " + formatMoneyNT(price * qty);
+      priceEl.innerText = formatMoneyNT(price * qty);
       body.appendChild(priceEl);
     }
 
