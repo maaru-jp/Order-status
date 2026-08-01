@@ -1077,6 +1077,12 @@
       line-height: 1.5;
     }
 
+    .card-hint {
+      color: #ff0000;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .panel-hint a {
       color: var(--jp-matcha-deep);
       font-weight: 600;
@@ -2409,9 +2415,9 @@
 
       <div id="panelCard" class="mode-panel">
         <div class="search-panel">
-          <label for="memberCardNo">請輸入會員卡號（13 碼純數字）</label>
+          <label for="memberCardNo">請輸入會員卡號（13 碼數字）</label>
           <div class="card-input-row">
-            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼純數字" autocomplete="off">
+            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
             <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
           <p class="card-hint">輸入 13 碼會員卡號查看全部交易紀錄；點選任一訂單編號即可查看該筆購買明細與配送進度。</p>
@@ -3941,7 +3947,7 @@
     document.querySelector(".container").classList.remove("has-member-result");
 
     if (!isValidMemberCardNo(card)) {
-      errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（純數字）";
+      errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（數字）";
       errorBox.style.display = "block";
       return;
     }
