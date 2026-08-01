@@ -329,6 +329,12 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .summary-money-row .money-value.is-multi-price {
+      white-space: normal;
+      text-align: right;
+      line-height: 1.5;
+    }
+
     .summary-money-row.is-deposit .money-value,
     .deposit-paid-amount,
     .deposit-paid-date {
@@ -2747,12 +2753,29 @@
         || String((srcItems[0] && (srcItems[0].lineName || srcItems[0].name)) || "").trim();
       if (title && !isUrlLike(title)) data.groupTitle = title;
     }
-    // 補齊品項單價／數量（order_status 常缺 price）
+    // 補齊品項單價／數量（order_status 常缺 price，且「工作表1」可能只有單一品項）
     const srcItems = Array.isArray(src.items) ? src.items : [];
     if (srcItems.length) {
       const destItems = Array.isArray(data.items) ? data.items.slice() : [];
-      if (!destItems.length) {
-        data.items = srcItems.map(mapCustomerOrderItem);
+      if (srcItems.length > destItems.length) {
+        // 以歷史訂單的品項為主，沿用原本已知的出貨狀態與圖片
+        const prevByName = {};
+        destItems.forEach(function(it) {
+          const key = String((it && it.name) || "").trim();
+          if (key) prevByName[key] = it;
+        });
+        data.items = srcItems.map(function(srcIt) {
+          const mapped = mapCustomerOrderItem(srcIt);
+          const prev = prevByName[mapped.name];
+          if (prev) {
+            if (prev.itemStatus) mapped.itemStatus = prev.itemStatus;
+            if (prev.itemStatusCode) mapped.itemStatusCode = prev.itemStatusCode;
+            if (prev.image) mapped.image = prev.image;
+          }
+          return mapped;
+        });
+        data.itemSummary = null;
+        data.product = data.items.map(function(it) { return it.name; }).join("\n");
       } else {
         for (let i = 0; i < destItems.length; i++) {
           const srcIt = srcItems[i] || srcItems[0];
@@ -3023,44 +3046,50 @@
 
   function resolveUnitPriceAndQty(data) {
     const items = Array.isArray(data && data.items) ? data.items : [];
+    const rows = [];
     let totalQty = 0;
-    let priced = [];
+    let allPriced = items.length > 0;
+
     for (let i = 0; i < items.length; i++) {
       const it = items[i] || {};
       let qty = Math.max(0, Math.floor(Number(it.qty != null ? it.qty : it.quantity) || 0));
       if (!qty) qty = 1;
       totalQty += qty;
       const priceRaw = it.price;
-      if (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw))) {
-        priced.push({ price: Number(priceRaw), qty: qty });
-      }
+      const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw)))
+        ? Math.max(0, Math.round(Number(priceRaw)))
+        : null;
+      if (price == null) allPriced = false;
+      rows.push({ name: String(it.name || "").trim(), price: price, qty: qty });
     }
     if (totalQty <= 0) totalQty = 1;
 
-    let unitPrice = null;
-    if (items.length === 1 && priced.length === 1) {
-      unitPrice = priced[0].price;
-    } else if (priced.length === 1 && items.length === 1) {
-      unitPrice = priced[0].price;
-    } else if (priced.length === items.length && priced.length > 0) {
-      const first = priced[0].price;
-      const allSame = priced.every(function(p) { return p.price === first; });
-      if (allSame) unitPrice = first;
+    if (allPriced) {
+      const distinct = rows.map(function(r) { return r.price; }).filter(function(p, idx, arr) {
+        return arr.indexOf(p) === idx;
+      });
+      if (distinct.length === 1) {
+        return { text: formatMoneyNT(distinct[0]), qty: totalQty, multi: false };
+      }
+      const text = rows.map(function(r) {
+        return formatMoneyNT(r.price) + " × " + r.qty;
+      }).join("、");
+      return { text: text, qty: totalQty, multi: true };
     }
 
-    if (unitPrice == null) {
-      const sub = Number(data && data.subtotal);
-      if (!isNaN(sub) && sub > 0) {
-        unitPrice = Math.round(sub / totalQty);
-      } else {
-        const net = computeProductNet(data);
-        if (net > 0) unitPrice = Math.round(net / totalQty);
-      }
+    let unitPrice = null;
+    const sub = Number(data && data.subtotal);
+    if (!isNaN(sub) && sub > 0) {
+      unitPrice = Math.round(sub / totalQty);
+    } else {
+      const net = computeProductNet(data);
+      if (net > 0) unitPrice = Math.round(net / totalQty);
     }
 
     return {
-      unitPrice: unitPrice != null && !isNaN(unitPrice) ? Math.max(0, Math.round(unitPrice)) : null,
-      qty: totalQty
+      text: unitPrice != null && !isNaN(unitPrice) ? formatMoneyNT(Math.max(0, unitPrice)) : "—",
+      qty: totalQty,
+      multi: false
     };
   }
 
@@ -3085,9 +3114,9 @@
       || (data && data.updated) || ""
     );
     document.getElementById("rGroupTitle").innerText = resolveGroupTitle(data);
-    document.getElementById("rUnitPrice").innerText = unitInfo.unitPrice != null
-      ? formatMoneyNT(unitInfo.unitPrice)
-      : "—";
+    const unitPriceEl = document.getElementById("rUnitPrice");
+    unitPriceEl.innerText = unitInfo.text;
+    unitPriceEl.classList.toggle("is-multi-price", !!unitInfo.multi);
     document.getElementById("rQty").innerText = "× " + unitInfo.qty;
     document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
 
