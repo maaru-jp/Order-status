@@ -1211,18 +1211,50 @@
     }
 
     .result-back {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
-    .result-back button {
-      border: none;
-      background: none;
+    .result-back button,
+    #btnBackToCardList {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 20px;
+      border: 2px solid var(--jp-matcha-deep);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #edf6f0 100%);
       color: var(--jp-matcha-deep);
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
       cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.16);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .result-back button:hover,
+    #btnBackToCardList:hover {
+      background: linear-gradient(180deg, #edf6f0 0%, #dff0e6 100%);
+      box-shadow: 0 6px 18px rgba(95, 133, 116, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .result-back button:active,
+    #btnBackToCardList:active {
+      transform: translateY(0);
+    }
+
+    .result-back-hint {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--jp-ink-soft);
     }
 
     .detail-loading {
@@ -2236,13 +2268,14 @@
       <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
         <div class="detail-loading-spinner" aria-hidden="true"></div>
         <div class="detail-loading-title" id="detailLoadingTitle">正在開啟訂單明細…</div>
-        <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在切換並載入購買明細與配送進度。</div>
+        <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
         <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
       </div>
 
       <div class="result" id="resultBox">
         <div class="result-back" id="resultBackWrap" style="display:none;">
           <button type="button" id="btnBackToCardList">← 返回交易紀錄列表</button>
+          <div class="result-back-hint">可回到全部訂單，再點選其他訂單編號查看明細</div>
         </div>
         <div class="result-layout">
           <section class="summary-card">
@@ -3401,7 +3434,7 @@
     if (!loading) return;
     document.getElementById("detailLoadingTitle").innerText = "正在開啟訂單明細…";
     document.getElementById("detailLoadingDesc").innerText =
-      "請稍候，畫面正在切換並載入購買明細、金額與配送進度。";
+      "請稍候，畫面正在載入中。";
     const orderEl = document.getElementById("detailLoadingOrder");
     if (queryId) {
       orderEl.style.display = "inline-block";
