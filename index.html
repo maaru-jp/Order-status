@@ -243,9 +243,9 @@
 
     .summary-top {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 14px;
-      margin-bottom: 10px;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .item {
@@ -254,6 +254,119 @@
       color: var(--jp-ink);
       font-size: 14px;
       font-weight: 700;
+    }
+
+    .summary-meta-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .summary-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--jp-ink);
+      line-height: 1.5;
+    }
+
+    .summary-meta-row .meta-label {
+      color: var(--jp-ink-soft);
+      white-space: nowrap;
+    }
+
+    .summary-meta-row .meta-value {
+      color: #3f3a36;
+      word-break: break-word;
+    }
+
+    .summary-money {
+      margin: 4px 0 14px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(125, 157, 140, 0.28);
+      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
+    }
+
+    .summary-money-block {
+      margin-bottom: 12px;
+    }
+
+    .summary-money-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .summary-money-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--jp-matcha-deep);
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .summary-money-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.55;
+      color: var(--jp-ink);
+      padding: 4px 0;
+    }
+
+    .summary-money-row .money-label {
+      color: var(--jp-ink-soft);
+    }
+
+    .summary-money-row .money-value {
+      color: #3f3a36;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-money .money-sub {
+      display: block;
+      margin-top: 2px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--jp-ink-soft);
+      line-height: 1.45;
+    }
+
+    .summary-money-due {
+      margin-top: 4px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(125, 157, 140, 0.35);
+    }
+
+    .summary-money-due .due-amount {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--jp-sakura-deep);
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-money-formula {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--jp-ink-soft);
+      line-height: 1.5;
+    }
+
+    .summary-section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--jp-sakura-deep);
+      letter-spacing: 0.08em;
+      margin: 4px 0 8px;
     }
 
     .item-products {
@@ -1972,9 +2085,50 @@
             <div class="card-title">訂單摘要</div>
             <div class="summary-top">
               <div class="item">訂單編號：<span id="rOrderId"></span></div>
-              <div class="item">備註：<span id="rNote"></span></div>
             </div>
-            <div class="item item-products">商品內容<div id="rProduct" class="product-content"></div></div>
+
+            <div class="summary-meta-list">
+              <div class="summary-meta-row">
+                <span class="meta-label">📅 訂單成立日期：</span>
+                <span class="meta-value" id="rOrderDate">—</span>
+              </div>
+              <div class="summary-meta-row">
+                <span class="meta-label">🏷️ 團名／商品名稱：</span>
+                <span class="meta-value" id="rGroupTitle">—</span>
+              </div>
+            </div>
+
+            <div class="summary-money" id="rMoneyBox">
+              <div class="summary-money-block">
+                <div class="summary-money-row">
+                  <span class="money-label">總金額</span>
+                  <span class="money-value" id="rProductNet">NT$—</span>
+                </div>
+                <div class="summary-money-row" id="rDepositRow">
+                  <span class="money-label">訂金</span>
+                  <span class="money-value" id="rDeposit">NT$—</span>
+                </div>
+                <div class="money-sub" id="rDepositNote" style="display:none;"></div>
+              </div>
+
+              <div class="summary-money-block">
+                <div class="summary-money-heading">🚚 物流費用</div>
+                <div class="summary-money-row">
+                  <span class="money-label" id="rShippingLabel">賣貨便運費</span>
+                  <span class="money-value" id="rShippingFee">NT$—</span>
+                </div>
+              </div>
+
+              <div class="summary-money-block summary-money-due">
+                <div class="summary-money-heading">🚚 待貨到結清金額</div>
+                <div class="due-amount" id="rAmountDue">NT$—</div>
+                <div class="summary-money-formula" id="rAmountFormula">＝（訂單總金額 − 訂金 ＋ 賣貨便運費）</div>
+              </div>
+            </div>
+
+            <div class="summary-section-label">商品內容</div>
+            <div class="item item-products"><div id="rProduct" class="product-content"></div></div>
+            <div class="item" style="margin-top:12px;font-size:13px;color:var(--jp-ink-soft);">備註：<span id="rNote">—</span></div>
           </section>
 
           <section class="timeline-card">
@@ -2496,16 +2650,42 @@
       ? names.join("\n")
       : String((ord && ord.product) || "").trim();
 
+    const productNet = ord && ord.productNet != null
+      ? Number(ord.productNet)
+      : Math.max(0, Math.ceil(
+        (Number(ord && ord.subtotal) || 0)
+        - (Number(ord && ord.discount) || 0)
+        - Math.floor(Number(ord && ord.pointsUsed) || 0)
+      ));
+    const shippingFee = Math.max(0, Math.round(Number(ord && ord.shippingFee) || 0));
+    const depositAmount = Math.max(0, Math.round(Number(ord && ord.depositAmount) || 0));
+
     return {
       error: false,
       orderId: toOrderStatusQueryId(ord && ord.id),
       product: productText,
       items: items,
       itemSummary: buildItemSummary(items),
-      note: "-",
+      note: String((ord && (ord.remark || ord.note)) || "").trim() || "-",
       history: history,
       status: trackingStatus,
-      updated: shipDate || orderDate || ""
+      updated: shipDate || orderDate || "",
+      orderDate: orderDate,
+      date: orderDate,
+      groupTitle: String((ord && ord.groupTitle) || "").trim() || (names[0] || productText.split(/\n/)[0] || ""),
+      productNet: productNet,
+      subtotal: Number(ord && ord.subtotal) || 0,
+      discount: Number(ord && ord.discount) || 0,
+      pointsUsed: Math.floor(Number(ord && ord.pointsUsed) || 0),
+      shippingFee: shippingFee,
+      shippingMethod: String((ord && ord.shippingMethod) || "").trim() || "賣貨便",
+      shippingStatus: String((ord && ord.shippingStatus) || "").trim(),
+      depositAmount: depositAmount,
+      depositRemark: String((ord && ord.depositRemark) || "").trim(),
+      depositPaidDate: String((ord && ord.depositPaidDate) || "").trim() || orderDate,
+      amountDue: ord && ord.amountDue != null
+        ? Number(ord.amountDue)
+        : Math.max(0, productNet + shippingFee - depositAmount)
     };
   }
 
@@ -2661,10 +2841,125 @@
     history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
   }
 
+  function formatMoneyNT(amount) {
+    const n = Math.max(0, Math.round(Number(amount) || 0));
+    return "NT$" + n.toLocaleString("zh-TW");
+  }
+
+  function formatSummaryDate(dateStr) {
+    if (!dateStr) return "—";
+    const s = String(dateStr).trim();
+    const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m) {
+      return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
+    }
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear() + "-"
+        + String(d.getMonth() + 1).padStart(2, "0") + "-"
+        + String(d.getDate()).padStart(2, "0");
+    }
+    return s.slice(0, 10) || "—";
+  }
+
+  function formatSummaryDateSlash(dateStr) {
+    const iso = formatSummaryDate(dateStr);
+    if (!iso || iso === "—") return "";
+    return iso.replace(/-/g, "/");
+  }
+
+  function computeProductNet(data) {
+    if (data && data.productNet != null && data.productNet !== "") {
+      return Math.max(0, Math.round(Number(data.productNet) || 0));
+    }
+    const sub = Number(data && data.subtotal) || 0;
+    const disc = Number(data && data.discount) || 0;
+    const pts = Math.floor(Number(data && data.pointsUsed) || 0);
+    return Math.max(0, Math.ceil(sub - disc - pts));
+  }
+
+  function computeAmountDue(data, productNet, shippingFee, depositAmount) {
+    if (data && data.amountDue != null && data.amountDue !== "") {
+      return Math.max(0, Math.round(Number(data.amountDue) || 0));
+    }
+    return Math.max(0, Math.ceil(productNet + shippingFee - depositAmount));
+  }
+
+  function resolveGroupTitle(data) {
+    const direct = String((data && (data.groupTitle || data.productTitle)) || "").trim();
+    if (direct) return direct;
+    const product = String((data && data.product) || "").trim();
+    if (product) {
+      const first = product.split(/\n|；|;/).map(function(s) { return s.trim(); }).filter(Boolean)[0];
+      if (first && !isUrlLike(first)) return first;
+    }
+    const items = Array.isArray(data && data.items) ? data.items : [];
+    if (items.length) {
+      const name = String(items[0].name || items[0].lineName || "").trim();
+      if (name) return name;
+    }
+    return "—";
+  }
+
+  function renderOrderMoneySummary(data) {
+    const productNet = computeProductNet(data);
+    const shippingFee = Math.max(0, Math.round(Number(data && data.shippingFee) || 0));
+    const depositAmount = Math.max(0, Math.round(Number(data && data.depositAmount) || 0));
+    const amountDue = computeAmountDue(data, productNet, shippingFee, depositAmount);
+    const shippingMethod = String((data && data.shippingMethod) || "").trim() || "賣貨便";
+    const shippingStatus = String((data && data.shippingStatus) || "").trim();
+    const depositPaidDate = formatSummaryDateSlash(
+      (data && (data.depositPaidDate || data.preorderDate || data.orderDate || data.date)) || ""
+    );
+
+    document.getElementById("rOrderDate").innerText = formatSummaryDate(
+      (data && (data.orderDate || data.date || data.updated)) || ""
+    );
+    document.getElementById("rGroupTitle").innerText = resolveGroupTitle(data);
+    document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
+
+    const depositEl = document.getElementById("rDeposit");
+    const depositNote = document.getElementById("rDepositNote");
+    if (depositAmount > 0) {
+      depositEl.innerText = formatMoneyNT(depositAmount)
+        + (depositPaidDate ? "（" + depositPaidDate + "已收）" : "（已收）");
+      if (depositNote) {
+        const remark = String((data && data.depositRemark) || "").trim();
+        if (remark && remark !== depositPaidDate + "已收") {
+          depositNote.style.display = "block";
+          depositNote.innerText = remark;
+        } else {
+          depositNote.style.display = "none";
+          depositNote.innerText = "";
+        }
+      }
+    } else {
+      depositEl.innerText = "NT$0";
+      if (depositNote) {
+        depositNote.style.display = "none";
+        depositNote.innerText = "";
+      }
+    }
+
+    const shipLabel = shippingMethod.indexOf("運費") >= 0 ? shippingMethod : (shippingMethod + "運費");
+    document.getElementById("rShippingLabel").innerText = shipLabel;
+    document.getElementById("rShippingFee").innerText = shippingStatus.indexOf("免運") >= 0
+      ? "NT$0（免運）"
+      : formatMoneyNT(shippingFee);
+
+    document.getElementById("rAmountDue").innerText = formatMoneyNT(amountDue);
+    document.getElementById("rAmountFormula").innerText =
+      "＝（訂單總金額 " + formatMoneyNT(productNet)
+      + " − 訂金 " + formatMoneyNT(depositAmount)
+      + " ＋ " + shipLabel + " " + formatMoneyNT(shippingStatus.indexOf("免運") >= 0 ? 0 : shippingFee)
+      + "）";
+  }
+
   function showOrderResultFromData(data, options) {
     const opts = options || {};
     const queryId = data.orderId || "";
     document.getElementById("rOrderId").innerText = queryId;
+    renderOrderMoneySummary(data || {});
     renderProduct(data.product, data.items, data.itemSummary);
     document.getElementById("rNote").innerText = formatOrderNote(data.note);
     const history = normalizeHistory(data.history, data.status, data.updated);
