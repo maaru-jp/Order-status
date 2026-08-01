@@ -2100,10 +2100,6 @@
                 <span class="meta-label">📅 訂單成立日期：</span>
                 <span class="meta-value" id="rOrderDate">—</span>
               </div>
-              <div class="summary-meta-row">
-                <span class="meta-label">🏷️ 團名／商品名稱：</span>
-                <span class="meta-value" id="rGroupTitle">—</span>
-              </div>
             </div>
 
             <div class="summary-money" id="rMoneyBox">
@@ -3006,22 +3002,6 @@
     return Math.max(0, Math.ceil(productNet + shippingFee - depositAmount));
   }
 
-  function resolveGroupTitle(data) {
-    const direct = String((data && (data.groupTitle || data.productTitle)) || "").trim();
-    if (direct) return direct;
-    const product = String((data && data.product) || "").trim();
-    if (product) {
-      const first = product.split(/\n|；|;/).map(function(s) { return s.trim(); }).filter(Boolean)[0];
-      if (first && !isUrlLike(first)) return first;
-    }
-    const items = Array.isArray(data && data.items) ? data.items : [];
-    if (items.length) {
-      const name = String(items[0].name || items[0].lineName || "").trim();
-      if (name) return name;
-    }
-    return "—";
-  }
-
   // API 未提供金額欄位時，從配送歷程文字反推訂金與訂單成立日期
   function deriveSummaryFallbackFromHistory(data) {
     const out = { depositAmount: 0, depositPaidDate: "", orderDate: "" };
@@ -3113,7 +3093,6 @@
       || fallback.orderDate
       || (data && data.updated) || ""
     );
-    document.getElementById("rGroupTitle").innerText = resolveGroupTitle(data);
     const unitPriceEl = document.getElementById("rUnitPrice");
     unitPriceEl.innerText = unitInfo.text;
     unitPriceEl.classList.toggle("is-multi-price", !!unitInfo.multi);
