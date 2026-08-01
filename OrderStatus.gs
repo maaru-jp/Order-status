@@ -626,6 +626,14 @@ function resolvePublicMemberCardParam_(params) {
   return "";
 }
 
+function orderProductNetPublic_(ord) {
+  var sub = Number(ord && ord.subtotal) || 0;
+  var disc = Number(ord && ord.discount) || 0;
+  if (isNaN(disc)) disc = 0;
+  var pts = Math.floor(Number(ord && ord.pointsUsed) || 0);
+  return Math.max(0, Math.ceil(sub - disc - pts));
+}
+
 function orderEffectiveShippingPublic_(ord) {
   var fee = Number(ord && ord.shippingFee);
   if (isNaN(fee)) fee = 38;
@@ -635,15 +643,80 @@ function orderEffectiveShippingPublic_(ord) {
 }
 
 function orderAmountDuePublic_(ord) {
-  var sub = Number(ord && ord.subtotal) || 0;
-  var disc = Number(ord && ord.discount) || 0;
-  if (isNaN(disc)) disc = 0;
-  var pts = Math.floor(Number(ord && ord.pointsUsed) || 0);
+  var net = orderProductNetPublic_(ord);
   var ship = orderEffectiveShippingPublic_(ord);
   var dep = Number(ord && ord.depositAmount) || 0;
   if (isNaN(dep) || dep < 0) dep = 0;
-  var gross = Math.max(0, Math.ceil(sub - disc - pts + ship));
+  var gross = Math.max(0, Math.ceil(net + ship));
   return dep > 0 ? Math.max(0, gross - dep) : gross;
+}
+
+function parseDepositPaidDatePublic_(depositRemark, fallbackDate) {
+  var text = String(depositRemark || "").trim();
+  var m = text.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) {
+    return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
+  }
+  return normalizeSheetDateValue_(fallbackDate) || "";
+}
+
+function buildPublicGroupTitle_(ord, items) {
+  var product = String(ord && ord.product || "").trim();
+  if (product) {
+    var first = product.split(/\n|；|;/).map(function(s) {
+      return String(s || "").trim();
+    }).filter(Boolean)[0];
+    if (first && !isPublicUrlLike_(first)) return first;
+  }
+  if (items && items.length && items[0].name) return String(items[0].name).trim();
+  return "";
+}
+
+function findShopOrderByIdPublic_(orderId) {
+  try {
+    var all = getCustomerOrdersFromShopSheet_();
+    for (var i = 0; i < (all || []).length; i++) {
+      if (orderIdsEquivalent_(all[i].id, orderId)) return all[i];
+    }
+  } catch (err) {
+    Logger.log("[findShopOrderByIdPublic_] " + err);
+  }
+  return null;
+}
+
+function enrichOrderStatusWithShopOrder_(result, orderId) {
+  if (!result || result.error) return result;
+  var shop = findShopOrderByIdPublic_(orderId);
+  if (!shop) return result;
+  var items = Array.isArray(result.items) && result.items.length
+    ? result.items
+    : (Array.isArray(shop.items) ? shop.items.map(mapPublicStatusItem_) : []);
+  var net = orderProductNetPublic_(shop);
+  var ship = orderEffectiveShippingPublic_(shop);
+  var dep = Number(shop.depositAmount) || 0;
+  var depositRemark = String(shop.depositRemark || "").trim();
+  var orderDate = normalizeSheetDateValue_(shop.date) || result.updated || "";
+  var groupTitle = buildPublicGroupTitle_(shop, items) || buildPublicGroupTitle_({ product: result.product }, items);
+  var shippingMethod = String(shop.shippingMethod || "").trim() || "賣貨便";
+  result.orderDate = orderDate;
+  result.groupTitle = groupTitle;
+  result.subtotal = Number(shop.subtotal) || 0;
+  result.discount = Number(shop.discount) || 0;
+  result.pointsUsed = Math.floor(Number(shop.pointsUsed) || 0);
+  result.productNet = net;
+  result.shippingFee = ship;
+  result.shippingMethod = shippingMethod;
+  result.shippingStatus = String(shop.shippingStatus || "").trim();
+  result.depositAmount = dep;
+  result.depositRemark = depositRemark;
+  result.depositPaidDate = parseDepositPaidDatePublic_(depositRemark, shop.preorderDate || shop.date);
+  result.amountDue = orderAmountDuePublic_(shop);
+  if (!result.product && shop.product) result.product = String(shop.product);
+  if ((!result.items || !result.items.length) && items.length) {
+    result.items = items;
+    result.itemSummary = buildPublicItemSummary_(items);
+  }
+  return result;
 }
 
 function sanitizePublicOrderItem_(it) {
@@ -673,14 +746,19 @@ function sanitizePublicOrder_(ord) {
     subtotal: Number(ord && ord.subtotal) || 0,
     discount: Number(ord && ord.discount) || 0,
     pointsUsed: Math.floor(Number(ord && ord.pointsUsed) || 0),
+    productNet: orderProductNetPublic_(ord),
     shippingFee: orderEffectiveShippingPublic_(ord),
+    shippingStatus: String(ord && ord.shippingStatus != null ? ord.shippingStatus : "").trim(),
     depositAmount: Number(ord && ord.depositAmount) || 0,
+    depositRemark: String(ord && ord.depositRemark != null ? ord.depositRemark : "").trim(),
+    depositPaidDate: parseDepositPaidDatePublic_(ord && ord.depositRemark, ord && (ord.preorderDate || ord.date)),
     amountDue: orderAmountDuePublic_(ord),
     pointsEarned: Math.floor(Number(ord && ord.pointsEarned) || 0),
     linkedOrderIds: String(ord && ord.linkedOrderIds != null ? ord.linkedOrderIds : "").trim(),
     preorderDate: ord && ord.preorderDate != null ? String(ord.preorderDate) : "",
     shipDate: ord && ord.shipDate != null ? String(ord.shipDate) : "",
-    shippingMethod: String(ord && ord.shippingMethod != null ? ord.shippingMethod : "").trim(),
+    shippingMethod: String(ord && ord.shippingMethod != null ? ord.shippingMethod : "").trim() || "賣貨便",
+    groupTitle: buildPublicGroupTitle_(ord, items),
     items: items
   };
 }
@@ -1183,7 +1261,20 @@ function getSheet1OrderStatusPublic_(ss, id) {
     note: sanitizePublicOrderNote_({ remark: note }),
     history: history,
     status: trackingStatus,
-    updated: updated
+    updated: updated,
+    orderDate: updated || "",
+    groupTitle: buildPublicGroupTitle_({ product: product }, items),
+    productNet: 0,
+    subtotal: 0,
+    discount: 0,
+    pointsUsed: 0,
+    shippingFee: 0,
+    shippingMethod: "賣貨便",
+    shippingStatus: "",
+    depositAmount: 0,
+    depositRemark: "",
+    depositPaidDate: "",
+    amountDue: 0
   };
 }
 
@@ -1499,7 +1590,7 @@ function getOrderStatusPublic_(params) {
 
   var result = getSheet1OrderStatusPublic_(ss, id);
   if (result && result.error === false) {
-    return result;
+    return enrichOrderStatusWithShopOrder_(result, id);
   }
   return {
     error: true,
