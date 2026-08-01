@@ -329,12 +329,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .summary-money-row .money-value.is-multi-price {
-      white-space: normal;
-      text-align: right;
-      line-height: 1.5;
-    }
-
     .summary-money-row.is-deposit .money-value,
     .deposit-paid-amount,
     .deposit-paid-date {
@@ -345,6 +339,83 @@
     .deposit-paid-mark {
       color: var(--jp-amber-deep);
       font-weight: 700;
+    }
+
+    .line-items-box {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(125, 157, 140, 0.35);
+    }
+
+    .line-items-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--jp-matcha-deep);
+      letter-spacing: 0.04em;
+    }
+
+    .line-items-heading .line-items-count {
+      color: var(--jp-ink-soft);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .line-item {
+      padding: 10px 0;
+      border-top: 1px solid rgba(234, 223, 214, 0.9);
+    }
+
+    .line-item:first-of-type {
+      border-top: none;
+      padding-top: 2px;
+    }
+
+    .line-item-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3f3a36;
+      line-height: 1.45;
+      word-break: break-word;
+      margin-bottom: 6px;
+    }
+
+    .line-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line-item-calc {
+      color: var(--jp-ink-soft);
+      min-width: 0;
+    }
+
+    .line-item-subtotal {
+      color: #3f3a36;
+      white-space: nowrap;
+    }
+
+    .line-item-subtotal strong {
+      color: var(--jp-matcha-deep);
+      font-weight: 800;
+    }
+
+    .product-price-line {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--jp-matcha-deep);
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
     }
 
     .summary-money-due {
@@ -2104,14 +2175,25 @@
 
             <div class="summary-money" id="rMoneyBox">
               <div class="summary-money-block">
-                <div class="summary-money-row">
-                  <span class="money-label">單價</span>
-                  <span class="money-value" id="rUnitPrice">NT$—</span>
+                <div class="line-items-box" id="rLineItemsBox" style="display:none;">
+                  <div class="line-items-heading">
+                    <span>商品明細</span>
+                    <span class="line-items-count" id="rLineItemsCount"></span>
+                  </div>
+                  <div id="rLineItems"></div>
                 </div>
-                <div class="summary-money-row">
-                  <span class="money-label">數量</span>
-                  <span class="money-value" id="rQty">—</span>
+
+                <div id="rSimplePriceQty">
+                  <div class="summary-money-row">
+                    <span class="money-label">單價</span>
+                    <span class="money-value" id="rUnitPrice">NT$—</span>
+                  </div>
+                  <div class="summary-money-row">
+                    <span class="money-label">數量</span>
+                    <span class="money-value" id="rQty">—</span>
+                  </div>
                 </div>
+
                 <div class="summary-money-row">
                   <span class="money-label">總金額</span>
                   <span class="money-value" id="rProductNet">NT$—</span>
@@ -3024,53 +3106,101 @@
     return out;
   }
 
-  function resolveUnitPriceAndQty(data) {
+  function getOrderLineItems(data) {
     const items = Array.isArray(data && data.items) ? data.items : [];
-    const rows = [];
-    let totalQty = 0;
-    let allPriced = items.length > 0;
-
-    for (let i = 0; i < items.length; i++) {
-      const it = items[i] || {};
-      let qty = Math.max(0, Math.floor(Number(it.qty != null ? it.qty : it.quantity) || 0));
+    return items.map(function(it) {
+      let qty = Math.max(0, Math.floor(Number(it && (it.qty != null ? it.qty : it.quantity)) || 0));
       if (!qty) qty = 1;
-      totalQty += qty;
-      const priceRaw = it.price;
+      const priceRaw = it && it.price;
       const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw)))
         ? Math.max(0, Math.round(Number(priceRaw)))
         : null;
-      if (price == null) allPriced = false;
-      rows.push({ name: String(it.name || "").trim(), price: price, qty: qty });
-    }
-    if (totalQty <= 0) totalQty = 1;
+      return {
+        name: String((it && (it.name || it.lineName)) || "").trim() || "商品",
+        qty: qty,
+        price: price,
+        lineTotal: price != null ? price * qty : null
+      };
+    });
+  }
 
-    if (allPriced) {
-      const distinct = rows.map(function(r) { return r.price; }).filter(function(p, idx, arr) {
-        return arr.indexOf(p) === idx;
-      });
-      if (distinct.length === 1) {
-        return { text: formatMoneyNT(distinct[0]), qty: totalQty, multi: false };
+  function shouldShowLineItemBreakdown(lines) {
+    if (!lines || lines.length <= 1) return false;
+    const prices = lines.map(function(l) { return l.price; });
+    const qtys = lines.map(function(l) { return l.qty; });
+    const hasAnyPrice = prices.some(function(p) { return p != null; });
+    const priceVary = hasAnyPrice && prices.some(function(p) { return p !== prices[0]; });
+    const qtyVary = qtys.some(function(q) { return q !== qtys[0]; });
+    return lines.length >= 2 || priceVary || qtyVary;
+  }
+
+  function renderLineItemsBreakdown(data) {
+    const box = document.getElementById("rLineItemsBox");
+    const listEl = document.getElementById("rLineItems");
+    const countEl = document.getElementById("rLineItemsCount");
+    const simpleEl = document.getElementById("rSimplePriceQty");
+    const lines = getOrderLineItems(data);
+    const useBreakdown = shouldShowLineItemBreakdown(lines);
+
+    if (!useBreakdown) {
+      box.style.display = "none";
+      listEl.innerHTML = "";
+      countEl.innerText = "";
+      simpleEl.style.display = "";
+      const first = lines[0] || { price: null, qty: 1 };
+      let unitPrice = first.price;
+      if (unitPrice == null) {
+        const sub = Number(data && data.subtotal);
+        const qty = first.qty || 1;
+        if (!isNaN(sub) && sub > 0) unitPrice = Math.round(sub / qty);
+        else {
+          const net = computeProductNet(data);
+          if (net > 0) unitPrice = Math.round(net / qty);
+        }
       }
-      const text = rows.map(function(r) {
-        return formatMoneyNT(r.price) + " × " + r.qty;
-      }).join("、");
-      return { text: text, qty: totalQty, multi: true };
+      document.getElementById("rUnitPrice").innerText =
+        unitPrice != null && !isNaN(unitPrice) ? formatMoneyNT(Math.max(0, unitPrice)) : "—";
+      document.getElementById("rQty").innerText = "× " + (first.qty || 1);
+      return;
     }
 
-    let unitPrice = null;
-    const sub = Number(data && data.subtotal);
-    if (!isNaN(sub) && sub > 0) {
-      unitPrice = Math.round(sub / totalQty);
-    } else {
-      const net = computeProductNet(data);
-      if (net > 0) unitPrice = Math.round(net / totalQty);
-    }
+    simpleEl.style.display = "none";
+    box.style.display = "block";
+    const totalQty = lines.reduce(function(sum, l) { return sum + l.qty; }, 0);
+    countEl.innerText = lines.length + " 項／共 " + totalQty + " 件";
+    listEl.innerHTML = "";
 
-    return {
-      text: unitPrice != null && !isNaN(unitPrice) ? formatMoneyNT(Math.max(0, unitPrice)) : "—",
-      qty: totalQty,
-      multi: false
-    };
+    lines.forEach(function(line, idx) {
+      const row = document.createElement("div");
+      row.className = "line-item";
+
+      const name = document.createElement("div");
+      name.className = "line-item-name";
+      name.innerText = (idx + 1) + ". " + line.name;
+      row.appendChild(name);
+
+      const meta = document.createElement("div");
+      meta.className = "line-item-meta";
+
+      const calc = document.createElement("div");
+      calc.className = "line-item-calc";
+      calc.innerText = line.price != null
+        ? ("單價 " + formatMoneyNT(line.price) + "  × " + line.qty)
+        : ("數量 × " + line.qty);
+
+      const sub = document.createElement("div");
+      sub.className = "line-item-subtotal";
+      if (line.lineTotal != null) {
+        sub.innerHTML = "小計 <strong>" + formatMoneyNT(line.lineTotal) + "</strong>";
+      } else {
+        sub.innerText = "—";
+      }
+
+      meta.appendChild(calc);
+      meta.appendChild(sub);
+      row.appendChild(meta);
+      listEl.appendChild(row);
+    });
   }
 
   function renderOrderMoneySummary(data) {
@@ -3086,17 +3216,13 @@
       (data && (data.depositPaidDate || data.preorderDate || data.orderDate || data.date))
       || fallback.depositPaidDate || ""
     );
-    const unitInfo = resolveUnitPriceAndQty(data);
 
     document.getElementById("rOrderDate").innerText = formatSummaryDate(
       (data && (data.orderDate || data.date))
       || fallback.orderDate
       || (data && data.updated) || ""
     );
-    const unitPriceEl = document.getElementById("rUnitPrice");
-    unitPriceEl.innerText = unitInfo.text;
-    unitPriceEl.classList.toggle("is-multi-price", !!unitInfo.multi);
-    document.getElementById("rQty").innerText = "× " + unitInfo.qty;
+    renderLineItemsBreakdown(data || {});
     document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
 
     const depositEl = document.getElementById("rDeposit");
@@ -4086,6 +4212,19 @@
     qtyEl.innerText = "數量 × " + qty;
     body.appendChild(qtyEl);
 
+    const priceRaw = item.price;
+    const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw)))
+      ? Math.max(0, Math.round(Number(priceRaw)))
+      : null;
+    if (price != null) {
+      const priceEl = document.createElement("div");
+      priceEl.className = "product-price-line";
+      priceEl.innerText = "單價 " + formatMoneyNT(price)
+        + "  × " + qty
+        + " ＝ " + formatMoneyNT(price * qty);
+      body.appendChild(priceEl);
+    }
+
     const badge = document.createElement("span");
     badge.className = "item-status-badge " + (code === "shipped" ? "done" : "wait");
     badge.innerText = (code === "shipped" ? "✓ " : "⏳ ") + (item.itemStatus || (code === "shipped" ? "已出貨" : "待出貨"));
@@ -4110,7 +4249,7 @@
 
     const ul = document.createElement("ul");
     ul.className = "product-list";
-    const defaultVisibleCount = 2;
+    const defaultVisibleCount = list.length <= 6 ? list.length : 3;
     const isExpandable = list.length > defaultVisibleCount;
     let isExpanded = false;
 
