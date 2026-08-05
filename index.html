@@ -549,6 +549,94 @@
       background: linear-gradient(180deg, #fff9f3 0%, #ffffff 45%);
     }
 
+    .product-card.is-cancelled {
+      border-top-color: #d87979;
+      background: linear-gradient(180deg, #fff5f5 0%, #ffffff 45%);
+      opacity: 0.92;
+    }
+
+    .product-card.is-cancelled .product-name {
+      text-decoration: line-through;
+      color: #8a6f6f;
+    }
+
+    .product-card.is-cancelled .product-qty,
+    .product-card.is-cancelled .product-price-line {
+      color: #a08080;
+      text-decoration: line-through;
+    }
+
+    .product-cancel-note {
+      margin-top: 4px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #c45c5c;
+      line-height: 1.4;
+    }
+
+    .item-status-badge.cancel {
+      color: #b42318;
+      background: #fef3f2;
+      border: 1px solid #f5c2c0;
+    }
+
+    .line-item.is-cancelled .line-item-name {
+      text-decoration: line-through;
+      color: #8a6f6f;
+    }
+
+    .line-item-cancel-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #b42318;
+      background: #fef3f2;
+      border: 1px solid #f5c2c0;
+      text-decoration: none;
+      vertical-align: middle;
+    }
+
+    .summary-money-row.is-cancel .money-value {
+      color: #b42318;
+      font-weight: 800;
+    }
+
+    .summary-money-row.is-credit .money-value {
+      color: var(--jp-amber-deep);
+      font-weight: 800;
+    }
+
+    .summary-credit-note {
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--jp-ink-soft);
+      line-height: 1.45;
+    }
+
+    .summary-credit-note a {
+      color: var(--jp-matcha-deep);
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .order-list-tag.cancel {
+      color: #b42318;
+      background: #fef3f2;
+      border-color: #f5c2c0;
+    }
+
+    .order-list-tag.credit {
+      color: var(--jp-amber-deep);
+      background: var(--jp-amber-soft);
+      border-color: #f0d7a8;
+    }
+
     .product-body {
       width: 100%;
       min-width: 0;
@@ -2262,7 +2350,7 @@
   <aside class="brand">
     <!-- 🔧 把這張圖換成你的 MAARU Logo -->
     <img src="S__283426825.jpg">
-    <h2>MAARU 日韓萌物GO</h2>
+    <h2>MAARU 日本萌GO</h2>
     <p>日本代購｜訂單查詢</p>
     <nav class="brand-nav" aria-label="快速連結">
       <a class="brand-nav-btn brand-nav-btn--shop" href="https://maaru-jp.github.io/ProductManagement2/index.html#/" target="_blank" rel="noopener">
@@ -2309,7 +2397,7 @@
       <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
         <div class="detail-loading-spinner" aria-hidden="true"></div>
         <div class="detail-loading-title" id="detailLoadingTitle">正在開啟訂單明細…</div>
-        <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中</div>
+        <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
         <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
       </div>
 
@@ -2357,10 +2445,24 @@
                   <span class="money-label">總金額</span>
                   <span class="money-value" id="rProductNet">NT$—</span>
                 </div>
+                <div class="summary-money-row is-cancel" id="rCancelledRow" style="display:none;">
+                  <span class="money-label">缺貨取消扣除</span>
+                  <span class="money-value" id="rCancelledAmount">−NT$0</span>
+                </div>
+                <div class="summary-money-row is-credit" id="rCreditOutRow" style="display:none;">
+                  <span class="money-label">已轉移至其他團</span>
+                  <span class="money-value" id="rCreditOutAmount">NT$0</span>
+                </div>
+                <div class="summary-credit-note" id="rCreditOutNote" style="display:none;"></div>
                 <div class="summary-money-row is-deposit" id="rDepositRow">
                   <span class="money-label">訂金</span>
                   <span class="money-value" id="rDeposit">NT$—</span>
                 </div>
+                <div class="summary-money-row is-credit" id="rCreditInRow" style="display:none;">
+                  <span class="money-label">跨團轉入抵扣</span>
+                  <span class="money-value" id="rCreditInAmount">NT$0</span>
+                </div>
+                <div class="summary-credit-note" id="rCreditInNote" style="display:none;"></div>
               </div>
 
               <div class="summary-money-block">
@@ -2496,7 +2598,7 @@
       </div>
 
       <div class="footer">
-        如有疑問請聯絡 MAARU SHOP LINE官方帳號
+        如有疑問請聯絡 MAARU LINE官方帳號
       </div>
 
     </div>
@@ -2810,7 +2912,8 @@
 
   function mapCustomerOrderItem(it) {
     const label = String((it && (it.shipStatus || it.itemStatus)) || "待出貨").trim() || "待出貨";
-    const shipped = /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(label);
+    const cancelled = isCancelledItemStatus(label);
+    const shipped = !cancelled && /已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(label);
     const qty = Math.max(0, Math.floor(Number(it && (it.qty != null ? it.qty : it.quantity)) || 0));
     const priceRaw = it && it.price;
     const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw))) ? Number(priceRaw) : null;
@@ -2819,9 +2922,14 @@
       image: "",
       qty: qty > 0 ? qty : 1,
       price: price,
-      itemStatus: label,
-      itemStatusCode: shipped ? "shipped" : "pending"
+      itemStatus: cancelled ? "缺貨取消" : label,
+      itemStatusCode: cancelled ? "cancelled" : (shipped ? "shipped" : "pending")
     };
+  }
+
+  function isCancelledItemStatus(label) {
+    const st = String(label || "").trim();
+    return st === "缺貨取消" || st === "已取消" || (st.indexOf("缺貨") >= 0 && st.indexOf("取消") >= 0);
   }
 
   function parseProductLinesToItems(productText) {
@@ -2855,17 +2963,20 @@
     let shipped = 0;
     let pendingArrival = 0;
     let pendingShip = 0;
+    let active = 0;
     list.forEach(function(it) {
       const label = String(it.itemStatus || "").trim() || "待出貨";
+      if (it.itemStatusCode === "cancelled" || isCancelledItemStatus(label)) return;
+      active += 1;
       if (isShippedItemLabel(label)) shipped += 1;
       else if (label === "待到貨") pendingArrival += 1;
       else pendingShip += 1;
     });
-    const total = list.length;
-    if (shipped === total) return "已出貨";
+    if (active === 0) return "缺貨取消";
+    if (shipped === active) return "已出貨";
     if (shipped > 0) return "部分已出貨";
-    if (pendingArrival === total || pendingArrival > 0) return "待到貨";
-    if (pendingShip === total) return "待出貨";
+    if (pendingArrival === active || pendingArrival > 0) return "待到貨";
+    if (pendingShip === active) return "待出貨";
     const st = String(orderStatus || "").trim();
     if (st === "出貨中") return "集運中";
     if (st === "已確認") return "已採購";
@@ -2922,16 +3033,35 @@
       ? names.join("\n")
       : String((ord && ord.product) || "").trim();
 
+    const draft = {
+      items: items,
+      subtotal: Number(ord && ord.subtotal) || 0,
+      discount: Number(ord && ord.discount) || 0,
+      pointsUsed: Math.floor(Number(ord && ord.pointsUsed) || 0),
+      cancelledAmount: Number(ord && ord.cancelledAmount) || 0,
+      creditInAmount: Math.max(0, Math.round(Number(ord && ord.creditInAmount) || 0)),
+      creditInFromOrderId: String((ord && ord.creditInFromOrderId) || "").trim(),
+      creditOutAmount: Math.max(0, Math.round(Number(ord && ord.creditOutAmount) || 0)),
+      creditOutToOrderId: String((ord && ord.creditOutToOrderId) || "").trim()
+    };
     const productNet = ord && ord.productNet != null
       ? Number(ord.productNet)
-      : Math.max(0, Math.ceil(
-        (Number(ord && ord.subtotal) || 0)
-        - (Number(ord && ord.discount) || 0)
-        - Math.floor(Number(ord && ord.pointsUsed) || 0)
-      ));
+      : computeProductNet(draft);
     const shipInfo = resolveEffectiveShippingFee(ord || {});
     const shippingFee = shipInfo.fee;
     const depositAmount = Math.max(0, Math.round(Number(ord && ord.depositAmount) || 0));
+    const cancelledAmount = computeCancelledAmount(Object.assign({}, draft, { items: items }));
+
+    if (cancelledAmount > 0) {
+      history.push({
+        time: orderDate || "",
+        status: "缺貨取消",
+        note: "缺貨取消扣除 NT$" + cancelledAmount
+          + (draft.creditOutToOrderId
+            ? ("，已轉移至 " + draft.creditOutToOrderId + " 折抵")
+            : "")
+      });
+    }
 
     return {
       error: false,
@@ -2957,9 +3087,14 @@
       depositAmount: depositAmount,
       depositRemark: String((ord && ord.depositRemark) || "").trim(),
       depositPaidDate: String((ord && ord.depositPaidDate) || "").trim() || orderDate,
+      cancelledAmount: cancelledAmount,
+      creditInAmount: draft.creditInAmount,
+      creditInFromOrderId: draft.creditInFromOrderId,
+      creditOutAmount: draft.creditOutAmount,
+      creditOutToOrderId: draft.creditOutToOrderId,
       amountDue: ord && ord.amountDue != null
         ? Number(ord.amountDue)
-        : Math.max(0, productNet + shippingFee - depositAmount)
+        : Math.max(0, productNet + shippingFee - depositAmount - draft.creditInAmount)
     };
   }
 
@@ -2995,7 +3130,9 @@
     const copy = [
       "subtotal", "discount", "pointsUsed", "shippingFee", "shippingStatus",
       "depositAmount", "depositRemark", "amountDue", "shippingMethod",
-      "preorderDate", "shipDate", "pointsEarned", "linkedOrderIds", "remark", "note"
+      "preorderDate", "shipDate", "pointsEarned", "linkedOrderIds", "remark", "note",
+      "cancelledAmount", "creditInAmount", "creditInFromOrderId",
+      "creditOutAmount", "creditOutToOrderId", "productNet"
     ];
     copy.forEach(function(key) {
       if ((data[key] == null || data[key] === "") && src[key] != null && src[key] !== "") {
@@ -3246,21 +3383,52 @@
     return iso.replace(/-/g, "/");
   }
 
+  function computeCancelledAmount(data) {
+    if (data && data.cancelledAmount != null && data.cancelledAmount !== "") {
+      return Math.max(0, Math.round(Number(data.cancelledAmount) || 0));
+    }
+    const items = Array.isArray(data && data.items) ? data.items : [];
+    let sum = 0;
+    items.forEach(function(it) {
+      const label = String(it.itemStatus || it.shipStatus || "").trim();
+      if (!(it.itemStatusCode === "cancelled" || isCancelledItemStatus(label))) return;
+      const qty = Math.max(1, Math.floor(Number(it.qty) || 1));
+      const price = Number(it.price);
+      if (!isNaN(price)) sum += price * qty;
+    });
+    return Math.max(0, Math.round(sum));
+  }
+
   function computeProductNet(data) {
     if (data && data.productNet != null && data.productNet !== "") {
       return Math.max(0, Math.round(Number(data.productNet) || 0));
     }
-    const sub = Number(data && data.subtotal) || 0;
+    const items = Array.isArray(data && data.items) ? data.items : [];
+    let fromItems = 0;
+    let hasPricedActive = false;
+    items.forEach(function(it) {
+      const label = String(it.itemStatus || it.shipStatus || "").trim();
+      if (it.itemStatusCode === "cancelled" || isCancelledItemStatus(label)) return;
+      const price = Number(it.price);
+      if (isNaN(price)) return;
+      hasPricedActive = true;
+      const qty = Math.max(1, Math.floor(Number(it.qty) || 1));
+      fromItems += price * qty;
+    });
+    let sub = hasPricedActive
+      ? fromItems
+      : Math.max(0, (Number(data && data.subtotal) || 0) - computeCancelledAmount(data));
     const disc = Number(data && data.discount) || 0;
     const pts = Math.floor(Number(data && data.pointsUsed) || 0);
     return Math.max(0, Math.ceil(sub - disc - pts));
   }
 
   function computeAmountDue(data, productNet, shippingFee, depositAmount) {
+    const creditIn = Math.max(0, Math.round(Number(data && data.creditInAmount) || 0));
     if (data && data.amountDue != null && data.amountDue !== "") {
       return Math.max(0, Math.round(Number(data.amountDue) || 0));
     }
-    return Math.max(0, Math.ceil(productNet + shippingFee - depositAmount));
+    return Math.max(0, Math.ceil(productNet + shippingFee - depositAmount - creditIn));
   }
 
   // API 未提供金額欄位時，從配送歷程文字反推訂金與訂單成立日期
@@ -3294,17 +3462,22 @@
       const price = (priceRaw != null && priceRaw !== "" && !isNaN(Number(priceRaw)))
         ? Math.max(0, Math.round(Number(priceRaw)))
         : null;
+      const label = String((it && (it.itemStatus || it.shipStatus)) || "").trim();
+      const cancelled = (it && it.itemStatusCode === "cancelled") || isCancelledItemStatus(label);
       return {
         name: String((it && (it.name || it.lineName)) || "").trim() || "商品",
         qty: qty,
         price: price,
-        lineTotal: price != null ? price * qty : null
+        cancelled: cancelled,
+        lineTotal: (!cancelled && price != null) ? price * qty : null
       };
     });
   }
 
   function shouldShowLineItemBreakdown(lines) {
-    if (!lines || lines.length <= 1) return false;
+    if (!lines || !lines.length) return false;
+    if (lines.some(function(l) { return l.cancelled; })) return true;
+    if (lines.length <= 1) return false;
     const prices = lines.map(function(l) { return l.price; });
     const qtys = lines.map(function(l) { return l.qty; });
     const hasAnyPrice = prices.some(function(p) { return p != null; });
@@ -3351,11 +3524,12 @@
 
     lines.forEach(function(line, idx) {
       const row = document.createElement("div");
-      row.className = "line-item";
+      row.className = "line-item" + (line.cancelled ? " is-cancelled" : "");
 
       const name = document.createElement("div");
       name.className = "line-item-name";
-      name.innerText = (idx + 1) + ". " + line.name;
+      name.innerHTML = escapeHtmlText((idx + 1) + ". " + line.name)
+        + (line.cancelled ? '<span class="line-item-cancel-tag">缺貨取消</span>' : "");
       row.appendChild(name);
 
       const meta = document.createElement("div");
@@ -3369,7 +3543,11 @@
 
       const sub = document.createElement("div");
       sub.className = "line-item-subtotal";
-      if (line.lineTotal != null) {
+      if (line.cancelled) {
+        sub.innerHTML = line.price != null
+          ? ("原 " + formatMoneyNT(line.price * line.qty) + " → <strong>不計入</strong>")
+          : "<strong>不計入</strong>";
+      } else if (line.lineTotal != null) {
         sub.innerHTML = "小計 <strong>" + formatMoneyNT(line.lineTotal) + "</strong>";
       } else {
         sub.innerText = "—";
@@ -3380,6 +3558,14 @@
       row.appendChild(meta);
       listEl.appendChild(row);
     });
+  }
+
+  function escapeHtmlText(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function resolveEffectiveShippingFee(data) {
@@ -3429,6 +3615,38 @@
     renderLineItemsBreakdown(data || {});
     document.getElementById("rProductNet").innerText = formatMoneyNT(productNet);
 
+    const cancelledAmount = computeCancelledAmount(data);
+    const creditOutAmount = Math.max(0, Math.round(Number(data && data.creditOutAmount) || 0));
+    const creditOutTo = String((data && data.creditOutToOrderId) || "").trim();
+    const creditInAmount = Math.max(0, Math.round(Number(data && data.creditInAmount) || 0));
+    const creditInFrom = String((data && data.creditInFromOrderId) || "").trim();
+
+    const cancelledRow = document.getElementById("rCancelledRow");
+    if (cancelledRow) {
+      cancelledRow.style.display = cancelledAmount > 0 ? "flex" : "none";
+      document.getElementById("rCancelledAmount").innerText = "−" + formatMoneyNT(cancelledAmount);
+    }
+
+    const creditOutRow = document.getElementById("rCreditOutRow");
+    const creditOutNote = document.getElementById("rCreditOutNote");
+    if (creditOutRow) {
+      const showOut = creditOutAmount > 0 && !!creditOutTo;
+      creditOutRow.style.display = showOut ? "flex" : "none";
+      document.getElementById("rCreditOutAmount").innerText = formatMoneyNT(creditOutAmount);
+      if (creditOutNote) {
+        if (showOut) {
+          creditOutNote.style.display = "block";
+          creditOutNote.innerHTML = "因缺貨無法供貨，已轉至 "
+            + '<a href="#" data-jump-order="' + escapeHtmlText(creditOutTo) + '">'
+            + escapeHtmlText(toOrderStatusQueryId(creditOutTo) || creditOutTo)
+            + "</a> 折抵。";
+        } else {
+          creditOutNote.style.display = "none";
+          creditOutNote.innerHTML = "";
+        }
+      }
+    }
+
     const depositEl = document.getElementById("rDeposit");
     if (depositAmount > 0) {
       const paidMark = depositPaidDate
@@ -3440,6 +3658,29 @@
       depositEl.textContent = "NT$0";
     }
 
+    const creditInRow = document.getElementById("rCreditInRow");
+    const creditInNote = document.getElementById("rCreditInNote");
+    if (creditInRow) {
+      const showIn = creditInAmount > 0;
+      creditInRow.style.display = showIn ? "flex" : "none";
+      document.getElementById("rCreditInAmount").innerText = "−" + formatMoneyNT(creditInAmount);
+      if (creditInNote) {
+        if (showIn && creditInFrom) {
+          creditInNote.style.display = "block";
+          creditInNote.innerHTML = "已自 "
+            + '<a href="#" data-jump-order="' + escapeHtmlText(creditInFrom) + '">'
+            + escapeHtmlText(toOrderStatusQueryId(creditInFrom) || creditInFrom)
+            + "</a> 缺貨取消款轉入本單折抵。";
+        } else if (showIn) {
+          creditInNote.style.display = "block";
+          creditInNote.innerText = "已自其他團訂單轉入本單折抵。";
+        } else {
+          creditInNote.style.display = "none";
+          creditInNote.innerHTML = "";
+        }
+      }
+    }
+
     const shipLabel = shippingMethod.indexOf("運費") >= 0 ? shippingMethod : (shippingMethod + "運費");
     document.getElementById("rShippingLabel").innerText = shipLabel;
     document.getElementById("rShippingFee").innerText = formatShippingFeeDisplay(shipInfo);
@@ -3448,8 +3689,17 @@
     document.getElementById("rAmountFormula").innerText =
       "＝（訂單總金額 " + formatMoneyNT(productNet)
       + " − 訂金 " + formatMoneyNT(depositAmount)
+      + (creditInAmount > 0 ? (" − 跨團轉入 " + formatMoneyNT(creditInAmount)) : "")
       + " ＋ " + shipLabel + " " + formatMoneyNT(shippingFee)
       + "）";
+
+    document.querySelectorAll("[data-jump-order]").forEach(function(a) {
+      a.addEventListener("click", function(e) {
+        e.preventDefault();
+        const oid = a.getAttribute("data-jump-order");
+        if (oid) openOrderDetail(oid, true);
+      });
+    });
   }
 
   function showOrderOpenToast(queryId) {
@@ -3648,9 +3898,11 @@
     let pendingArrival = 0;
     let pendingShip = 0;
     let shipped = 0;
+    let cancelled = 0;
     items.forEach(function(it) {
       const ship = String(it && it.shipStatus || "待出貨").trim() || "待出貨";
-      if (ship === "待到貨") pendingArrival += 1;
+      if (isCancelledItemStatus(ship)) cancelled += 1;
+      else if (ship === "待到貨") pendingArrival += 1;
       else if (ship === "已出貨") shipped += 1;
       else pendingShip += 1;
     });
@@ -3659,8 +3911,11 @@
       pendingArrival: pendingArrival,
       pendingShip: pendingShip,
       shipped: shipped,
+      cancelled: cancelled,
       firstName: items.length ? String(items[0].lineName || "").trim() : "",
-      productText: String(ord && ord.product || "").trim()
+      productText: String(ord && ord.product || "").trim(),
+      creditInAmount: Math.max(0, Math.round(Number(ord && ord.creditInAmount) || 0)),
+      creditOutAmount: Math.max(0, Math.round(Number(ord && ord.creditOutAmount) || 0))
     };
   }
 
@@ -3858,6 +4113,24 @@
           const t = document.createElement("span");
           t.className = "order-list-tag ok";
           t.innerText = "已出貨 " + summary.shipped;
+          tags.appendChild(t);
+        }
+        if (summary.cancelled > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag cancel";
+          t.innerText = "缺貨取消 " + summary.cancelled;
+          tags.appendChild(t);
+        }
+        if (summary.creditOutAmount > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag credit";
+          t.innerText = "已轉出抵扣";
+          tags.appendChild(t);
+        }
+        if (summary.creditInAmount > 0) {
+          const t = document.createElement("span");
+          t.className = "order-list-tag credit";
+          t.innerText = "有跨團轉入";
           tags.appendChild(t);
         }
         if (ord.status !== "已完成" && ord.status !== "已取消" && ord.amountDue > 0) {
@@ -4354,8 +4627,10 @@
 
   function normalizeItemStatusCode(code, label) {
     const c = String(code || "").trim();
+    if (c === "cancelled") return "cancelled";
     if (c === "shipped") return "shipped";
     const text = String(label || "").trim();
+    if (isCancelledItemStatus(text)) return "cancelled";
     if (/已出貨|已寄出|已到貨|配送中|賣貨便|7-11/.test(text)) return "shipped";
     return "pending";
   }
@@ -4395,7 +4670,7 @@
             image: image || (isUrlLike(rawName) ? rawName : ""),
             qty: qty,
             price: price,
-            itemStatus: code === "shipped" ? "已出貨" : (label || "待出貨"),
+            itemStatus: code === "cancelled" ? "缺貨取消" : (code === "shipped" ? "已出貨" : (label || "待出貨")),
             itemStatusCode: code
           };
         })
@@ -4423,8 +4698,14 @@
 
   function buildItemSummary(list) {
     const total = list.length;
+    const cancelled = list.filter(item => item.itemStatusCode === "cancelled").length;
     const shipped = list.filter(item => item.itemStatusCode === "shipped").length;
-    return { total, shipped, pending: Math.max(total - shipped, 0) };
+    return {
+      total,
+      shipped,
+      cancelled,
+      pending: Math.max(total - shipped - cancelled, 0)
+    };
   }
 
   function renderProductSummary(list, summaryData) {
@@ -4436,8 +4717,10 @@
     const wrap = document.createElement("div");
     wrap.className = "product-summary";
 
+    const activeTotal = Math.max(0, summary.total - (summary.cancelled || 0));
     const left = document.createElement("div");
-    left.innerHTML = "出貨進度 <strong>" + summary.shipped + " / " + summary.total + "</strong> 件";
+    left.innerHTML = "出貨進度 <strong>" + summary.shipped + " / " + activeTotal + "</strong> 件"
+      + (summary.cancelled ? ("（缺貨取消 " + summary.cancelled + "）") : "");
 
     const pills = document.createElement("div");
     pills.className = "product-summary-pills";
@@ -4452,6 +4735,15 @@
 
     pills.appendChild(donePill);
     pills.appendChild(waitPill);
+    if (summary.cancelled) {
+      const cancelPill = document.createElement("span");
+      cancelPill.className = "summary-pill wait";
+      cancelPill.style.color = "#b42318";
+      cancelPill.style.background = "#fef3f2";
+      cancelPill.style.borderColor = "#f5c2c0";
+      cancelPill.innerText = "缺貨取消 " + summary.cancelled;
+      pills.appendChild(cancelPill);
+    }
     wrap.appendChild(left);
     wrap.appendChild(pills);
     return wrap;
@@ -4459,8 +4751,11 @@
 
   function createProductCard(item) {
     const card = document.createElement("li");
-    const code = item.itemStatusCode === "shipped" ? "shipped" : "pending";
-    card.className = "product-card " + (code === "shipped" ? "is-shipped" : "is-pending");
+    const code = item.itemStatusCode === "cancelled"
+      ? "cancelled"
+      : (item.itemStatusCode === "shipped" ? "shipped" : "pending");
+    card.className = "product-card "
+      + (code === "shipped" ? "is-shipped" : (code === "cancelled" ? "is-cancelled" : "is-pending"));
 
     const thumbUrl = cloudinaryThumb(item.image);
     if (thumbUrl) {
@@ -4509,9 +4804,21 @@
       body.appendChild(priceEl);
     }
 
+    if (code === "cancelled") {
+      const note = document.createElement("div");
+      note.className = "product-cancel-note";
+      note.innerText = "因缺貨無法供貨，已自此訂單取消";
+      body.appendChild(note);
+    }
+
     const badge = document.createElement("span");
-    badge.className = "item-status-badge " + (code === "shipped" ? "done" : "wait");
-    badge.innerText = (code === "shipped" ? "✓ " : "⏳ ") + (item.itemStatus || (code === "shipped" ? "已出貨" : "待出貨"));
+    badge.className = "item-status-badge "
+      + (code === "shipped" ? "done" : (code === "cancelled" ? "cancel" : "wait"));
+    badge.innerText = code === "shipped"
+      ? ("✓ " + (item.itemStatus || "已出貨"))
+      : (code === "cancelled"
+        ? ("✕ " + (item.itemStatus || "缺貨取消"))
+        : ("⏳ " + (item.itemStatus || "待出貨")));
     body.appendChild(badge);
 
     card.appendChild(body);
