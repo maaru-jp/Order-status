@@ -534,10 +534,21 @@ function jsonOutput(obj) {
 
 function normalizeSheetDateValue_(val) {
   if (val == null || val === "") return "";
+  var tz = "Asia/Taipei";
   if (Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime())) {
-    return Utilities.formatDate(val, Session.getScriptTimeZone() || "Asia/Taipei", "yyyy-MM-dd");
+    return Utilities.formatDate(val, tz, "yyyy-MM-dd");
   }
   var s = String(val).trim();
+  var dateOnly = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+  if (dateOnly) {
+    return dateOnly[1] + "-" + ("0" + dateOnly[2]).slice(-2) + "-" + ("0" + dateOnly[3]).slice(-2);
+  }
+  if (/T\d{2}:\d{2}/.test(s) || /GMT|UTC|Z$|[+-]\d{2}:?\d{2}$/.test(s)) {
+    var d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return Utilities.formatDate(d, tz, "yyyy-MM-dd");
+    }
+  }
   var m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   if (m) {
     return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
@@ -635,11 +646,18 @@ function orderProductNetPublic_(ord) {
 }
 
 function orderEffectiveShippingPublic_(ord) {
-  var fee = Number(ord && ord.shippingFee);
-  if (isNaN(fee)) fee = 38;
   var st = String(ord && ord.shippingStatus || "");
-  if (st.indexOf("免運") >= 0) return 0;
-  return Math.max(0, Math.ceil(fee));
+  var remark = String(ord && (ord.remark || ord.depositRemark) || "");
+  if (st.indexOf("免運") >= 0 || st.indexOf("併箱") >= 0) return 0;
+  if (remark.indexOf("併箱免運") >= 0) return 0;
+  var fee = Number(ord && ord.shippingFee);
+  if (ord && ord.shippingFee != null && String(ord.shippingFee).trim() !== "") {
+    if (isNaN(fee) || fee < 0) fee = 0;
+    return Math.max(0, Math.ceil(fee));
+  }
+  var linked = String(ord && ord.linkedOrderIds || "").trim();
+  if (linked) return 0;
+  return 38;
 }
 
 function orderAmountDuePublic_(ord) {
@@ -695,7 +713,7 @@ function enrichOrderStatusWithShopOrder_(result, orderId) {
   var ship = orderEffectiveShippingPublic_(shop);
   var dep = Number(shop.depositAmount) || 0;
   var depositRemark = String(shop.depositRemark || "").trim();
-  var orderDate = normalizeSheetDateValue_(shop.date) || result.updated || "";
+  var orderDate = normalizeSheetDateValue_(shop.preorderDate) || normalizeSheetDateValue_(shop.date) || result.updated || "";
   var groupTitle = buildPublicGroupTitle_(shop, items) || buildPublicGroupTitle_({ product: result.product }, items);
   var shippingMethod = String(shop.shippingMethod || "").trim() || "賣貨便";
   result.orderDate = orderDate;
@@ -741,7 +759,7 @@ function sanitizePublicOrder_(ord) {
   return {
     id: String(ord && ord.id != null ? ord.id : "").trim(),
     status: String(ord && ord.status != null ? ord.status : "").trim() || "待處理",
-    date: ord && ord.date != null ? String(ord.date) : "",
+    date: normalizeSheetDateValue_(ord && (ord.preorderDate || ord.date)),
     product: String(ord && ord.product != null ? ord.product : "").trim(),
     subtotal: Number(ord && ord.subtotal) || 0,
     discount: Number(ord && ord.discount) || 0,

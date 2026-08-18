@@ -2750,18 +2750,58 @@
     return raw;
   }
 
+  function toTaipeiCalendarDate_(dateStr) {
+    if (!dateStr) return "";
+    const s = String(dateStr).trim();
+    if (!s) return "";
+    const dateOnly = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (dateOnly) {
+      return dateOnly[1] + "-" + ("0" + dateOnly[2]).slice(-2) + "-" + ("0" + dateOnly[3]).slice(-2);
+    }
+    if (/T\d{2}:\d{2}/.test(s) || /GMT|UTC|Z$|[+-]\d{2}:?\d{2}$/.test(s)) {
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        try {
+          const parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Taipei",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).formatToParts(d);
+          const y = (parts.find(function(p) { return p.type === "year"; }) || {}).value;
+          const mo = (parts.find(function(p) { return p.type === "month"; }) || {}).value;
+          const day = (parts.find(function(p) { return p.type === "day"; }) || {}).value;
+          if (y && mo && day) return y + "-" + mo + "-" + day;
+        } catch (e) {}
+        return d.getFullYear() + "-"
+          + String(d.getMonth() + 1).padStart(2, "0") + "-"
+          + String(d.getDate()).padStart(2, "0");
+      }
+    }
+    const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m) {
+      return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
+    }
+    return s.length >= 10 ? s.slice(0, 10) : s;
+  }
+
+  function pickOrderEstablishedDate_(data) {
+    if (!data) return "";
+    return toTaipeiCalendarDate_(
+      data.preorderDate || data.orderDate || data.date || ""
+    );
+  }
+
   function formatCustomerOrderDate(dateStr) {
-    if (!dateStr) return "—";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return String(dateStr).slice(0, 10);
-    return d.toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit" });
+    const iso = toTaipeiCalendarDate_(dateStr);
+    if (!iso) return "—";
+    return iso.replace(/-/g, "/");
   }
 
   function parseOrderDateValue(dateStr) {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    if (!isNaN(d.getTime())) return d;
-    const m = String(dateStr).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    const iso = toTaipeiCalendarDate_(dateStr);
+    if (!iso) return null;
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!m) return null;
     return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
   }
@@ -2782,7 +2822,7 @@
   }
 
   function isOrderInRecentWindow(ord) {
-    const od = parseOrderDateValue(ord && ord.date);
+    const od = parseOrderDateValue(ord && (ord.preorderDate || ord.date));
     if (!od) return true;
     return od >= getRecentListCutoffDate();
   }
@@ -2795,7 +2835,7 @@
 
   function orderMatchesArchiveDateRange(ord) {
     if (!archiveDateFrom && !archiveDateTo) return true;
-    const od = parseOrderDateValue(ord && ord.date);
+    const od = parseOrderDateValue(ord && (ord.preorderDate || ord.date));
     if (!od) return false;
     if (archiveDateFrom) {
       const from = parseOrderDateValue(archiveDateFrom);
@@ -3009,8 +3049,8 @@
     const trackingStatus = deriveTrackingStatusFromItems(items, statusRaw);
 
     const history = [];
-    const orderDate = String((ord && ord.date) || "").slice(0, 10);
-    const shipDate = String((ord && ord.shipDate) || "").slice(0, 10);
+    const orderDate = pickOrderEstablishedDate_(ord);
+    const shipDate = toTaipeiCalendarDate_(ord && ord.shipDate);
     if (orderDate) {
       history.push({ time: orderDate, status: "訂單成立", note: "" });
     }
@@ -3092,9 +3132,7 @@
       creditInFromOrderId: draft.creditInFromOrderId,
       creditOutAmount: draft.creditOutAmount,
       creditOutToOrderId: draft.creditOutToOrderId,
-      amountDue: ord && ord.amountDue != null
-        ? Number(ord.amountDue)
-        : Math.max(0, productNet + shippingFee - depositAmount - draft.creditInAmount)
+      amountDue: Math.max(0, productNet + shippingFee - depositAmount - draft.creditInAmount)
     };
   }
 
@@ -3139,7 +3177,9 @@
         data[key] = src[key];
       }
     });
-    if (!data.orderDate && src.date) data.orderDate = src.date;
+    if (!data.orderDate) {
+      data.orderDate = pickOrderEstablishedDate_(src) || toTaipeiCalendarDate_(src.date);
+    }
     if (!data.groupTitle) {
       const srcItems = Array.isArray(src.items) ? src.items : [];
       const title = String(src.product || "").trim()
@@ -3362,19 +3402,7 @@
   }
 
   function formatSummaryDate(dateStr) {
-    if (!dateStr) return "—";
-    const s = String(dateStr).trim();
-    const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-    if (m) {
-      return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
-    }
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      return d.getFullYear() + "-"
-        + String(d.getMonth() + 1).padStart(2, "0") + "-"
-        + String(d.getDate()).padStart(2, "0");
-    }
-    return s.slice(0, 10) || "—";
+    return toTaipeiCalendarDate_(dateStr) || "—";
   }
 
   function formatSummaryDateSlash(dateStr) {
@@ -3425,9 +3453,7 @@
 
   function computeAmountDue(data, productNet, shippingFee, depositAmount) {
     const creditIn = Math.max(0, Math.round(Number(data && data.creditInAmount) || 0));
-    if (data && data.amountDue != null && data.amountDue !== "") {
-      return Math.max(0, Math.round(Number(data.amountDue) || 0));
-    }
+    // 一律依公式重算，避免 API／試算表舊的 amountDue 未扣跨團轉入
     return Math.max(0, Math.ceil(productNet + shippingFee - depositAmount - creditIn));
   }
 
@@ -3608,7 +3634,7 @@
     );
 
     document.getElementById("rOrderDate").innerText = formatSummaryDate(
-      (data && (data.orderDate || data.date))
+      pickOrderEstablishedDate_(data)
       || fallback.orderDate
       || (data && data.updated) || ""
     );
@@ -4066,7 +4092,7 @@
       idEl.innerText = ord.id || "—";
       const dateEl = document.createElement("div");
       dateEl.className = "order-list-date";
-      dateEl.innerText = formatCustomerOrderDate(ord.date);
+      dateEl.innerText = formatCustomerOrderDate(ord.preorderDate || ord.date);
       left.appendChild(idEl);
       left.appendChild(dateEl);
 
