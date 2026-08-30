@@ -271,24 +271,25 @@
     }
 
     .brand-logo-btn {
-      --logo-size: 160px;
-      --logo-radius: 20px;
+      --logo-size: 148px;
       position: relative;
       width: var(--logo-size);
       height: var(--logo-size);
-      margin: 0 auto 18px;
+      margin: 0 auto 20px;
       padding: 0;
-      border: none;
-      border-radius: var(--logo-radius);
-      background: #f4c4cb;
+      border: 0;
+      border-radius: 28px;
+      background: transparent;
       cursor: pointer;
       display: block;
       line-height: 0;
-      overflow: hidden;
-      box-shadow: 0 8px 20px rgba(90, 72, 60, 0.1);
+      overflow: visible;
+      box-shadow:
+        0 4px 10px rgba(90, 72, 60, 0.06),
+        0 14px 28px rgba(90, 72, 60, 0.1);
       transition:
-        box-shadow 0.22s ease,
-        transform 0.22s ease;
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
     }
 
     .brand-logo-btn img {
@@ -296,26 +297,31 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      border: none;
-      border-radius: 0;
+      border: 0;
+      border-radius: 28px;
       object-fit: cover;
       object-position: center;
       display: block;
+      vertical-align: top;
     }
 
     .brand-logo-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 26px rgba(95, 133, 116, 0.16);
+      transform: translateY(-4px);
+      box-shadow:
+        0 8px 16px rgba(90, 72, 60, 0.08),
+        0 20px 36px rgba(90, 72, 60, 0.14);
     }
 
     .brand-logo-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 5px 14px rgba(90, 72, 60, 0.1);
+      transform: translateY(-1px);
+      box-shadow:
+        0 3px 8px rgba(90, 72, 60, 0.07),
+        0 10px 20px rgba(90, 72, 60, 0.1);
     }
 
     .brand-logo-btn:focus-visible {
       outline: 2px solid var(--jp-sakura);
-      outline-offset: 4px;
+      outline-offset: 5px;
     }
 
     .brand-search {
@@ -2866,8 +2872,13 @@
       }
 
       .brand-logo-btn {
-        --logo-size: 120px;
+        --logo-size: 112px;
         margin-bottom: 14px;
+      }
+
+      .brand-logo-btn,
+      .brand-logo-btn img {
+        border-radius: 22px;
       }
 
       .app-main {
