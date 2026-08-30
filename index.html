@@ -271,75 +271,101 @@
     }
 
     .brand-logo-btn {
+      --logo-size: 132px;
       position: relative;
+      width: var(--logo-size);
+      height: var(--logo-size);
+      margin: 0 auto 18px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 148px;
-      height: 148px;
-      margin: 0 auto 18px;
-      padding: 0;
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      border-radius: 50%;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.18) 45%, rgba(255, 249, 244, 0.35) 100%);
-      box-shadow:
-        0 10px 28px rgba(90, 72, 60, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.85),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(14px) saturate(1.2);
-      -webkit-backdrop-filter: blur(14px) saturate(1.2);
-      cursor: pointer;
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      isolation: isolate;
+      transition: transform 0.28s ease;
     }
 
+    /* 外圈柔光：櫻花＋抹茶 */
     .brand-logo-btn::before {
       content: "";
       position: absolute;
-      top: 10%;
-      left: 14%;
-      width: 42%;
-      height: 22%;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 100%);
+      inset: -8px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(232, 160, 160, 0.45) 0%, transparent 55%),
+        radial-gradient(circle at 75% 70%, rgba(125, 157, 140, 0.38) 0%, transparent 58%);
+      opacity: 0.75;
+      z-index: -1;
+      animation: brand-logo-aura 4.8s ease-in-out infinite;
       pointer-events: none;
-      z-index: 2;
     }
 
+    /* 玻璃環邊 */
     .brand-logo-btn::after {
-      content: "重新整理";
+      content: "";
       position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      inset: -3px;
       border-radius: 50%;
-      background: rgba(95, 133, 116, 0.72);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index: 3;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      border: 1.5px solid rgba(255, 255, 255, 0.72);
+      box-shadow:
+        0 0 0 1px rgba(232, 160, 160, 0.18),
+        0 8px 22px rgba(90, 72, 60, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.35) 0%,
+        rgba(255, 255, 255, 0.05) 45%,
+        rgba(255, 249, 244, 0.2) 100%
+      );
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 0;
+      pointer-events: none;
+      animation: brand-logo-ring 6s linear infinite;
+    }
+
+    .brand-logo-btn img {
+      position: relative;
+      z-index: 1;
+      width: var(--logo-size);
+      height: var(--logo-size);
+      margin: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.92);
+      box-shadow:
+        0 6px 18px rgba(90, 72, 60, 0.12),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+      object-fit: cover;
+      display: block;
+      animation: brand-logo-float 5.2s ease-in-out infinite;
     }
 
     .brand-logo-btn:hover {
-      transform: translateY(-2px) scale(1.03);
-      border-color: rgba(255, 255, 255, 0.95);
-      box-shadow:
-        0 14px 32px rgba(95, 133, 116, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        0 0 0 4px rgba(125, 157, 140, 0.16);
+      transform: translateY(-3px) scale(1.04);
+    }
+
+    .brand-logo-btn:hover::before {
+      opacity: 1;
+      inset: -12px;
+      animation-duration: 2.8s;
     }
 
     .brand-logo-btn:hover::after {
-      opacity: 1;
-      transform: scale(1);
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 0 0 2px rgba(232, 160, 160, 0.28),
+        0 12px 28px rgba(95, 133, 116, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .brand-logo-btn:hover img {
+      animation-play-state: paused;
+      box-shadow:
+        0 10px 24px rgba(90, 72, 60, 0.16),
+        0 0 0 3px rgba(125, 157, 140, 0.12);
     }
 
     .brand-logo-btn:active {
@@ -348,30 +374,52 @@
 
     .brand-logo-btn:focus-visible {
       outline: 2px solid var(--jp-sakura);
-      outline-offset: 4px;
+      outline-offset: 6px;
     }
 
-    .brand-logo-btn img {
-      width: 124px;
-      height: 124px;
-      margin: 0;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 4px 14px rgba(90, 72, 60, 0.1);
-      object-fit: cover;
-      display: block;
-      position: relative;
-      z-index: 1;
+    @keyframes brand-logo-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
-    .brand img {
-      width: 132px;
-      margin-bottom: 18px;
-      border-radius: 50%;
-      border: 3px solid #fff;
-      box-shadow: var(--jp-shadow);
-      position: relative;
-      z-index: 1;
+    @keyframes brand-logo-aura {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.65;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.95;
+      }
+    }
+
+    @keyframes brand-logo-ring {
+      0% {
+        box-shadow:
+          0 0 0 1px rgba(232, 160, 160, 0.18),
+          0 8px 22px rgba(90, 72, 60, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(125, 157, 140, 0.28),
+          0 10px 24px rgba(90, 72, 60, 0.14),
+          inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      }
+      100% {
+        box-shadow:
+          0 0 0 1px rgba(232, 160, 160, 0.18),
+          0 8px 22px rgba(90, 72, 60, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .brand-logo-btn::before,
+      .brand-logo-btn::after,
+      .brand-logo-btn img {
+        animation: none !important;
+      }
     }
 
     .brand-search {
@@ -576,11 +624,13 @@
     }
 
     .page-sub-key {
+      display: block;
       color: var(--jp-sakura-deep);
       font-weight: 600;
     }
 
     .page-sub-desc {
+      display: block;
       color: var(--jp-matcha-deep);
       font-weight: 500;
     }
@@ -2919,28 +2969,9 @@
         border-bottom: 1px solid var(--jp-border);
       }
 
-      .brand img {
-        width: 96px;
-      }
-
       .brand-logo-btn {
-        width: 112px;
-        height: 112px;
+        --logo-size: 96px;
         margin-bottom: 14px;
-      }
-
-      .brand-logo-btn img {
-        width: 92px;
-        height: 92px;
-      }
-
-      .brand-logo-btn::after {
-        font-size: 12px;
-      }
-
-      .brand-logo-btn:active::after {
-        opacity: 1;
-        transform: scale(1);
       }
 
       .app-main {
@@ -3058,8 +3089,8 @@
     <header class="brand-page-head">
       <h1 id="pageTitle">訂單查詢</h1>
       <div class="page-sub" id="pageSub">
-        <span class="page-sub-key">輸入 13 碼會員卡號</span>
-        <span class="page-sub-desc">查詢後選擇訂單，即可查看完整購買明細與配送進度。</span>
+        <span class="page-sub-key">輸入 13 碼會員卡號查詢後選擇訂單，</span>
+        <span class="page-sub-desc">即可查看完整購買明細與配送進度。</span>
       </div>
     </header>
 
@@ -4088,7 +4119,7 @@
 
     if (isCard) {
       pageTitle.innerText = "訂單查詢";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc">查詢後選擇訂單，即可查看完整購買明細與配送進度。</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號查詢後選擇訂單，</span><span class="page-sub-desc">即可查看完整購買明細與配送進度。</span>';
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
