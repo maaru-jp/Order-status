@@ -25,13 +25,7 @@
       --jp-border: #eadfd6;
       --jp-shadow: 0 10px 28px rgba(90, 72, 60, 0.08);
       --jp-radius: 16px;
-      --sidebar-bg: #1e293b;
-      --sidebar-bg-soft: #334155;
-      --sidebar-border: rgba(255, 255, 255, 0.1);
-      --sidebar-text: #cbd5e1;
-      --sidebar-text-muted: #94a3b8;
-      --sidebar-text-bright: #f8fafc;
-      --sidebar-width: 300px;
+      --brand-width: 280px;
     }
 
     * { box-sizing: border-box; }
@@ -49,144 +43,61 @@
 
     .app {
       display: flex;
-      min-height: 100vh;
-      background: var(--jp-bg);
-    }
-
-    .app.has-member-result .app-main {
-      background:
-        radial-gradient(circle at 12% 8%, rgba(232, 160, 160, 0.12) 0%, transparent 42%),
-        radial-gradient(circle at 88% 92%, rgba(125, 157, 140, 0.1) 0%, transparent 40%),
-        #f8f4ef;
-    }
-
-    /* 左側功能選單 */
-    .app-sidebar {
-      width: var(--sidebar-width);
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
       height: 100vh;
       min-height: 100vh;
-      max-height: 100vh;
-      background: var(--sidebar-bg);
-      color: var(--sidebar-text);
-      border-right: 1px solid var(--sidebar-bg-soft);
-      position: sticky;
-      top: 0;
-      align-self: flex-start;
-      max-height: 100vh;
-    }
-
-    .sidebar-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 18px 16px;
-      border-bottom: 1px solid var(--sidebar-border);
-    }
-
-    .sidebar-brand img {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .sidebar-brand h2 {
-      margin: 0 0 4px;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--sidebar-text-bright);
-      letter-spacing: 0.04em;
-      line-height: 1.35;
-    }
-
-    .sidebar-brand p {
-      margin: 0;
-      font-size: 11px;
-      color: var(--sidebar-text-muted);
-      line-height: 1.4;
-    }
-
-    .sidebar-search {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--sidebar-border);
-      flex-shrink: 0;
-    }
-
-    .sidebar-search label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--sidebar-text-muted);
-      margin-bottom: 8px;
-    }
-
-    .sidebar-search input {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: var(--sidebar-text-bright);
-      margin-bottom: 10px;
-    }
-
-    .sidebar-search input::placeholder {
-      color: rgba(203, 213, 225, 0.55);
-    }
-
-    .sidebar-search input:focus {
-      border-color: rgba(232, 160, 160, 0.65);
-      box-shadow: 0 0 0 3px rgba(232, 160, 160, 0.18);
-    }
-
-    .sidebar-search .btn-search {
-      margin-top: 2px;
-    }
-
-    .sidebar-error {
-      margin-top: 10px;
-      margin-bottom: 0;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      line-height: 1.5;
-      background: rgba(180, 74, 74, 0.18);
-      border: 1px solid rgba(242, 208, 203, 0.35);
-      color: #fecaca;
-    }
-
-    .sidebar-orders {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
 
-    .sidebar-orders-head {
-      padding: 14px 18px 10px;
-      border-bottom: 1px solid var(--sidebar-border);
+    /* 左側品牌區（維持原本樣式） */
+    .brand {
+      width: var(--brand-width);
       flex-shrink: 0;
-    }
-
-    .sidebar-orders-scroll {
-      flex: 1;
-      min-height: 0;
+      background: linear-gradient(180deg, #fff9f4 0%, #f8ebe4 100%);
+      padding: 36px 24px;
+      text-align: center;
+      border-right: 1px solid var(--jp-border);
+      position: relative;
       overflow-y: auto;
-      padding: 12px 14px 18px;
+      align-self: stretch;
     }
 
-    .sidebar-orders-scroll::-webkit-scrollbar {
-      width: 6px;
+    .brand::before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(232, 160, 160, 0.12);
+      top: -60px;
+      right: -50px;
     }
 
-    .sidebar-orders-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
+    .brand img {
+      width: 132px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: var(--jp-shadow);
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand h2 {
+      font-size: 20px;
+      margin: 8px 0 6px;
+      font-weight: 700;
+      color: #3f3a36;
+      letter-spacing: 0.08em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: var(--jp-ink-soft);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
 
     /* 右側主內容 */
@@ -195,13 +106,17 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      background: var(--jp-bg);
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(232, 160, 160, 0.12) 0%, transparent 42%),
+        radial-gradient(circle at 88% 92%, rgba(125, 157, 140, 0.1) 0%, transparent 40%),
+        var(--jp-bg);
     }
 
     .main-header {
-      padding: 24px 28px 12px;
       flex-shrink: 0;
+      padding: 22px 28px 10px;
     }
 
     .main-header h1 {
@@ -217,12 +132,60 @@
       line-height: 1.6;
     }
 
-    .main-content {
+    .member-layout {
       flex: 1;
       min-height: 0;
-      padding: 0 28px 20px;
+      display: grid;
+      grid-template-columns: minmax(300px, 38%) minmax(0, 62%);
+      gap: 20px;
+      padding: 0 28px 12px;
+    }
+
+    .member-nav {
+      min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+    }
+
+    .member-nav .search-panel {
+      flex-shrink: 0;
+      margin-bottom: 10px;
+    }
+
+    .member-nav .error-card {
+      flex-shrink: 0;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .member-nav-list-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-top: 8px;
+      padding-right: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .member-nav-list-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .member-nav-list-scroll::-webkit-scrollbar-thumb {
+      background: rgba(125, 157, 140, 0.35);
+      border-radius: 999px;
+    }
+
+    .footer {
+      flex-shrink: 0;
+      padding: 10px 28px 16px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--jp-ink-soft);
+      letter-spacing: 0.04em;
     }
 
     .container {
@@ -1105,7 +1068,6 @@
       text-align: center;
       font-size: 12px;
       color: var(--jp-ink-soft);
-      margin-top: 24px;
       letter-spacing: 0.04em;
     }
 
@@ -1400,11 +1362,6 @@
       border-color: var(--jp-sakura);
     }
 
-    .container.has-wide-result,
-    .app.has-member-result {
-      /* legacy hook */
-    }
-
     .member-workspace {
       display: contents;
     }
@@ -1414,11 +1371,20 @@
     }
 
     .card-summary {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       margin-top: 0;
-      padding: 0;
-      border: none;
-      border-radius: 0;
-      background: transparent;
+      padding: 14px;
+      border-radius: var(--jp-radius);
+      border: 1px solid rgba(125, 157, 140, 0.35);
+      background: linear-gradient(180deg, rgba(125, 157, 140, 0.08) 0%, #fff 100%);
+    }
+
+    .card-summary-head {
+      flex-shrink: 0;
     }
 
     .member-result-head {
@@ -1426,14 +1392,14 @@
       flex-direction: column;
       gap: 6px;
       padding-bottom: 10px;
-      border-bottom: none;
+      border-bottom: 1px dashed var(--jp-border);
     }
 
     .member-result-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      color: var(--sidebar-text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--jp-matcha-deep);
       text-transform: uppercase;
     }
 
@@ -1446,8 +1412,8 @@
     }
 
     .member-result-card .order-list-id {
-      font-size: 14px;
-      color: var(--sidebar-text-bright);
+      font-size: 15px;
+      color: #3f3a36;
     }
 
     .card-summary-grid {
@@ -1458,47 +1424,54 @@
     }
 
     .card-summary-item {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--sidebar-border);
-      border-radius: 10px;
-      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid var(--jp-border);
+      border-radius: 12px;
+      padding: 10px 12px;
     }
 
     .card-summary-item .label {
-      font-size: 10px;
-      color: var(--sidebar-text-muted);
+      font-size: 11px;
+      color: var(--jp-ink-soft);
     }
 
     .card-summary-item .value {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
-      color: var(--sidebar-text-bright);
-      margin-top: 2px;
+      color: #3f3a36;
+      margin-top: 4px;
     }
 
     .order-list-section-title {
       margin-top: 12px;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--sidebar-text-muted);
-      text-transform: uppercase;
+      color: #3f3a36;
+      flex-shrink: 0;
     }
 
     .order-list-section-title.is-archive {
-      color: #fbbf24;
+      color: var(--jp-matcha-deep);
+    }
+
+    .card-summary .order-list-toolbar,
+    .card-summary .order-archive-toolbar,
+    .card-summary .order-list-count-hint {
+      flex-shrink: 0;
     }
 
     .member-detail {
       position: relative;
-      flex: 1;
-      min-height: 420px;
+      min-height: 0;
+      height: 100%;
       min-width: 0;
       overflow-y: auto;
+      overflow-x: hidden;
       border: 1px solid var(--jp-border);
       border-radius: 18px;
       background: var(--jp-cream);
       box-shadow: var(--jp-shadow);
+      -webkit-overflow-scrolling: touch;
     }
 
     .member-detail-empty {
@@ -1561,18 +1534,6 @@
       gap: 16px;
     }
 
-    .app.has-order-selected .member-detail .result-layout {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .footer {
-      flex-shrink: 0;
-      padding: 12px 28px 20px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--jp-ink-soft);
-    }
-
     .member-detail-mobile-back {
       display: none;
       width: 100%;
@@ -1587,112 +1548,16 @@
       text-align: left;
     }
 
-    .member-sidebar .order-list {
+    .member-nav-list-scroll .order-list {
       max-height: none;
-      gap: 6px;
-    }
-
-    .app-sidebar .order-list-item {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-      color: var(--sidebar-text-bright);
-      padding: 10px 12px;
-      border-radius: 10px;
-    }
-
-    .app-sidebar .order-list-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.18);
-      box-shadow: none;
-      transform: none;
-    }
-
-    .app-sidebar .order-list-id {
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .order-list-date,
-    .app-sidebar .order-list-compact-summary,
-    .app-sidebar .order-list-meta,
-    .app-sidebar .order-list-items,
-    .app-sidebar .order-list-product-preview {
-      color: var(--sidebar-text);
-    }
-
-    .app-sidebar .order-list-count-hint {
-      color: var(--sidebar-text-muted);
-      font-size: 11px;
-    }
-
-    .app-sidebar .order-filter-chip {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.12);
-      color: var(--sidebar-text);
-    }
-
-    .app-sidebar .order-filter-chip.is-active {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(244, 114, 182, 0.45);
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .order-list-search {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .order-list-search::placeholder {
-      color: rgba(203, 213, 225, 0.5);
-    }
-
-    .app-sidebar .btn-order-load-more,
-    .app-sidebar .btn-order-archive-open,
-    .app-sidebar .btn-order-archive-back,
-    .app-sidebar .btn-archive-date-apply {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .order-archive-entry {
-      border-color: rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .app-sidebar .order-archive-entry-title,
-    .app-sidebar .order-archive-entry-desc,
-    .app-sidebar .order-archive-toolbar-label {
-      color: var(--sidebar-text);
-    }
-
-    .app-sidebar .card-empty {
-      color: var(--sidebar-text-muted);
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .app-sidebar .btn-card-copy-inline {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.16);
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .btn-card-paste {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.16);
-      color: var(--sidebar-text-bright);
-    }
-
-    .app-sidebar .btn-card-paste:hover,
-    .app-sidebar .btn-card-copy-inline:hover {
-      background: rgba(255, 255, 255, 0.16);
+      overflow: visible;
+      margin-top: 0;
     }
 
     .order-list-item.is-selected {
-      border-color: rgba(244, 114, 182, 0.55);
-      background: rgba(255, 255, 255, 0.14);
-      box-shadow: inset 3px 0 0 #f472b6;
+      border-color: var(--jp-matcha-deep);
+      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
+      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.14);
     }
 
     .order-list-item.is-selected:hover {
@@ -2594,21 +2459,24 @@
     @media (max-width: 768px) {
       .app {
         flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
       }
 
-      .app-sidebar {
+      .brand {
         width: 100%;
-        position: relative;
-        max-height: none;
-        min-height: auto;
+        padding: 20px 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--jp-border);
       }
 
-      .sidebar-orders {
-        max-height: none;
+      .brand img {
+        width: 96px;
       }
 
-      .sidebar-orders-scroll {
-        max-height: none;
+      .app-main {
+        height: auto;
         overflow: visible;
       }
 
@@ -2616,8 +2484,20 @@
         padding: 16px 16px 10px;
       }
 
-      .main-content {
+      .member-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
         padding: 0 12px 12px;
+        min-height: auto;
+      }
+
+      .member-nav-list-scroll {
+        max-height: 52vh;
+      }
+
+      .member-detail {
+        min-height: 360px;
+        height: auto;
       }
 
       .member-detail .result-layout {
@@ -2680,50 +2560,75 @@
 
 <div class="app">
 
-  <aside class="app-sidebar" aria-label="會員訂單選單">
-    <div class="sidebar-brand">
-      <img src="S__283426825.jpg" alt="MAARU Logo">
-      <div>
-        <h2>MAARU 日本萌GO</h2>
-        <p>日本代購｜訂單查詢</p>
+  <aside class="brand">
+    <img src="S__283426825.jpg" alt="MAARU Logo">
+    <h2>MAARU 日本萌GO</h2>
+    <p>日本代購｜訂單查詢</p>
+  </aside>
+
+  <main class="app-main">
+    <div class="mode-tabs" role="tablist" aria-label="查詢方式" style="display:none;">
+      <button type="button" id="tabOrder" class="mode-tab" role="tab" aria-selected="false">訂單明細</button>
+      <button type="button" id="tabCard" class="mode-tab is-active" role="tab" aria-selected="true">會員中心</button>
+    </div>
+
+    <div id="panelOrder" class="mode-panel is-hidden">
+      <div class="search-panel" id="orderSearchPanel" style="display:none;">
+        <label for="orderId">請輸入訂單編號（共五碼數字）</label>
+        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off" inputmode="numeric">
+        <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
+      </div>
+      <div class="error" id="errorBox">
+        ⚠ 查無此訂單編號，請確認是否輸入正確
       </div>
     </div>
 
-    <div class="sidebar-search">
-      <label for="memberCardNo">會員卡號（13 碼）</label>
-      <div class="card-input-row">
-        <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
-        <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
+    <header class="main-header">
+      <h1 id="pageTitle">會員中心</h1>
+      <div class="page-sub" id="pageSub">
+        <span class="page-sub-key">輸入 13 碼會員卡號</span>
+        <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>
       </div>
-      <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
-      <div class="sidebar-error error-card" id="cardErrorBox" style="display:none;">
-        ⚠ 查詢失敗，請確認卡號是否正確
-      </div>
-    </div>
+    </header>
 
-    <div class="sidebar-orders card-summary" id="cardResultBox" style="display:none;">
-      <div class="order-open-toast" id="orderOpenToast" style="display:none;" aria-live="polite"></div>
-      <div class="sidebar-orders-head member-sidebar" aria-label="訂單列表與篩選">
-        <div class="member-result-head">
-          <div class="member-result-label">會員卡號</div>
-          <div class="member-result-card">
-            <span id="rCardNo" class="order-list-id"></span>
-            <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
+    <div class="member-layout">
+      <div class="member-nav" id="panelCard">
+        <div class="search-panel">
+          <label for="memberCardNo">請輸入會員卡號（13 碼數字）</label>
+          <div class="card-input-row">
+            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
+            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
+          <p class="card-hint">輸入 13 碼會員卡號查詢交易紀錄，點選訂單後右側即時顯示明細。</p>
+          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
         </div>
-        <div class="card-summary-grid">
-          <div class="card-summary-item">
-            <div class="label">訂單筆數</div>
-            <div class="value" id="rOrderCount">0</div>
-          </div>
-          <div class="card-summary-item">
-            <div class="label">待結清合計</div>
-            <div class="value" id="rTotalDue">NT$0</div>
-          </div>
+
+        <div class="error error-card" id="cardErrorBox" style="display:none;">
+          ⚠ 查詢失敗，請確認卡號是否正確
         </div>
-      </div>
-      <div class="sidebar-orders-scroll member-workspace">
-        <aside class="member-sidebar">
+
+        <div class="card-summary" id="cardResultBox" style="display:none;">
+          <div class="order-open-toast" id="orderOpenToast" style="display:none;" aria-live="polite"></div>
+          <div class="card-summary-head">
+            <div class="member-result-head">
+              <div class="member-result-label">會員卡號</div>
+              <div class="member-result-card">
+                <span id="rCardNo" class="order-list-id"></span>
+                <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
+              </div>
+            </div>
+            <div class="card-summary-grid">
+              <div class="card-summary-item">
+                <div class="label">訂單筆數</div>
+                <div class="value" id="rOrderCount">0</div>
+              </div>
+              <div class="card-summary-item">
+                <div class="label">待結清合計</div>
+                <div class="value" id="rTotalDue">NT$0</div>
+              </div>
+            </div>
+          </div>
+
           <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
           <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
             <div class="order-archive-toolbar-head">
@@ -2752,46 +2657,19 @@
             <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
           </div>
           <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
-          <div class="order-list" id="rOrderList"></div>
-          <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
-          <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
-            <div class="order-archive-entry-title">歷史訂單專區</div>
-            <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
-            <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+
+          <div class="member-nav-list-scroll">
+            <div class="order-list" id="rOrderList"></div>
+            <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
+            <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
+              <div class="order-archive-entry-title">歷史訂單專區</div>
+              <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
+              <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+            </div>
           </div>
-        </aside>
+        </div>
       </div>
-    </div>
-  </aside>
 
-  <main class="app-main">
-    <div class="mode-tabs" role="tablist" aria-label="查詢方式" style="display:none;">
-      <button type="button" id="tabOrder" class="mode-tab" role="tab" aria-selected="false">訂單明細</button>
-      <button type="button" id="tabCard" class="mode-tab is-active" role="tab" aria-selected="true">會員中心</button>
-    </div>
-
-    <div id="panelOrder" class="mode-panel is-hidden">
-      <div class="search-panel" id="orderSearchPanel" style="display:none;">
-        <label for="orderId">請輸入訂單編號（共五碼數字）</label>
-        <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off" inputmode="numeric">
-        <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
-      </div>
-      <div class="error" id="errorBox">
-        ⚠ 查無此訂單編號，請確認是否輸入正確
-      </div>
-    </div>
-
-    <div id="panelCard" class="mode-panel"></div>
-
-    <header class="main-header">
-      <h1 id="pageTitle">會員中心</h1>
-      <div class="page-sub" id="pageSub">
-        <span class="page-sub-key">輸入左側會員卡號</span>
-        <span class="page-sub-desc"> 查詢後點選訂單，右側即時顯示購買明細與配送進度</span>
-      </div>
-    </header>
-
-    <div class="main-content">
       <section class="member-detail" id="memberDetailPanel" aria-label="訂單明細">
         <button type="button" class="member-detail-mobile-back" id="btnMemberDetailBack">← 返回訂單列表</button>
         <div class="member-detail-empty" id="memberDetailEmpty">
@@ -3689,7 +3567,7 @@
 
     if (isCard) {
       pageTitle.innerText = "會員中心";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入左側會員卡號</span><span class="page-sub-desc"> 查詢後點選訂單，右側即時顯示購買明細與配送進度</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>';
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
@@ -4254,8 +4132,8 @@
     const card = getActiveMemberCardForLookup_();
     if (isValidMemberCardNo(card)) params.set("card", card);
     history.replaceState(null, "", "?" + params.toString());
-    const sidebar = document.querySelector(".app-sidebar");
-    if (sidebar) sidebar.scrollIntoView({ behavior: "smooth", block: "start" });
+    const nav = document.querySelector(".member-nav");
+    if (nav) nav.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function normalizeOrderIdQuery(value) {
