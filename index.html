@@ -1600,9 +1600,88 @@
       background: linear-gradient(180deg, #fffaf6 0%, #fff5ee 100%);
     }
 
-    .member-detail .result-layout {
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    /* 網頁版：配送歷程橫條在上、訂單摘要全寬在下 */
+    @media (min-width: 769px) {
+      .member-detail .result.member-detail-result {
+        padding: 16px 18px 20px;
+      }
+
+      .member-detail .result-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .member-detail .timeline-card {
+        order: -1;
+        width: 100%;
+        padding: 14px 18px 12px;
+        background: linear-gradient(180deg, #f3faf6 0%, #fff 100%);
+        border-color: rgba(125, 157, 140, 0.32);
+      }
+
+      .member-detail .timeline-card .card-title {
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+      }
+
+      .member-detail .timeline-card .progress-wrap {
+        margin-bottom: 10px;
+        padding: 10px 14px 8px;
+        border: none;
+        background: rgba(255, 255, 255, 0.75);
+      }
+
+      .member-detail .timeline-card .progress-track {
+        gap: 6px;
+      }
+
+      .member-detail .timeline-card .progress-step {
+        font-size: 11px;
+      }
+
+      .member-detail .timeline-card .history-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px 16px;
+      }
+
+      .member-detail .timeline-card .history-header {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+        flex-shrink: 0;
+      }
+
+      .member-detail .timeline-card .status-hero {
+        flex: 1 1 220px;
+        min-width: 0;
+        padding: 10px 14px;
+        margin: 0;
+      }
+
+      .member-detail .timeline-card .status-hero-title {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .member-detail .timeline-card .status-hero-time {
+        font-size: 13px;
+      }
+
+      .member-detail .timeline-card .history-empty {
+        flex: 1 1 100%;
+        margin: 0;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .member-detail .summary-card {
+        width: 100%;
+      }
     }
 
     .member-detail-mobile-back {
