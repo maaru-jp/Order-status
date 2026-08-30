@@ -271,155 +271,63 @@
     }
 
     .brand-logo-btn {
-      --logo-size: 132px;
+      --logo-size: 120px;
       position: relative;
       width: var(--logo-size);
       height: var(--logo-size);
       margin: 0 auto 18px;
-      padding: 0;
-      border: none;
-      border-radius: 50%;
-      background: transparent;
+      padding: 5px;
+      border: 2px solid var(--jp-border);
+      border-radius: 22px;
+      background: var(--jp-cream);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      isolation: isolate;
-      transition: transform 0.28s ease;
-    }
-
-    /* 外圈柔光：櫻花＋抹茶 */
-    .brand-logo-btn::before {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 30% 25%, rgba(232, 160, 160, 0.45) 0%, transparent 55%),
-        radial-gradient(circle at 75% 70%, rgba(125, 157, 140, 0.38) 0%, transparent 58%);
-      opacity: 0.75;
-      z-index: -1;
-      animation: brand-logo-aura 4.8s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    /* 玻璃環邊 */
-    .brand-logo-btn::after {
-      content: "";
-      position: absolute;
-      inset: -3px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(255, 255, 255, 0.72);
       box-shadow:
-        0 0 0 1px rgba(232, 160, 160, 0.18),
-        0 8px 22px rgba(90, 72, 60, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.35) 0%,
-        rgba(255, 255, 255, 0.05) 45%,
-        rgba(255, 249, 244, 0.2) 100%
-      );
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 0;
-      pointer-events: none;
-      animation: brand-logo-ring 6s linear infinite;
+        0 2px 0 rgba(255, 255, 255, 0.9) inset,
+        0 6px 16px rgba(90, 72, 60, 0.08);
+      transition:
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        transform 0.22s ease,
+        background 0.22s ease;
     }
 
     .brand-logo-btn img {
-      position: relative;
-      z-index: 1;
-      width: var(--logo-size);
-      height: var(--logo-size);
+      width: 100%;
+      height: 100%;
       margin: 0;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.92);
-      box-shadow:
-        0 6px 18px rgba(90, 72, 60, 0.12),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+      border-radius: 16px;
+      border: 1px solid rgba(234, 223, 214, 0.9);
       object-fit: cover;
       display: block;
-      animation: brand-logo-float 5.2s ease-in-out infinite;
+      transition: border-color 0.22s ease;
     }
 
     .brand-logo-btn:hover {
-      transform: translateY(-3px) scale(1.04);
-    }
-
-    .brand-logo-btn:hover::before {
-      opacity: 1;
-      inset: -12px;
-      animation-duration: 2.8s;
-    }
-
-    .brand-logo-btn:hover::after {
-      border-color: rgba(255, 255, 255, 0.95);
+      border-color: var(--jp-matcha);
+      background: #fff;
+      transform: translateY(-2px);
       box-shadow:
-        0 0 0 2px rgba(232, 160, 160, 0.28),
-        0 12px 28px rgba(95, 133, 116, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 1);
+        0 2px 0 rgba(255, 255, 255, 1) inset,
+        0 10px 22px rgba(95, 133, 116, 0.14);
     }
 
     .brand-logo-btn:hover img {
-      animation-play-state: paused;
-      box-shadow:
-        0 10px 24px rgba(90, 72, 60, 0.16),
-        0 0 0 3px rgba(125, 157, 140, 0.12);
+      border-color: rgba(125, 157, 140, 0.35);
     }
 
     .brand-logo-btn:active {
-      transform: translateY(0) scale(0.98);
+      transform: translateY(0);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 4px 12px rgba(90, 72, 60, 0.1);
     }
 
     .brand-logo-btn:focus-visible {
       outline: 2px solid var(--jp-sakura);
-      outline-offset: 6px;
-    }
-
-    @keyframes brand-logo-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-
-    @keyframes brand-logo-aura {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.65;
-      }
-      50% {
-        transform: scale(1.08);
-        opacity: 0.95;
-      }
-    }
-
-    @keyframes brand-logo-ring {
-      0% {
-        box-shadow:
-          0 0 0 1px rgba(232, 160, 160, 0.18),
-          0 8px 22px rgba(90, 72, 60, 0.12),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      }
-      50% {
-        box-shadow:
-          0 0 0 1px rgba(125, 157, 140, 0.28),
-          0 10px 24px rgba(90, 72, 60, 0.14),
-          inset 0 1px 0 rgba(255, 255, 255, 0.95);
-      }
-      100% {
-        box-shadow:
-          0 0 0 1px rgba(232, 160, 160, 0.18),
-          0 8px 22px rgba(90, 72, 60, 0.12),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .brand-logo-btn::before,
-      .brand-logo-btn::after,
-      .brand-logo-btn img {
-        animation: none !important;
-      }
+      outline-offset: 4px;
     }
 
     .brand-search {
@@ -3088,10 +2996,6 @@
   <aside class="brand">
     <header class="brand-page-head">
       <h1 id="pageTitle">訂單查詢</h1>
-      <div class="page-sub" id="pageSub">
-        <span class="page-sub-key">輸入 13 碼會員卡號查詢後選擇訂單，</span>
-        <span class="page-sub-desc">即可查看完整購買明細與配送進度。</span>
-      </div>
     </header>
 
     <div class="brand-identity">
@@ -4119,7 +4023,7 @@
 
     if (isCard) {
       pageTitle.innerText = "訂單查詢";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號查詢後選擇訂單，</span><span class="page-sub-desc">即可查看完整購買明細與配送進度。</span>';
+      if (pageSub) pageSub.innerHTML = "";
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
@@ -4127,7 +4031,9 @@
       container.classList.toggle("has-order-selected", !!selectedMemberOrderId);
     } else {
       pageTitle.innerText = "訂單明細";
-      pageSub.innerHTML = '<span class="page-sub-key">購買明細與配送進度</span><span class="page-sub-desc"> 由此筆訂單返回交易紀錄列表可查看其他訂單</span>';
+      if (pageSub) {
+        pageSub.innerHTML = '<span class="page-sub-key">購買明細與配送進度</span><span class="page-sub-desc"> 由此筆訂單返回交易紀錄列表可查看其他訂單</span>';
+      }
       container.classList.remove("has-member-result");
       if (document.getElementById("resultBox").style.display === "none") {
         container.classList.remove("has-wide-result");
