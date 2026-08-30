@@ -279,17 +279,17 @@
       padding: 0;
       border: 0;
       border-radius: 28px;
-      background: transparent;
+      background: #f4c4cb;
       cursor: pointer;
       display: block;
       line-height: 0;
-      overflow: visible;
-      box-shadow:
-        0 4px 10px rgba(90, 72, 60, 0.06),
-        0 14px 28px rgba(90, 72, 60, 0.1);
-      transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
+      overflow: hidden;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      box-shadow: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.25s ease;
     }
 
     .brand-logo-btn img {
@@ -298,15 +298,25 @@
       margin: 0;
       padding: 0;
       border: 0;
-      border-radius: 28px;
+      outline: none;
+      border-radius: inherit;
       object-fit: cover;
       object-position: center;
       display: block;
       vertical-align: top;
+      box-shadow:
+        0 4px 10px rgba(90, 72, 60, 0.06),
+        0 14px 28px rgba(90, 72, 60, 0.1);
+      transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
     }
 
     .brand-logo-btn:hover {
       transform: translateY(-4px);
+    }
+
+    .brand-logo-btn:hover img {
       box-shadow:
         0 8px 16px rgba(90, 72, 60, 0.08),
         0 20px 36px rgba(90, 72, 60, 0.14);
@@ -314,6 +324,9 @@
 
     .brand-logo-btn:active {
       transform: translateY(-1px);
+    }
+
+    .brand-logo-btn:active img {
       box-shadow:
         0 3px 8px rgba(90, 72, 60, 0.07),
         0 10px 20px rgba(90, 72, 60, 0.1);
@@ -2874,10 +2887,6 @@
       .brand-logo-btn {
         --logo-size: 112px;
         margin-bottom: 14px;
-      }
-
-      .brand-logo-btn,
-      .brand-logo-btn img {
         border-radius: 22px;
       }
 
