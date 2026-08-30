@@ -25,6 +25,13 @@
       --jp-border: #eadfd6;
       --jp-shadow: 0 10px 28px rgba(90, 72, 60, 0.08);
       --jp-radius: 16px;
+      --sidebar-bg: #1e293b;
+      --sidebar-bg-soft: #334155;
+      --sidebar-border: rgba(255, 255, 255, 0.1);
+      --sidebar-text: #cbd5e1;
+      --sidebar-text-muted: #94a3b8;
+      --sidebar-text-bright: #f8fafc;
+      --sidebar-width: 300px;
     }
 
     * { box-sizing: border-box; }
@@ -43,65 +50,179 @@
     .app {
       display: flex;
       min-height: 100vh;
+      background: var(--jp-bg);
     }
 
-    /* 左側品牌區 */
-    .brand {
-      width: 280px;
-      background: linear-gradient(180deg, #fff9f4 0%, #f8ebe4 100%);
-      padding: 36px 24px;
-      text-align: center;
-      border-right: 1px solid var(--jp-border);
-      position: relative;
-      overflow: visible;
+    .app.has-member-result .app-main {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(232, 160, 160, 0.12) 0%, transparent 42%),
+        radial-gradient(circle at 88% 92%, rgba(125, 157, 140, 0.1) 0%, transparent 40%),
+        #f8f4ef;
     }
 
-    .brand::before {
-      content: "";
-      position: absolute;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: rgba(232, 160, 160, 0.12);
-      top: -60px;
-      right: -50px;
+    /* 左側功能選單 */
+    .app-sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-height: 100vh;
+      max-height: 100vh;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      border-right: 1px solid var(--sidebar-bg-soft);
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      max-height: 100vh;
     }
 
-    .brand img {
-      width: 132px;
-      margin-bottom: 18px;
-      border-radius: 50%;
-      border: 3px solid #fff;
-      box-shadow: var(--jp-shadow);
-      position: relative;
-      z-index: 1;
-    }
-
-    .brand h2 {
-      font-size: 20px;
-      margin: 8px 0 6px;
-      font-weight: 700;
-      color: #3f3a36;
-      letter-spacing: 0.08em;
-      position: relative;
-      z-index: 1;
-    }
-
-    .brand p {
-      font-size: 13px;
-      color: var(--jp-ink-soft);
-      line-height: 1.6;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* 右側查詢區 */
-    .main {
-      flex: 1;
+    .sidebar-brand {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 28px 20px;
+      gap: 12px;
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    .sidebar-brand img {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand h2 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--sidebar-text-bright);
+      letter-spacing: 0.04em;
+      line-height: 1.35;
+    }
+
+    .sidebar-brand p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--sidebar-text-muted);
+      line-height: 1.4;
+    }
+
+    .sidebar-search {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-search label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sidebar-text-muted);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-search input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--sidebar-text-bright);
+      margin-bottom: 10px;
+    }
+
+    .sidebar-search input::placeholder {
+      color: rgba(203, 213, 225, 0.55);
+    }
+
+    .sidebar-search input:focus {
+      border-color: rgba(232, 160, 160, 0.65);
+      box-shadow: 0 0 0 3px rgba(232, 160, 160, 0.18);
+    }
+
+    .sidebar-search .btn-search {
+      margin-top: 2px;
+    }
+
+    .sidebar-error {
+      margin-top: 10px;
+      margin-bottom: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      background: rgba(180, 74, 74, 0.18);
+      border: 1px solid rgba(242, 208, 203, 0.35);
+      color: #fecaca;
+    }
+
+    .sidebar-orders {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-orders-head {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-orders-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px 14px 18px;
+    }
+
+    .sidebar-orders-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar-orders-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+    }
+
+    /* 右側主內容 */
+    .app-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--jp-bg);
+    }
+
+    .main-header {
+      padding: 24px 28px 12px;
+      flex-shrink: 0;
+    }
+
+    .main-header h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 700;
+      color: #3f3a36;
+      letter-spacing: 0.06em;
+    }
+
+    .main-header .page-sub {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .main-content {
+      flex: 1;
+      min-height: 0;
+      padding: 0 28px 20px;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
@@ -1280,39 +1401,104 @@
     }
 
     .container.has-wide-result,
-    .container.has-member-result {
-      max-width: 960px;
-    }
-
-    .container.has-member-result.has-order-selected {
-      max-width: 1120px;
+    .app.has-member-result {
+      /* legacy hook */
     }
 
     .member-workspace {
-      display: grid;
-      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-      gap: 16px;
-      margin-top: 4px;
-      align-items: start;
+      display: contents;
     }
 
     .member-sidebar {
+      display: contents;
+    }
+
+    .card-summary {
+      margin-top: 0;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .member-result-head {
       display: flex;
       flex-direction: column;
-      min-width: 0;
+      gap: 6px;
+      padding-bottom: 10px;
+      border-bottom: none;
+    }
+
+    .member-result-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--sidebar-text-muted);
+      text-transform: uppercase;
+    }
+
+    .member-result-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .member-result-card .order-list-id {
+      font-size: 14px;
+      color: var(--sidebar-text-bright);
+    }
+
+    .card-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .card-summary-item {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .card-summary-item .label {
+      font-size: 10px;
+      color: var(--sidebar-text-muted);
+    }
+
+    .card-summary-item .value {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--sidebar-text-bright);
+      margin-top: 2px;
+    }
+
+    .order-list-section-title {
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--sidebar-text-muted);
+      text-transform: uppercase;
+    }
+
+    .order-list-section-title.is-archive {
+      color: #fbbf24;
     }
 
     .member-detail {
       position: relative;
-      min-height: 360px;
+      flex: 1;
+      min-height: 420px;
       min-width: 0;
-      max-height: min(78vh, 860px);
       overflow-y: auto;
       border: 1px solid var(--jp-border);
-      border-radius: var(--jp-radius);
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 4px 18px rgba(90, 72, 60, 0.05);
+      border-radius: 18px;
+      background: var(--jp-cream);
+      box-shadow: var(--jp-shadow);
     }
 
     .member-detail-empty {
@@ -1371,7 +1557,20 @@
     }
 
     .member-detail .result-layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .app.has-order-selected .member-detail .result-layout {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .footer {
+      flex-shrink: 0;
+      padding: 12px 28px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--jp-ink-soft);
     }
 
     .member-detail-mobile-back {
@@ -1389,13 +1588,111 @@
     }
 
     .member-sidebar .order-list {
-      max-height: min(52vh, 500px);
+      max-height: none;
+      gap: 6px;
+    }
+
+    .app-sidebar .order-list-item {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--sidebar-text-bright);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .app-sidebar .order-list-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .app-sidebar .order-list-id {
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .order-list-date,
+    .app-sidebar .order-list-compact-summary,
+    .app-sidebar .order-list-meta,
+    .app-sidebar .order-list-items,
+    .app-sidebar .order-list-product-preview {
+      color: var(--sidebar-text);
+    }
+
+    .app-sidebar .order-list-count-hint {
+      color: var(--sidebar-text-muted);
+      font-size: 11px;
+    }
+
+    .app-sidebar .order-filter-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--sidebar-text);
+    }
+
+    .app-sidebar .order-filter-chip.is-active {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(244, 114, 182, 0.45);
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .order-list-search {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .order-list-search::placeholder {
+      color: rgba(203, 213, 225, 0.5);
+    }
+
+    .app-sidebar .btn-order-load-more,
+    .app-sidebar .btn-order-archive-open,
+    .app-sidebar .btn-order-archive-back,
+    .app-sidebar .btn-archive-date-apply {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .order-archive-entry {
+      border-color: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .app-sidebar .order-archive-entry-title,
+    .app-sidebar .order-archive-entry-desc,
+    .app-sidebar .order-archive-toolbar-label {
+      color: var(--sidebar-text);
+    }
+
+    .app-sidebar .card-empty {
+      color: var(--sidebar-text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .app-sidebar .btn-card-copy-inline {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .btn-card-paste {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: var(--sidebar-text-bright);
+    }
+
+    .app-sidebar .btn-card-paste:hover,
+    .app-sidebar .btn-card-copy-inline:hover {
+      background: rgba(255, 255, 255, 0.16);
     }
 
     .order-list-item.is-selected {
-      border-color: var(--jp-matcha-deep);
-      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
-      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.14);
+      border-color: rgba(244, 114, 182, 0.55);
+      background: rgba(255, 255, 255, 0.14);
+      box-shadow: inset 3px 0 0 #f472b6;
     }
 
     .order-list-item.is-selected:hover {
@@ -1547,76 +1844,7 @@
       box-shadow: 0 6px 18px rgba(90, 72, 60, 0.08);
     }
 
-    .card-summary {
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: var(--jp-radius);
-      border: 1px solid rgba(125, 157, 140, 0.35);
-      background: linear-gradient(180deg, rgba(125, 157, 140, 0.08) 0%, #fff 100%);
-    }
-
-    .member-result-head {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding-bottom: 12px;
-      border-bottom: 1px dashed var(--jp-border);
-    }
-
-    .member-result-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      color: var(--jp-matcha-deep);
-      text-transform: uppercase;
-    }
-
-    .member-result-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .member-result-card .order-list-id {
-      font-size: 15px;
-    }
-
-    .card-summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .card-summary-item {
-      background: #fff;
-      border: 1px solid var(--jp-border);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-
-    .card-summary-item .label {
-      font-size: 11px;
-      color: var(--jp-ink-soft);
-    }
-
-    .card-summary-item .value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #3f3a36;
-      margin-top: 4px;
-    }
-
-    .order-list-section-title {
-      margin-top: 14px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #3f3a36;
-    }
-
-    .order-list-product-preview {
+    .order-open-toast {
       margin-top: 8px;
       font-size: 14px;
       font-weight: 700;
@@ -2368,56 +2596,36 @@
         flex-direction: column;
       }
 
-      .brand {
+      .app-sidebar {
         width: 100%;
-        padding: 20px 16px;
-        border-right: none;
-        border-bottom: 1px solid var(--jp-border);
+        position: relative;
+        max-height: none;
+        min-height: auto;
       }
 
-      .brand img {
-        width: 96px;
+      .sidebar-orders {
+        max-height: none;
       }
 
-      .brand-nav {
-        flex-direction: row;
-        gap: 8px;
-        margin-top: 14px;
+      .sidebar-orders-scroll {
+        max-height: none;
+        overflow: visible;
       }
 
-      .brand-nav-btn {
-        flex: 1;
-        padding: 10px 8px;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 6px;
+      .main-header {
+        padding: 16px 16px 10px;
       }
 
-      .brand-nav-text {
-        align-items: center;
+      .main-content {
+        padding: 0 12px 12px;
       }
 
-      .brand-nav-desc {
-        display: none;
+      .member-detail .result-layout {
+        grid-template-columns: 1fr;
       }
 
-      .brand-nav-label {
-        font-size: 11px;
-      }
-
-      .brand-nav-arrow {
-        display: none;
-      }
-
-      .main {
-        padding: 16px 12px;
-      }
-
-      .container {
-        max-width: 420px;
-        padding: 20px 16px;
-        border-radius: 18px;
+      .footer {
+        padding: 12px 16px 16px;
       }
 
       .result-layout {
@@ -2444,20 +2652,12 @@
         grid-template-columns: 1fr;
       }
 
-      .member-workspace {
-        grid-template-columns: 1fr;
-      }
-
       .member-detail.has-content .member-detail-mobile-back {
         display: block;
       }
 
-      .member-sidebar .order-list {
-        max-height: none;
-      }
-
       .member-detail {
-        max-height: none;
+        min-height: 320px;
       }
 
       .mode-tabs {
@@ -2480,129 +2680,135 @@
 
 <div class="app">
 
-  <!-- 左側 MAARU 品牌區 -->
-  <aside class="brand">
-    <!-- 🔧 把這張圖換成你的 MAARU Logo -->
-    <img src="S__283426825.jpg">
-    <h2>MAARU 日本萌GO</h2>
-    <p>日本代購｜訂單查詢</p>
-  </aside>
+  <aside class="app-sidebar" aria-label="會員訂單選單">
+    <div class="sidebar-brand">
+      <img src="S__283426825.jpg" alt="MAARU Logo">
+      <div>
+        <h2>MAARU 日本萌GO</h2>
+        <p>日本代購｜訂單查詢</p>
+      </div>
+    </div>
 
-  <!-- 右側查詢功能 -->
-  <main class="main">
-    <div class="container">
+    <div class="sidebar-search">
+      <label for="memberCardNo">會員卡號（13 碼）</label>
+      <div class="card-input-row">
+        <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
+        <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
+      </div>
+      <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
+      <div class="sidebar-error error-card" id="cardErrorBox" style="display:none;">
+        ⚠ 查詢失敗，請確認卡號是否正確
+      </div>
+    </div>
 
-      <div class="page-head">
-        <h1 id="pageTitle">會員中心</h1>
-        <div class="page-sub" id="pageSub">
-          <span class="page-sub-key">輸入 13 碼會員卡號</span>
-          <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側即時顯示購買明細與配送進度</span>
+    <div class="sidebar-orders card-summary" id="cardResultBox" style="display:none;">
+      <div class="order-open-toast" id="orderOpenToast" style="display:none;" aria-live="polite"></div>
+      <div class="sidebar-orders-head member-sidebar" aria-label="訂單列表與篩選">
+        <div class="member-result-head">
+          <div class="member-result-label">會員卡號</div>
+          <div class="member-result-card">
+            <span id="rCardNo" class="order-list-id"></span>
+            <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
+          </div>
+        </div>
+        <div class="card-summary-grid">
+          <div class="card-summary-item">
+            <div class="label">訂單筆數</div>
+            <div class="value" id="rOrderCount">0</div>
+          </div>
+          <div class="card-summary-item">
+            <div class="label">待結清合計</div>
+            <div class="value" id="rTotalDue">NT$0</div>
+          </div>
         </div>
       </div>
-
-      <div class="mode-tabs" role="tablist" aria-label="查詢方式" style="display:none;">
-        <button type="button" id="tabOrder" class="mode-tab" role="tab" aria-selected="false">訂單明細</button>
-        <button type="button" id="tabCard" class="mode-tab is-active" role="tab" aria-selected="true">會員中心</button>
+      <div class="sidebar-orders-scroll member-workspace">
+        <aside class="member-sidebar">
+          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
+          <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
+            <div class="order-archive-toolbar-head">
+              <span class="order-archive-toolbar-label">歷史訂單專區 · 可查詢全部紀錄</span>
+              <button type="button" class="btn-order-archive-back" id="btnBackToRecentOrders">← 返回近期訂單</button>
+            </div>
+            <div class="order-archive-date-row">
+              <select id="orderArchiveDatePreset" aria-label="查詢期間">
+                <option value="all">全部紀錄</option>
+                <option value="custom">自訂日期區間</option>
+              </select>
+              <span id="orderArchiveCustomRange" style="display:none;">
+                <input type="date" id="orderArchiveFrom" aria-label="起始日期">
+                <span>～</span>
+                <input type="date" id="orderArchiveTo" aria-label="結束日期">
+                <button type="button" class="btn-archive-date-apply" id="btnApplyArchiveDate">套用</button>
+              </span>
+            </div>
+          </div>
+          <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
+            <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
+              <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
+              <button type="button" class="order-filter-chip" data-filter="active">進行中</button>
+              <button type="button" class="order-filter-chip" data-filter="done">已完成</button>
+            </div>
+            <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
+          </div>
+          <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
+          <div class="order-list" id="rOrderList"></div>
+          <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
+          <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
+            <div class="order-archive-entry-title">歷史訂單專區</div>
+            <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
+            <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+          </div>
+        </aside>
       </div>
+    </div>
+  </aside>
 
-      <div id="panelOrder" class="mode-panel is-hidden">
+  <main class="app-main">
+    <div class="mode-tabs" role="tablist" aria-label="查詢方式" style="display:none;">
+      <button type="button" id="tabOrder" class="mode-tab" role="tab" aria-selected="false">訂單明細</button>
+      <button type="button" id="tabCard" class="mode-tab is-active" role="tab" aria-selected="true">會員中心</button>
+    </div>
+
+    <div id="panelOrder" class="mode-panel is-hidden">
       <div class="search-panel" id="orderSearchPanel" style="display:none;">
         <label for="orderId">請輸入訂單編號（共五碼數字）</label>
         <input type="text" id="orderId" placeholder="例如：00001" title="訂單編號為共五碼數字，例如 00001" autocomplete="off" inputmode="numeric">
         <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
       </div>
-
       <div class="error" id="errorBox">
         ⚠ 查無此訂單編號，請確認是否輸入正確
       </div>
-      </div>
+    </div>
 
-      <div id="panelCard" class="mode-panel">
-        <div class="search-panel">
-          <label for="memberCardNo">請輸入會員卡號（13 碼數字）</label>
-          <div class="card-input-row">
-            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
-            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
-          </div>
-          <p class="card-hint">輸入 13 碼會員卡號查詢交易紀錄；查詢後於左側點選訂單，右側即時顯示購買明細與配送進度。</p>
-          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
+    <div id="panelCard" class="mode-panel"></div>
+
+    <header class="main-header">
+      <h1 id="pageTitle">會員中心</h1>
+      <div class="page-sub" id="pageSub">
+        <span class="page-sub-key">輸入左側會員卡號</span>
+        <span class="page-sub-desc"> 查詢後點選訂單，右側即時顯示購買明細與配送進度</span>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <section class="member-detail" id="memberDetailPanel" aria-label="訂單明細">
+        <button type="button" class="member-detail-mobile-back" id="btnMemberDetailBack">← 返回訂單列表</button>
+        <div class="member-detail-empty" id="memberDetailEmpty">
+          <div class="member-detail-empty-icon" aria-hidden="true">📋</div>
+          <div class="member-detail-empty-title">請從左側選擇訂單</div>
+          <div class="member-detail-empty-desc">輸入會員卡號查詢後，點選任一筆交易紀錄，此處將顯示完整購買明細與配送進度</div>
         </div>
 
-        <div class="card-summary" id="cardResultBox" style="display:none;">
-          <div class="order-open-toast" id="orderOpenToast" style="display:none;" aria-live="polite"></div>
-          <div class="member-workspace">
-            <aside class="member-sidebar" aria-label="訂單列表與篩選">
-              <div class="member-result-head">
-                <div class="member-result-label">會員卡號</div>
-                <div class="member-result-card">
-                  <span id="rCardNo" class="order-list-id"></span>
-                  <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
-                </div>
-              </div>
-              <div class="card-summary-grid">
-                <div class="card-summary-item">
-                  <div class="label">訂單筆數</div>
-                  <div class="value" id="rOrderCount">0</div>
-                </div>
-                <div class="card-summary-item">
-                  <div class="label">待結清合計</div>
-                  <div class="value" id="rTotalDue">NT$0</div>
-                </div>
-              </div>
-              <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
-              <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
-                <div class="order-archive-toolbar-head">
-                  <span class="order-archive-toolbar-label">歷史訂單專區 · 可查詢全部紀錄</span>
-                  <button type="button" class="btn-order-archive-back" id="btnBackToRecentOrders">← 返回近期訂單</button>
-                </div>
-                <div class="order-archive-date-row">
-                  <select id="orderArchiveDatePreset" aria-label="查詢期間">
-                    <option value="all">全部紀錄</option>
-                    <option value="custom">自訂日期區間</option>
-                  </select>
-                  <span id="orderArchiveCustomRange" style="display:none;">
-                    <input type="date" id="orderArchiveFrom" aria-label="起始日期">
-                    <span>～</span>
-                    <input type="date" id="orderArchiveTo" aria-label="結束日期">
-                    <button type="button" class="btn-archive-date-apply" id="btnApplyArchiveDate">套用</button>
-                  </span>
-                </div>
-              </div>
-              <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
-                <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
-                  <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
-                  <button type="button" class="order-filter-chip" data-filter="active">進行中</button>
-                  <button type="button" class="order-filter-chip" data-filter="done">已完成</button>
-                </div>
-                <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
-              </div>
-              <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
-              <div class="order-list" id="rOrderList"></div>
-              <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
-              <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
-                <div class="order-archive-entry-title">歷史訂單專區</div>
-                <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
-                <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
-              </div>
-            </aside>
+        <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
+          <div class="detail-loading-spinner" aria-hidden="true"></div>
+          <div class="detail-loading-title" id="detailLoadingTitle">正在載入訂單明細…</div>
+          <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
+          <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
+        </div>
 
-            <section class="member-detail" id="memberDetailPanel" aria-label="訂單明細">
-              <button type="button" class="member-detail-mobile-back" id="btnMemberDetailBack">← 返回訂單列表</button>
-              <div class="member-detail-empty" id="memberDetailEmpty">
-                <div class="member-detail-empty-icon" aria-hidden="true">📋</div>
-                <div class="member-detail-empty-title">請從左側選擇訂單</div>
-                <div class="member-detail-empty-desc">點選任一筆交易紀錄，此處將顯示購買明細與配送進度</div>
-              </div>
-
-              <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
-                <div class="detail-loading-spinner" aria-hidden="true"></div>
-                <div class="detail-loading-title" id="detailLoadingTitle">正在載入訂單明細…</div>
-                <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
-                <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
-              </div>
-
-              <div class="result member-detail-result" id="resultBox" style="display:none;">
-                <div class="result-layout">
+        <div class="result member-detail-result" id="resultBox" style="display:none;">
+          <div class="result-layout">
                   <section class="summary-card">
                     <div class="card-title">訂單摘要</div>
                     <div class="summary-top">
@@ -2715,19 +2921,11 @@
                   </section>
                 </div>
               </div>
-            </section>
-          </div>
-        </div>
+      </section>
+    </div>
 
-        <div class="error error-card" id="cardErrorBox" style="display:none;">
-          ⚠ 查詢失敗，請確認卡號是否正確
-        </div>
-      </div>
-
-      <div class="footer">
-        如有疑問請聯絡 MAARU LINE官方帳號
-      </div>
-
+    <div class="footer">
+      如有疑問請聯絡 MAARU LINE官方帳號
     </div>
   </main>
 
@@ -3487,11 +3685,11 @@
 
     const pageTitle = document.getElementById("pageTitle");
     const pageSub = document.getElementById("pageSub");
-    const container = document.querySelector(".container");
+    const container = document.querySelector(".app");
 
     if (isCard) {
       pageTitle.innerText = "會員中心";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢後於左側選擇訂單，右側即時顯示購買明細與配送進度</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入左側會員卡號</span><span class="page-sub-desc"> 查詢後點選訂單，右側即時顯示購買明細與配送進度</span>';
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
@@ -3905,7 +4103,7 @@
     document.getElementById("resultBox").style.display = "none";
     setMemberDetailState("empty");
     highlightSelectedOrderListItem("");
-    document.querySelector(".container").classList.remove("has-order-selected");
+    document.querySelector(".app").classList.remove("has-order-selected");
   }
 
   function scrollMemberDetailIntoView() {
@@ -3965,9 +4163,9 @@
     document.getElementById("errorBox").style.display = "none";
     setMemberDetailState("result");
     highlightSelectedOrderListItem(queryId);
-    document.querySelector(".container").classList.add("has-member-result");
-    document.querySelector(".container").classList.remove("has-wide-result");
-    document.querySelector(".container").classList.add("has-order-selected");
+    document.querySelector(".app").classList.add("has-member-result");
+    document.querySelector(".app").classList.remove("has-wide-result");
+    document.querySelector(".app").classList.add("has-order-selected");
 
     const input = document.getElementById("orderId");
     if (input) input.value = queryId;
@@ -4056,7 +4254,7 @@
     const card = getActiveMemberCardForLookup_();
     if (isValidMemberCardNo(card)) params.set("card", card);
     history.replaceState(null, "", "?" + params.toString());
-    const sidebar = document.querySelector(".member-sidebar");
+    const sidebar = document.querySelector(".app-sidebar");
     if (sidebar) sidebar.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -4210,7 +4408,7 @@
       if (filtered.length !== orders.length) {
         hint += "（帳戶共 " + orders.length + " 筆）";
       }
-      hint += getOrderListHintSuffix() + " · 左側點選，右側顯示明細";
+      hint += getOrderListHintSuffix() + " · 點選後右側顯示明細";
       hintEl.innerText = hint;
     }
 
@@ -4420,8 +4618,8 @@
     resultBox.style.display = "none";
     errorBox.style.display = "none";
     clearMemberOrderDetail();
-    document.querySelector(".container").classList.remove("has-member-result");
-    document.querySelector(".container").classList.remove("has-order-selected");
+    document.querySelector(".app").classList.remove("has-member-result");
+    document.querySelector(".app").classList.remove("has-order-selected");
 
     if (!isValidMemberCardNo(card)) {
       errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（數字）";
@@ -4469,7 +4667,7 @@
         errorBox.innerText = "⚠ " + hint + "。請確認後台已「同步試算表」，且 " + colHint + " 為 13 碼（建議前加 '）。";
         errorBox.style.display = "block";
         resultBox.style.display = "none";
-        document.querySelector(".container").classList.remove("has-member-result");
+        document.querySelector(".app").classList.remove("has-member-result");
         return;
       }
 
@@ -4481,9 +4679,9 @@
 
       resultBox.style.display = "block";
       setMemberDetailState("empty");
-      document.querySelector(".container").classList.remove("has-wide-result");
-      document.querySelector(".container").classList.add("has-member-result");
-      document.querySelector(".container").classList.remove("has-order-selected");
+      document.querySelector(".app").classList.remove("has-wide-result");
+      document.querySelector(".app").classList.add("has-member-result");
+      document.querySelector(".app").classList.remove("has-order-selected");
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "查詢失敗";
       if (/至少.*姓名|客戶姓名/.test(msg)) {
