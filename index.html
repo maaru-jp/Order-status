@@ -25,7 +25,7 @@
       --jp-border: #eadfd6;
       --jp-shadow: 0 10px 28px rgba(90, 72, 60, 0.08);
       --jp-radius: 16px;
-      --brand-width: 280px;
+      --brand-width: 300px;
     }
 
     * { box-sizing: border-box; }
@@ -53,12 +53,73 @@
       width: var(--brand-width);
       flex-shrink: 0;
       background: linear-gradient(180deg, #fff9f4 0%, #f8ebe4 100%);
-      padding: 36px 24px;
+      padding: 28px 20px 24px;
       text-align: center;
       border-right: 1px solid var(--jp-border);
       position: relative;
       overflow-y: auto;
       align-self: stretch;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-page-head {
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .brand-page-head h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .brand-page-head .page-sub {
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .brand-identity {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-search {
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    .brand-search .search-panel {
+      margin-bottom: 0;
+      padding: 14px;
+    }
+
+    .brand-search .card-hint {
+      font-size: 12px;
+      margin: 0 0 12px;
+      line-height: 1.55;
+      color: var(--jp-ink-soft);
+    }
+
+    .brand-search .error-card {
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    .brand-search .card-input-row {
+      margin-bottom: 10px;
+    }
+
+    .brand-search .card-input-row .card-input {
+      margin-bottom: 0;
+    }
+
+    .brand-search .btn-search {
+      margin-top: 0;
     }
 
     .brand::before {
@@ -115,21 +176,28 @@
     }
 
     .main-header {
-      flex-shrink: 0;
-      padding: 22px 28px 10px;
+      display: none;
     }
 
-    .main-header h1 {
-      margin: 0 0 6px;
-      font-size: 22px;
-      font-weight: 700;
-      color: #3f3a36;
-      letter-spacing: 0.06em;
-    }
-
-    .main-header .page-sub {
+    .member-nav-placeholder {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      border: 1px dashed var(--jp-border);
+      border-radius: var(--jp-radius);
+      background: rgba(255, 255, 255, 0.45);
+      color: var(--jp-ink-soft);
       font-size: 13px;
+      font-weight: 600;
       line-height: 1.6;
+      text-align: center;
+    }
+
+    .member-nav.has-results .member-nav-placeholder {
+      display: none;
     }
 
     .member-layout {
@@ -137,37 +205,38 @@
       min-height: 0;
       display: grid;
       grid-template-columns: minmax(300px, 38%) minmax(0, 62%);
+      grid-template-rows: minmax(0, 1fr);
       gap: 20px;
       padding: 0 28px 12px;
+      overflow: hidden;
+      align-items: stretch;
     }
 
     .member-nav {
       min-height: 0;
+      max-height: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    .member-nav .search-panel {
-      flex-shrink: 0;
-      margin-bottom: 10px;
-    }
-
-    .member-nav .error-card {
-      flex-shrink: 0;
-      margin-top: 0;
-      margin-bottom: 10px;
-    }
-
     .member-nav-list-scroll {
-      flex: 1;
+      flex: 1 1 0;
+      height: 0;
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       margin-top: 8px;
       padding-right: 4px;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    @media (min-width: 769px) {
+      .member-nav.has-results .member-nav-list-scroll {
+        min-height: 160px;
+      }
     }
 
     .member-nav-list-scroll::-webkit-scrollbar {
@@ -1371,8 +1440,9 @@
     }
 
     .card-summary {
-      flex: 1;
+      flex: 1 1 auto;
       min-height: 0;
+      max-height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1463,6 +1533,7 @@
     .member-detail {
       position: relative;
       min-height: 0;
+      max-height: 100%;
       height: 100%;
       min-width: 0;
       overflow-y: auto;
@@ -1954,8 +2025,8 @@
       margin-top: 8px;
       display: grid;
       gap: 8px;
-      max-height: min(62vh, 520px);
-      overflow-y: auto;
+      max-height: none;
+      overflow: visible;
       padding-right: 2px;
     }
 
@@ -2464,6 +2535,15 @@
         overflow: visible;
       }
 
+      .main-header {
+        display: none;
+      }
+
+      .brand-page-head,
+      .brand-search {
+        display: block;
+      }
+
       .brand {
         width: 100%;
         padding: 20px 16px;
@@ -2480,10 +2560,6 @@
         overflow: visible;
       }
 
-      .main-header {
-        padding: 16px 16px 10px;
-      }
-
       .member-layout {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -2492,7 +2568,10 @@
       }
 
       .member-nav-list-scroll {
+        flex: 1 1 auto;
+        height: auto;
         max-height: 52vh;
+        min-height: 120px;
       }
 
       .member-detail {
@@ -2561,9 +2640,33 @@
 <div class="app">
 
   <aside class="brand">
-    <img src="S__283426825.jpg" alt="MAARU Logo">
-    <h2>MAARU 日本萌GO</h2>
-    <p>日本代購｜訂單查詢</p>
+    <header class="brand-page-head">
+      <h1 id="pageTitle">會員中心</h1>
+      <div class="page-sub" id="pageSub">
+        <span class="page-sub-key">輸入 13 碼會員卡號</span>
+        <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>
+      </div>
+    </header>
+
+    <div class="brand-identity">
+      <img src="S__283426825.jpg" alt="MAARU Logo">
+      <h2>MAARU 日本萌GO</h2>
+      <p>日本代購｜訂單查詢</p>
+    </div>
+
+    <div class="brand-search">
+      <div class="search-panel">
+        <label for="memberCardNo">請輸入會員卡號（13 碼數字）</label>
+        <div class="card-input-row">
+          <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
+          <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
+        </div>
+        <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
+      </div>
+      <div class="error error-card" id="cardErrorBox" style="display:none;">
+        ⚠ 查詢失敗，請確認卡號是否正確
+      </div>
+    </div>
   </aside>
 
   <main class="app-main">
@@ -2583,28 +2686,10 @@
       </div>
     </div>
 
-    <header class="main-header">
-      <h1 id="pageTitle">會員中心</h1>
-      <div class="page-sub" id="pageSub">
-        <span class="page-sub-key">輸入 13 碼會員卡號</span>
-        <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>
-      </div>
-    </header>
-
     <div class="member-layout">
       <div class="member-nav" id="panelCard">
-        <div class="search-panel">
-          <label for="memberCardNo">請輸入會員卡號（13 碼數字）</label>
-          <div class="card-input-row">
-            <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
-            <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
-          </div>
-          <p class="card-hint">輸入 13 碼會員卡號查詢交易紀錄，點選訂單後右側即時顯示明細。</p>
-          <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
-        </div>
-
-        <div class="error error-card" id="cardErrorBox" style="display:none;">
-          ⚠ 查詢失敗，請確認卡號是否正確
+        <div class="member-nav-placeholder" id="memberNavPlaceholder">
+          請先輸入會員卡號查詢，訂單列表將顯示於此
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
@@ -2829,6 +2914,21 @@
   let orderListScope = "recent";
   let archiveDateFrom = "";
   let archiveDateTo = "";
+
+  function updateMemberNavResultsState() {
+    const nav = document.getElementById("panelCard");
+    const box = document.getElementById("cardResultBox");
+    if (!nav || !box) return;
+    const visible = box.style.display !== "none";
+    nav.classList.toggle("has-results", visible);
+  }
+
+  function setCardResultVisible(visible) {
+    const box = document.getElementById("cardResultBox");
+    if (!box) return;
+    box.style.display = visible ? "flex" : "none";
+    updateMemberNavResultsState();
+  }
 
   function normalizeMemberCardInput(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 13);
@@ -4493,7 +4593,7 @@
     const errorBox = document.getElementById("cardErrorBox");
     const btn = document.getElementById("btnSearchCard");
 
-    resultBox.style.display = "none";
+    setCardResultVisible(false);
     errorBox.style.display = "none";
     clearMemberOrderDetail();
     document.querySelector(".app").classList.remove("has-member-result");
@@ -4544,7 +4644,7 @@
           : "「會員卡號」欄";
         errorBox.innerText = "⚠ " + hint + "。請確認後台已「同步試算表」，且 " + colHint + " 為 13 碼（建議前加 '）。";
         errorBox.style.display = "block";
-        resultBox.style.display = "none";
+        setCardResultVisible(false);
         document.querySelector(".app").classList.remove("has-member-result");
         return;
       }
@@ -4555,7 +4655,7 @@
       params.delete("orderId");
       history.replaceState(null, "", "?" + params.toString());
 
-      resultBox.style.display = "block";
+      setCardResultVisible(true);
       setMemberDetailState("empty");
       document.querySelector(".app").classList.remove("has-wide-result");
       document.querySelector(".app").classList.add("has-member-result");
