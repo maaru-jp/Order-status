@@ -271,23 +271,21 @@
     }
 
     .brand-logo-btn {
-      --logo-size: 120px;
+      --logo-size: 160px;
       position: relative;
       width: var(--logo-size);
       height: var(--logo-size);
       margin: 0 auto 18px;
       padding: 0;
-      border: 2px solid var(--jp-border);
-      border-radius: 50%;
-      background: transparent;
+      border: none;
+      border-radius: 24px;
+      background: #f4c4cb;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: block;
+      line-height: 0;
       overflow: hidden;
-      box-shadow: 0 6px 16px rgba(90, 72, 60, 0.1);
+      box-shadow: 0 8px 20px rgba(90, 72, 60, 0.12);
       transition:
-        border-color 0.22s ease,
         box-shadow 0.22s ease,
         transform 0.22s ease;
     }
@@ -296,30 +294,22 @@
       width: 100%;
       height: 100%;
       margin: 0;
+      padding: 0;
       border: none;
       border-radius: 0;
       object-fit: cover;
+      object-position: center;
       display: block;
-      transition: transform 0.22s ease;
     }
 
     .brand-logo-btn:hover {
-      border-color: var(--jp-matcha);
       transform: translateY(-2px);
-      box-shadow: 0 10px 22px rgba(95, 133, 116, 0.16);
-    }
-
-    .brand-logo-btn:hover img {
-      transform: scale(1.03);
+      box-shadow: 0 12px 26px rgba(95, 133, 116, 0.18);
     }
 
     .brand-logo-btn:active {
       transform: translateY(0);
-      box-shadow: 0 4px 12px rgba(90, 72, 60, 0.1);
-    }
-
-    .brand-logo-btn:active img {
-      transform: scale(1);
+      box-shadow: 0 5px 14px rgba(90, 72, 60, 0.1);
     }
 
     .brand-logo-btn:focus-visible {
@@ -2875,7 +2865,7 @@
       }
 
       .brand-logo-btn {
-        --logo-size: 96px;
+        --logo-size: 120px;
         margin-bottom: 14px;
       }
 
@@ -3248,7 +3238,6 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbyyFnwQVNVamiWRD23U4TOIKnR_iHqfO3ObFmFl_lfqepR8tvFgvWvm5YBqxuFWZiaBfw/exec";
   const EXPECTED_SPREADSHEET_ID = "14dqpeCDpKRA8_Ca2b5Phinh00ydPiaBh3MHKrVYMVOI";
   const CORS_PROXY_PREFIX = "https://corsproxy.io/?";
-  const MEMBER_CARD_KEY = "maarushop_member_card_v1";
   const TEXT_SCALE_KEY = "maarushop_text_scale_v1";
   const TEXT_SCALE_OPTIONS = [1, 1.12, 1.25];
   const TEXT_SCALE_DEFAULT = 1.12;
@@ -3295,22 +3284,6 @@
     const c = normalizeMemberCardInput(card);
     if (c.length !== 13) return c;
     return c.slice(0, 4) + " " + c.slice(4, 8) + " " + c.slice(8);
-  }
-
-  function getSavedMemberCard() {
-    try {
-      return normalizeMemberCardInput(localStorage.getItem(MEMBER_CARD_KEY) || "");
-    } catch {
-      return "";
-    }
-  }
-
-  function saveMemberCard(card) {
-    try {
-      localStorage.setItem(MEMBER_CARD_KEY, normalizeMemberCardInput(card));
-    } catch {
-      // ignore
-    }
   }
 
   function flashActionButton(btn, doneText, resetText) {
@@ -3566,7 +3539,6 @@
     return normalizeMemberCardInput(
       cachedCardNo
       || (document.getElementById("memberCardNo") && document.getElementById("memberCardNo").value)
-      || getSavedMemberCard()
       || ""
     );
   }
@@ -3962,13 +3934,6 @@
     );
   }
 
-  function syncMemberCardInput(card) {
-    const c = normalizeMemberCardInput(card);
-    if (!c) return;
-    const el = document.getElementById("memberCardNo");
-    if (el) el.value = c;
-  }
-
   async function fetchJsonWithCorsFallback(url, options) {
     options = options || {};
     const timeoutMs = options.timeoutMs || 28000;
@@ -4038,16 +4003,14 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const cardVal = getActiveMemberCardForLookup_();
     if (isCard) {
       params.set("mode", "card");
-      if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
-      else params.delete("card");
+      params.delete("card");
       if (selectedMemberOrderId) params.set("orderId", selectedMemberOrderId);
       else params.delete("orderId");
     } else {
       params.set("mode", "order");
-      if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
+      params.delete("card");
       const oid = toOrderStatusQueryId(document.getElementById("orderId").value || "");
       if (oid) params.set("orderId", oid);
     }
@@ -4506,8 +4469,7 @@
     const params = new URLSearchParams(window.location.search);
     params.set("mode", "card");
     params.set("orderId", queryId);
-    const card = getActiveMemberCardForLookup_();
-    if (isValidMemberCardNo(card)) params.set("card", card);
+    params.delete("card");
     history.replaceState(null, "", "?" + params.toString());
   }
 
@@ -4584,8 +4546,7 @@
     const params = new URLSearchParams(window.location.search);
     params.set("mode", "card");
     params.delete("orderId");
-    const card = getActiveMemberCardForLookup_();
-    if (isValidMemberCardNo(card)) params.set("card", card);
+    params.delete("card");
     history.replaceState(null, "", "?" + params.toString());
     const nav = document.querySelector(".member-nav");
     if (nav) nav.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -4969,7 +4930,6 @@
         throw new Error(data.message || "查詢失敗");
       }
 
-      saveMemberCard(card);
       cachedCardOrders = Array.isArray(data.orders) ? data.orders : [];
       cachedCardNo = normalizeMemberCardInput(data.memberCardNo || card);
       document.getElementById("rCardNo").innerText = formatMemberCardDisplay(cachedCardNo);
@@ -5006,7 +4966,7 @@
 
       const params = new URLSearchParams(window.location.search);
       params.set("mode", "card");
-      params.set("card", card);
+      params.delete("card");
       params.delete("orderId");
       history.replaceState(null, "", "?" + params.toString());
 
@@ -5215,11 +5175,14 @@
     const brandReloadBtn = document.getElementById("btnBrandReload");
     if (brandReloadBtn) {
       brandReloadBtn.addEventListener("click", function() {
-        window.location.reload();
+        window.location.href = window.location.pathname;
       });
     }
     bindOrderListControls();
     bindCardClipboardActions();
+    try {
+      localStorage.removeItem("maarushop_member_card_v1");
+    } catch (e) {}
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
       e.target.value = normalizeMemberCardInput(e.target.value);
     });
@@ -5231,33 +5194,13 @@
     });
 
     const params = new URLSearchParams(window.location.search);
-    const cardParam = normalizeMemberCardInput(params.get("card") || "");
-    const saved = getSavedMemberCard();
-    const cardToUse = isValidMemberCardNo(cardParam) ? cardParam : saved;
-
-    if (cardToUse) {
-      syncMemberCardInput(cardToUse);
-      if (isValidMemberCardNo(cardToUse)) {
-        saveMemberCard(cardToUse);
-      }
-    }
-
     const orderIdParam = params.get("orderId") || "";
+    if (params.has("card") || params.has("orderId") || params.has("mode")) {
+      history.replaceState(null, "", window.location.pathname);
+    }
     setSearchMode("card");
 
-    if (isValidMemberCardNo(cardToUse)) {
-      searchByCard().then(function() {
-        if (orderIdParam) {
-          openOrderDetail(orderIdParam, true);
-        }
-      }).catch(function() {
-        if (orderIdParam) {
-          const cardError = document.getElementById("cardErrorBox");
-          cardError.innerText = "⚠ 請先以會員卡號查詢成功後，再查看訂單明細。";
-          cardError.style.display = "block";
-        }
-      });
-    } else if (orderIdParam) {
+    if (orderIdParam) {
       const cardError = document.getElementById("cardErrorBox");
       cardError.innerText = "⚠ 請輸入會員卡號查看交易紀錄，再點選訂單編號查看購買明細。";
       cardError.style.display = "block";
