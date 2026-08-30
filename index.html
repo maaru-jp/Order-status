@@ -276,53 +276,50 @@
       width: var(--logo-size);
       height: var(--logo-size);
       margin: 0 auto 18px;
-      padding: 5px;
+      padding: 0;
       border: 2px solid var(--jp-border);
-      border-radius: 22px;
-      background: var(--jp-cream);
+      border-radius: 50%;
+      background: transparent;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow:
-        0 2px 0 rgba(255, 255, 255, 0.9) inset,
-        0 6px 16px rgba(90, 72, 60, 0.08);
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(90, 72, 60, 0.1);
       transition:
         border-color 0.22s ease,
         box-shadow 0.22s ease,
-        transform 0.22s ease,
-        background 0.22s ease;
+        transform 0.22s ease;
     }
 
     .brand-logo-btn img {
       width: 100%;
       height: 100%;
       margin: 0;
-      border-radius: 16px;
-      border: 1px solid rgba(234, 223, 214, 0.9);
+      border: none;
+      border-radius: 0;
       object-fit: cover;
       display: block;
-      transition: border-color 0.22s ease;
+      transition: transform 0.22s ease;
     }
 
     .brand-logo-btn:hover {
       border-color: var(--jp-matcha);
-      background: #fff;
       transform: translateY(-2px);
-      box-shadow:
-        0 2px 0 rgba(255, 255, 255, 1) inset,
-        0 10px 22px rgba(95, 133, 116, 0.14);
+      box-shadow: 0 10px 22px rgba(95, 133, 116, 0.16);
     }
 
     .brand-logo-btn:hover img {
-      border-color: rgba(125, 157, 140, 0.35);
+      transform: scale(1.03);
     }
 
     .brand-logo-btn:active {
       transform: translateY(0);
-      box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.85) inset,
-        0 4px 12px rgba(90, 72, 60, 0.1);
+      box-shadow: 0 4px 12px rgba(90, 72, 60, 0.1);
+    }
+
+    .brand-logo-btn:active img {
+      transform: scale(1);
     }
 
     .brand-logo-btn:focus-visible {
