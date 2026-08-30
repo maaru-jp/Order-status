@@ -265,6 +265,113 @@
     .brand-identity {
       position: relative;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-logo-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 148px;
+      height: 148px;
+      margin: 0 auto 18px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.18) 45%, rgba(255, 249, 244, 0.35) 100%);
+      box-shadow:
+        0 10px 28px rgba(90, 72, 60, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .brand-logo-btn::before {
+      content: "";
+      position: absolute;
+      top: 10%;
+      left: 14%;
+      width: 42%;
+      height: 22%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .brand-logo-btn::after {
+      content: "重新整理";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(95, 133, 116, 0.72);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 3;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .brand-logo-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 14px 32px rgba(95, 133, 116, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        0 0 0 4px rgba(125, 157, 140, 0.16);
+    }
+
+    .brand-logo-btn:hover::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .brand-logo-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .brand-logo-btn:focus-visible {
+      outline: 2px solid var(--jp-sakura);
+      outline-offset: 4px;
+    }
+
+    .brand-logo-btn img {
+      width: 124px;
+      height: 124px;
+      margin: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 14px rgba(90, 72, 60, 0.1);
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand img {
+      width: 132px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: var(--jp-shadow);
+      position: relative;
+      z-index: 1;
     }
 
     .brand-search {
@@ -2816,6 +2923,26 @@
         width: 96px;
       }
 
+      .brand-logo-btn {
+        width: 112px;
+        height: 112px;
+        margin-bottom: 14px;
+      }
+
+      .brand-logo-btn img {
+        width: 92px;
+        height: 92px;
+      }
+
+      .brand-logo-btn::after {
+        font-size: 12px;
+      }
+
+      .brand-logo-btn:active::after {
+        opacity: 1;
+        transform: scale(1);
+      }
+
       .app-main {
         height: auto;
         overflow: visible;
@@ -2929,17 +3056,19 @@
 
   <aside class="brand">
     <header class="brand-page-head">
-      <h1 id="pageTitle">會員中心</h1>
+      <h1 id="pageTitle">訂單查詢</h1>
       <div class="page-sub" id="pageSub">
         <span class="page-sub-key">輸入 13 碼會員卡號</span>
-        <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>
+        <span class="page-sub-desc">查詢後選擇訂單，即可查看完整購買明細與配送進度。</span>
       </div>
     </header>
 
     <div class="brand-identity">
-      <img src="S__283426825.jpg" alt="MAARU Logo">
-      <h2>MAARU 日本萌GO</h2>
-      <p>日本代購｜訂單查詢</p>
+      <button type="button" class="brand-logo-btn" id="btnBrandReload" title="點擊重新整理網頁" aria-label="重新整理網頁">
+        <img src="S__283426825.jpg" alt="MAARU Logo">
+      </button>
+      <h2>MAARU 日韓萌GO</h2>
+      <p>日韓代購｜訂單查詢</p>
     </div>
 
     <div class="brand-search">
@@ -3958,8 +4087,8 @@
     const container = document.querySelector(".app");
 
     if (isCard) {
-      pageTitle.innerText = "會員中心";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢後於左側選擇訂單，右側顯示完整購買明細與配送進度</span>';
+      pageTitle.innerText = "訂單查詢";
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc">查詢後選擇訂單，即可查看完整購買明細與配送進度。</span>';
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
@@ -5149,6 +5278,12 @@
     });
     document.getElementById("btnMemberDetailBack").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
+    const brandReloadBtn = document.getElementById("btnBrandReload");
+    if (brandReloadBtn) {
+      brandReloadBtn.addEventListener("click", function() {
+        window.location.reload();
+      });
+    }
     bindOrderListControls();
     bindCardClipboardActions();
     document.getElementById("memberCardNo").addEventListener("input", function(e) {
