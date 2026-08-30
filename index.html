@@ -1284,6 +1284,124 @@
       max-width: 960px;
     }
 
+    .container.has-member-result.has-order-selected {
+      max-width: 1120px;
+    }
+
+    .member-workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 16px;
+      margin-top: 4px;
+      align-items: start;
+    }
+
+    .member-sidebar {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .member-detail {
+      position: relative;
+      min-height: 360px;
+      min-width: 0;
+      max-height: min(78vh, 860px);
+      overflow-y: auto;
+      border: 1px solid var(--jp-border);
+      border-radius: var(--jp-radius);
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(90, 72, 60, 0.05);
+    }
+
+    .member-detail-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 360px;
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--jp-ink-soft);
+    }
+
+    .member-detail-empty-icon {
+      font-size: 36px;
+      line-height: 1;
+      margin-bottom: 12px;
+      opacity: 0.85;
+    }
+
+    .member-detail-empty-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--jp-matcha-deep);
+      letter-spacing: 0.02em;
+    }
+
+    .member-detail-empty-desc {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.55;
+      max-width: 280px;
+    }
+
+    .member-detail.has-content .member-detail-empty {
+      display: none;
+    }
+
+    .member-detail .detail-loading {
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .member-detail .result.member-detail-result {
+      margin-top: 0;
+      border: none;
+      border-radius: 0;
+      background: linear-gradient(180deg, #fffaf6 0%, #fff5ee 100%);
+    }
+
+    .member-detail .result-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .member-detail-mobile-back {
+      display: none;
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-bottom: 1px solid var(--jp-border);
+      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
+      color: var(--jp-matcha-deep);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .member-sidebar .order-list {
+      max-height: min(52vh, 500px);
+    }
+
+    .order-list-item.is-selected {
+      border-color: var(--jp-matcha-deep);
+      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
+      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.14);
+    }
+
+    .order-list-item.is-selected:hover {
+      transform: none;
+    }
+
     .btn-search:disabled {
       opacity: 0.65;
       cursor: wait;
@@ -2326,6 +2444,22 @@
         grid-template-columns: 1fr;
       }
 
+      .member-workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .member-detail.has-content .member-detail-mobile-back {
+        display: block;
+      }
+
+      .member-sidebar .order-list {
+        max-height: none;
+      }
+
+      .member-detail {
+        max-height: none;
+      }
+
       .mode-tabs {
         gap: 6px;
       }
@@ -2352,22 +2486,6 @@
     <img src="S__283426825.jpg">
     <h2>MAARU 日本萌GO</h2>
     <p>日本代購｜訂單查詢</p>
-    <nav class="brand-nav" aria-label="快速連結">
-      <a class="brand-nav-btn brand-nav-btn--shop" href="https://maaru-jp.github.io/ProductManagement2/index.html#/" target="_blank" rel="noopener">
-        <span class="brand-nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
-          </svg>
-        </span>
-        <span class="brand-nav-text">
-          <span class="brand-nav-label">回到官網選購</span>
-          <span class="brand-nav-desc">瀏覽最新日本代購商品</span>
-        </span>
-        <span class="brand-nav-arrow" aria-hidden="true">→</span>
-      </a>
-    </nav>
   </aside>
 
   <!-- 右側查詢功能 -->
@@ -2378,7 +2496,7 @@
         <h1 id="pageTitle">會員中心</h1>
         <div class="page-sub" id="pageSub">
           <span class="page-sub-key">輸入 13 碼會員卡號</span>
-          <span class="page-sub-desc"> 查看全部交易紀錄，再點選訂單編號查看購買明細</span>
+          <span class="page-sub-desc"> 查詢後於左側選擇訂單，右側即時顯示購買明細與配送進度</span>
         </div>
       </div>
 
@@ -2394,132 +2512,6 @@
         <button type="button" class="btn-search" id="btnSearchOrder" onclick="searchOrder()">查詢訂單</button>
       </div>
 
-      <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
-        <div class="detail-loading-spinner" aria-hidden="true"></div>
-        <div class="detail-loading-title" id="detailLoadingTitle">正在開啟訂單明細…</div>
-        <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
-        <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
-      </div>
-
-      <div class="result" id="resultBox">
-        <div class="result-back" id="resultBackWrap" style="display:none;">
-          <button type="button" id="btnBackToCardList">← 返回交易紀錄列表</button>
-          <div class="result-back-hint">可回到全部訂單，再點選其他訂單編號查看明細</div>
-        </div>
-        <div class="result-layout">
-          <section class="summary-card">
-            <div class="card-title">訂單摘要</div>
-            <div class="summary-top">
-              <div class="item">訂單編號：<span id="rOrderId"></span></div>
-            </div>
-
-            <div class="summary-meta-list">
-              <div class="summary-meta-row">
-                <span class="meta-label">📅 訂單成立日期：</span>
-                <span class="meta-value" id="rOrderDate">—</span>
-              </div>
-            </div>
-
-            <div class="summary-money" id="rMoneyBox">
-              <div class="summary-money-block">
-                <div class="line-items-box" id="rLineItemsBox" style="display:none;">
-                  <div class="line-items-heading">
-                    <span>商品明細</span>
-                    <span class="line-items-count" id="rLineItemsCount"></span>
-                  </div>
-                  <div id="rLineItems"></div>
-                </div>
-
-                <div id="rSimplePriceQty">
-                  <div class="summary-money-row">
-                    <span class="money-label">單價</span>
-                    <span class="money-value" id="rUnitPrice">NT$—</span>
-                  </div>
-                  <div class="summary-money-row">
-                    <span class="money-label">數量</span>
-                    <span class="money-value" id="rQty">—</span>
-                  </div>
-                </div>
-
-                <div class="summary-money-row">
-                  <span class="money-label">總金額</span>
-                  <span class="money-value" id="rProductNet">NT$—</span>
-                </div>
-                <div class="summary-money-row is-cancel" id="rCancelledRow" style="display:none;">
-                  <span class="money-label">缺貨取消扣除</span>
-                  <span class="money-value" id="rCancelledAmount">−NT$0</span>
-                </div>
-                <div class="summary-money-row is-credit" id="rCreditOutRow" style="display:none;">
-                  <span class="money-label">已轉移至其他團</span>
-                  <span class="money-value" id="rCreditOutAmount">NT$0</span>
-                </div>
-                <div class="summary-credit-note" id="rCreditOutNote" style="display:none;"></div>
-                <div class="summary-money-row is-deposit" id="rDepositRow">
-                  <span class="money-label">訂金</span>
-                  <span class="money-value" id="rDeposit">NT$—</span>
-                </div>
-                <div class="summary-money-row is-credit" id="rCreditInRow" style="display:none;">
-                  <span class="money-label">跨團轉入抵扣</span>
-                  <span class="money-value" id="rCreditInAmount">NT$0</span>
-                </div>
-                <div class="summary-credit-note" id="rCreditInNote" style="display:none;"></div>
-              </div>
-
-              <div class="summary-money-block">
-                <div class="summary-money-heading">🚚 物流費用</div>
-                <div class="summary-money-row">
-                  <span class="money-label" id="rShippingLabel">賣貨便運費</span>
-                  <span class="money-value" id="rShippingFee">NT$—</span>
-                </div>
-              </div>
-
-              <div class="summary-money-block summary-money-due">
-                <div class="summary-money-heading">🚚 待貨到結清金額</div>
-                <div class="due-amount" id="rAmountDue">NT$—</div>
-                <div class="summary-money-formula" id="rAmountFormula">＝（訂單總金額 − 訂金 ＋ 賣貨便運費）</div>
-              </div>
-            </div>
-
-            <div class="summary-section-label">商品內容</div>
-            <div class="item item-products"><div id="rProduct" class="product-content"></div></div>
-            <div class="item" style="margin-top:12px;font-size:13px;color:var(--jp-ink-soft);">備註：<span id="rNote">—</span></div>
-          </section>
-
-          <section class="timeline-card">
-            <div class="card-title">配送歷程</div>
-            <div class="progress-wrap">
-              <div class="progress-track" id="rProgressTrack">
-                <div class="progress-step" data-step="0">
-                  <div class="progress-dot"></div>
-                  <div>訂單成立</div>
-                </div>
-                <div class="progress-step" data-step="1">
-                  <div class="progress-dot"></div>
-                  <div>集運中</div>
-                </div>
-                <div class="progress-step" data-step="2">
-                  <div class="progress-dot"></div>
-                  <div>已抵台</div>
-                </div>
-                <div class="progress-step" data-step="3">
-                  <div class="progress-dot"></div>
-                  <div>已出貨📦</div>
-                </div>
-              </div>
-            </div>
-            <div class="history-wrap">
-              <div class="history-header">
-                <span class="history-icon" aria-hidden="true"></span>
-                <span>貨態追蹤</span>
-                <span class="current-step" id="rCurrentStep" style="display: none;"></span>
-              </div>
-              <div id="rStatusHero" class="status-hero" style="display: none;"></div>
-              <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
-            </div>
-          </section>
-        </div>
-      </div>
-
       <div class="error" id="errorBox">
         ⚠ 查無此訂單編號，請確認是否輸入正確
       </div>
@@ -2532,63 +2524,198 @@
             <input type="text" id="memberCardNo" class="card-input" maxlength="13" inputmode="numeric" placeholder="13 碼數字" autocomplete="off">
             <button type="button" class="btn-card-action btn-card-paste" data-paste-target="memberCardNo" title="從剪貼簿貼上卡號">貼上</button>
           </div>
-          <p class="card-hint">輸入 13 碼會員卡號查看全部交易紀錄；點選任一訂單編號即可查看該筆購買明細與配送進度。</p>
+          <p class="card-hint">輸入 13 碼會員卡號查詢交易紀錄；查詢後於左側點選訂單，右側即時顯示購買明細與配送進度。</p>
           <button type="button" class="btn-search btn-search-matcha" id="btnSearchCard">查詢交易紀錄</button>
         </div>
 
         <div class="card-summary" id="cardResultBox" style="display:none;">
           <div class="order-open-toast" id="orderOpenToast" style="display:none;" aria-live="polite"></div>
-          <div class="member-result-head">
-            <div class="member-result-label">會員卡號</div>
-            <div class="member-result-card">
-              <span id="rCardNo" class="order-list-id"></span>
-              <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
-            </div>
-          </div>
-          <div class="card-summary-grid">
-            <div class="card-summary-item">
-              <div class="label">訂單筆數</div>
-              <div class="value" id="rOrderCount">0</div>
-            </div>
-            <div class="card-summary-item">
-              <div class="label">待結清合計</div>
-              <div class="value" id="rTotalDue">NT$0</div>
-            </div>
-          </div>
-          <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
-          <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
-            <div class="order-archive-toolbar-head">
-              <span class="order-archive-toolbar-label">歷史訂單專區 · 可查詢全部紀錄</span>
-              <button type="button" class="btn-order-archive-back" id="btnBackToRecentOrders">← 返回近期訂單</button>
-            </div>
-            <div class="order-archive-date-row">
-              <select id="orderArchiveDatePreset" aria-label="查詢期間">
-                <option value="all">全部紀錄</option>
-                <option value="custom">自訂日期區間</option>
-              </select>
-              <span id="orderArchiveCustomRange" style="display:none;">
-                <input type="date" id="orderArchiveFrom" aria-label="起始日期">
-                <span>～</span>
-                <input type="date" id="orderArchiveTo" aria-label="結束日期">
-                <button type="button" class="btn-archive-date-apply" id="btnApplyArchiveDate">套用</button>
-              </span>
-            </div>
-          </div>
-          <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
-            <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
-              <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
-              <button type="button" class="order-filter-chip" data-filter="active">進行中</button>
-              <button type="button" class="order-filter-chip" data-filter="done">已完成</button>
-            </div>
-            <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
-          </div>
-          <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
-          <div class="order-list" id="rOrderList"></div>
-          <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
-          <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
-            <div class="order-archive-entry-title">歷史訂單專區</div>
-            <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
-            <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+          <div class="member-workspace">
+            <aside class="member-sidebar" aria-label="訂單列表與篩選">
+              <div class="member-result-head">
+                <div class="member-result-label">會員卡號</div>
+                <div class="member-result-card">
+                  <span id="rCardNo" class="order-list-id"></span>
+                  <button type="button" class="btn-card-action btn-card-copy-inline" id="btnCopyResultCard" title="複製 13 碼卡號">複製</button>
+                </div>
+              </div>
+              <div class="card-summary-grid">
+                <div class="card-summary-item">
+                  <div class="label">訂單筆數</div>
+                  <div class="value" id="rOrderCount">0</div>
+                </div>
+                <div class="card-summary-item">
+                  <div class="label">待結清合計</div>
+                  <div class="value" id="rTotalDue">NT$0</div>
+                </div>
+              </div>
+              <div class="order-list-section-title" id="rOrderListTitle" style="display:none;">交易紀錄（近 5 年）</div>
+              <div class="order-archive-toolbar" id="orderArchiveToolbar" style="display:none;" aria-label="歷史訂單查詢">
+                <div class="order-archive-toolbar-head">
+                  <span class="order-archive-toolbar-label">歷史訂單專區 · 可查詢全部紀錄</span>
+                  <button type="button" class="btn-order-archive-back" id="btnBackToRecentOrders">← 返回近期訂單</button>
+                </div>
+                <div class="order-archive-date-row">
+                  <select id="orderArchiveDatePreset" aria-label="查詢期間">
+                    <option value="all">全部紀錄</option>
+                    <option value="custom">自訂日期區間</option>
+                  </select>
+                  <span id="orderArchiveCustomRange" style="display:none;">
+                    <input type="date" id="orderArchiveFrom" aria-label="起始日期">
+                    <span>～</span>
+                    <input type="date" id="orderArchiveTo" aria-label="結束日期">
+                    <button type="button" class="btn-archive-date-apply" id="btnApplyArchiveDate">套用</button>
+                  </span>
+                </div>
+              </div>
+              <div class="order-list-toolbar" id="orderListToolbar" style="display:none;">
+                <div class="order-list-filters" role="tablist" aria-label="篩選訂單">
+                  <button type="button" class="order-filter-chip is-active" data-filter="all">全部</button>
+                  <button type="button" class="order-filter-chip" data-filter="active">進行中</button>
+                  <button type="button" class="order-filter-chip" data-filter="done">已完成</button>
+                </div>
+                <input type="search" id="orderListSearch" class="order-list-search" placeholder="搜尋訂單編號（例如 00062）" autocomplete="off" inputmode="numeric">
+              </div>
+              <div class="order-list-count-hint" id="orderListCountHint" style="display:none;"></div>
+              <div class="order-list" id="rOrderList"></div>
+              <button type="button" class="btn-order-load-more" id="btnOrderListLoadMore" style="display:none;">載入更多</button>
+              <div class="order-archive-entry" id="orderArchiveEntry" style="display:none;">
+                <div class="order-archive-entry-title">歷史訂單專區</div>
+                <div class="order-archive-entry-desc" id="orderArchiveEntryDesc">另有更早的訂單紀錄，可在此查詢全部歷史交易。</div>
+                <button type="button" class="btn-order-archive-open" id="btnOpenOrderArchive">查看全部歷史訂單</button>
+              </div>
+            </aside>
+
+            <section class="member-detail" id="memberDetailPanel" aria-label="訂單明細">
+              <button type="button" class="member-detail-mobile-back" id="btnMemberDetailBack">← 返回訂單列表</button>
+              <div class="member-detail-empty" id="memberDetailEmpty">
+                <div class="member-detail-empty-icon" aria-hidden="true">📋</div>
+                <div class="member-detail-empty-title">請從左側選擇訂單</div>
+                <div class="member-detail-empty-desc">點選任一筆交易紀錄，此處將顯示購買明細與配送進度</div>
+              </div>
+
+              <div class="detail-loading" id="detailLoading" style="display:none;" aria-live="polite">
+                <div class="detail-loading-spinner" aria-hidden="true"></div>
+                <div class="detail-loading-title" id="detailLoadingTitle">正在載入訂單明細…</div>
+                <div class="detail-loading-desc" id="detailLoadingDesc">請稍候，畫面正在載入中。</div>
+                <div class="detail-loading-order" id="detailLoadingOrder" style="display:none;"></div>
+              </div>
+
+              <div class="result member-detail-result" id="resultBox" style="display:none;">
+                <div class="result-layout">
+                  <section class="summary-card">
+                    <div class="card-title">訂單摘要</div>
+                    <div class="summary-top">
+                      <div class="item">訂單編號：<span id="rOrderId"></span></div>
+                    </div>
+
+                    <div class="summary-meta-list">
+                      <div class="summary-meta-row">
+                        <span class="meta-label">📅 訂單成立日期：</span>
+                        <span class="meta-value" id="rOrderDate">—</span>
+                      </div>
+                    </div>
+
+                    <div class="summary-money" id="rMoneyBox">
+                      <div class="summary-money-block">
+                        <div class="line-items-box" id="rLineItemsBox" style="display:none;">
+                          <div class="line-items-heading">
+                            <span>商品明細</span>
+                            <span class="line-items-count" id="rLineItemsCount"></span>
+                          </div>
+                          <div id="rLineItems"></div>
+                        </div>
+
+                        <div id="rSimplePriceQty">
+                          <div class="summary-money-row">
+                            <span class="money-label">單價</span>
+                            <span class="money-value" id="rUnitPrice">NT$—</span>
+                          </div>
+                          <div class="summary-money-row">
+                            <span class="money-label">數量</span>
+                            <span class="money-value" id="rQty">—</span>
+                          </div>
+                        </div>
+
+                        <div class="summary-money-row">
+                          <span class="money-label">總金額</span>
+                          <span class="money-value" id="rProductNet">NT$—</span>
+                        </div>
+                        <div class="summary-money-row is-cancel" id="rCancelledRow" style="display:none;">
+                          <span class="money-label">缺貨取消扣除</span>
+                          <span class="money-value" id="rCancelledAmount">−NT$0</span>
+                        </div>
+                        <div class="summary-money-row is-credit" id="rCreditOutRow" style="display:none;">
+                          <span class="money-label">已轉移至其他團</span>
+                          <span class="money-value" id="rCreditOutAmount">NT$0</span>
+                        </div>
+                        <div class="summary-credit-note" id="rCreditOutNote" style="display:none;"></div>
+                        <div class="summary-money-row is-deposit" id="rDepositRow">
+                          <span class="money-label">訂金</span>
+                          <span class="money-value" id="rDeposit">NT$—</span>
+                        </div>
+                        <div class="summary-money-row is-credit" id="rCreditInRow" style="display:none;">
+                          <span class="money-label">跨團轉入抵扣</span>
+                          <span class="money-value" id="rCreditInAmount">NT$0</span>
+                        </div>
+                        <div class="summary-credit-note" id="rCreditInNote" style="display:none;"></div>
+                      </div>
+
+                      <div class="summary-money-block">
+                        <div class="summary-money-heading">🚚 物流費用</div>
+                        <div class="summary-money-row">
+                          <span class="money-label" id="rShippingLabel">賣貨便運費</span>
+                          <span class="money-value" id="rShippingFee">NT$—</span>
+                        </div>
+                      </div>
+
+                      <div class="summary-money-block summary-money-due">
+                        <div class="summary-money-heading">🚚 待貨到結清金額</div>
+                        <div class="due-amount" id="rAmountDue">NT$—</div>
+                        <div class="summary-money-formula" id="rAmountFormula">＝（訂單總金額 − 訂金 ＋ 賣貨便運費）</div>
+                      </div>
+                    </div>
+
+                    <div class="summary-section-label">商品內容</div>
+                    <div class="item item-products"><div id="rProduct" class="product-content"></div></div>
+                    <div class="item" style="margin-top:12px;font-size:13px;color:var(--jp-ink-soft);">備註：<span id="rNote">—</span></div>
+                  </section>
+
+                  <section class="timeline-card">
+                    <div class="card-title">配送歷程</div>
+                    <div class="progress-wrap">
+                      <div class="progress-track" id="rProgressTrack">
+                        <div class="progress-step" data-step="0">
+                          <div class="progress-dot"></div>
+                          <div>訂單成立</div>
+                        </div>
+                        <div class="progress-step" data-step="1">
+                          <div class="progress-dot"></div>
+                          <div>集運中</div>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                          <div class="progress-dot"></div>
+                          <div>已抵台</div>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                          <div class="progress-dot"></div>
+                          <div>已出貨📦</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="history-wrap">
+                      <div class="history-header">
+                        <span class="history-icon" aria-hidden="true"></span>
+                        <span>貨態追蹤</span>
+                        <span class="current-step" id="rCurrentStep" style="display: none;"></span>
+                      </div>
+                      <div id="rStatusHero" class="status-hero" style="display: none;"></div>
+                      <div class="history-empty" id="rHistoryEmpty" style="display: none;">尚無歷程記錄</div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
@@ -2616,6 +2743,7 @@
   let cachedCardOrders = [];
   let cachedCardNo = "";
   let openedFromCardList = false;
+  let selectedMemberOrderId = "";
   const ORDER_LIST_PAGE_SIZE = 6;
   /** 一般列表：顯示近 N 年訂單（建議 3～5，目前為 5） */
   const ORDER_LIST_RECENT_YEARS = 5;
@@ -3363,13 +3491,12 @@
 
     if (isCard) {
       pageTitle.innerText = "會員中心";
-      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查看全部交易紀錄，再點選訂單編號查看購買明細</span>';
+      pageSub.innerHTML = '<span class="page-sub-key">輸入 13 碼會員卡號</span><span class="page-sub-desc"> 查詢後於左側選擇訂單，右側即時顯示購買明細與配送進度</span>';
       const hasMemberResult = cachedCardOrders.length > 0
         || document.getElementById("cardResultBox").style.display !== "none";
       container.classList.remove("has-wide-result");
       container.classList.toggle("has-member-result", hasMemberResult);
-      openedFromCardList = false;
-      document.getElementById("resultBackWrap").style.display = "none";
+      container.classList.toggle("has-order-selected", !!selectedMemberOrderId);
     } else {
       pageTitle.innerText = "訂單明細";
       pageSub.innerHTML = '<span class="page-sub-key">購買明細與配送進度</span><span class="page-sub-desc"> 由此筆訂單返回交易紀錄列表可查看其他訂單</span>';
@@ -3385,7 +3512,8 @@
       params.set("mode", "card");
       if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
       else params.delete("card");
-      params.delete("orderId");
+      if (selectedMemberOrderId) params.set("orderId", selectedMemberOrderId);
+      else params.delete("orderId");
     } else {
       params.set("mode", "order");
       if (isValidMemberCardNo(cardVal)) params.set("card", cardVal);
@@ -3742,6 +3870,52 @@
     toast.innerText = "";
   }
 
+  function setMemberDetailState(state) {
+    const panel = document.getElementById("memberDetailPanel");
+    const empty = document.getElementById("memberDetailEmpty");
+    const loading = document.getElementById("detailLoading");
+    const result = document.getElementById("resultBox");
+    if (!panel) return;
+
+    const isEmpty = state === "empty";
+    const isLoading = state === "loading";
+    const isResult = state === "result";
+
+    panel.classList.toggle("has-content", !isEmpty);
+    if (empty) empty.style.display = isEmpty ? "flex" : "none";
+    if (loading) loading.style.display = isLoading ? "flex" : "none";
+    if (result) result.style.display = isResult ? "block" : "none";
+  }
+
+  function highlightSelectedOrderListItem(queryId) {
+    document.querySelectorAll(".order-list-item").forEach(function(el) {
+      const match = !!queryId && (
+        el.dataset.orderQuery === queryId
+        || toOrderStatusQueryId(el.dataset.orderId) === queryId
+      );
+      el.classList.toggle("is-selected", match);
+      if (match) el.setAttribute("aria-current", "true");
+      else el.removeAttribute("aria-current");
+    });
+  }
+
+  function clearMemberOrderDetail() {
+    selectedMemberOrderId = "";
+    hideDetailLoading();
+    document.getElementById("resultBox").style.display = "none";
+    setMemberDetailState("empty");
+    highlightSelectedOrderListItem("");
+    document.querySelector(".container").classList.remove("has-order-selected");
+  }
+
+  function scrollMemberDetailIntoView() {
+    const panel = document.getElementById("memberDetailPanel");
+    if (!panel) return;
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   function showDetailLoading(queryId) {
     const loading = document.getElementById("detailLoading");
     const resultBox = document.getElementById("resultBox");
@@ -3749,9 +3923,8 @@
     if (resultBox) resultBox.style.display = "none";
     if (errorBox) errorBox.style.display = "none";
     if (!loading) return;
-    document.getElementById("detailLoadingTitle").innerText = "正在開啟訂單明細…";
-    document.getElementById("detailLoadingDesc").innerText =
-      "請稍候，畫面正在載入中。";
+    document.getElementById("detailLoadingTitle").innerText = "正在載入訂單明細…";
+    document.getElementById("detailLoadingDesc").innerText = "請稍候，畫面正在載入中。";
     const orderEl = document.getElementById("detailLoadingOrder");
     if (queryId) {
       orderEl.style.display = "inline-block";
@@ -3760,8 +3933,8 @@
       orderEl.style.display = "none";
       orderEl.innerText = "";
     }
-    loading.style.display = "block";
-    loading.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMemberDetailState("loading");
+    scrollMemberDetailIntoView();
   }
 
   function hideDetailLoading() {
@@ -3782,17 +3955,29 @@
     const opts = options || {};
     hideDetailLoading();
     const queryId = data.orderId || "";
+    selectedMemberOrderId = queryId;
     document.getElementById("rOrderId").innerText = queryId;
     renderOrderMoneySummary(data || {});
     renderProduct(data.product, data.items, data.itemSummary);
     document.getElementById("rNote").innerText = formatOrderNote(data.note);
     const history = normalizeHistory(data.history, data.status, data.updated);
     renderHistory(history, data.items, data.itemSummary);
-    document.getElementById("resultBox").style.display = "block";
     document.getElementById("errorBox").style.display = "none";
-    document.getElementById("resultBackWrap").style.display = opts.showBack ? "block" : "none";
-    document.querySelector(".container").classList.remove("has-member-result");
-    document.querySelector(".container").classList.add("has-wide-result");
+    setMemberDetailState("result");
+    highlightSelectedOrderListItem(queryId);
+    document.querySelector(".container").classList.add("has-member-result");
+    document.querySelector(".container").classList.remove("has-wide-result");
+    document.querySelector(".container").classList.add("has-order-selected");
+
+    const input = document.getElementById("orderId");
+    if (input) input.value = queryId;
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("mode", "card");
+    params.set("orderId", queryId);
+    const card = getActiveMemberCardForLookup_();
+    if (isValidMemberCardNo(card)) params.set("card", card);
+    history.replaceState(null, "", "?" + params.toString());
   }
 
   async function openOrderDetail(orderId, fromCardList) {
@@ -3813,7 +3998,6 @@
       return;
     }
 
-    // 先在列表上給回饋，再切到明細載入畫面
     showOrderOpenToast(queryId);
     let clickedItem = null;
     document.querySelectorAll(".order-list-item").forEach(function(el) {
@@ -3823,32 +4007,14 @@
     });
     if (clickedItem) {
       clickedItem.classList.add("is-opening");
-      const action = clickedItem.querySelector(".order-list-action");
-      if (action) {
-        action.dataset.prevAction = action.innerText;
-        action.innerText = "開啟中，請稍候…";
-      }
       clickedItem.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
-    // 讓 toast 有機會先畫出來
-    await new Promise(function(resolve) { setTimeout(resolve, 120); });
+    await new Promise(function(resolve) { setTimeout(resolve, 80); });
 
     openedFromCardList = true;
-    setSearchMode("order");
-    const input = document.getElementById("orderId");
-    input.value = queryId;
+    setSearchMode("card");
     showDetailLoading(queryId);
-
-    const params = new URLSearchParams(window.location.search);
-    params.set("mode", "order");
-    params.set("orderId", queryId);
-    if (isValidMemberCardNo(card)) params.set("card", card);
-    history.replaceState(null, "", "?" + params.toString());
-
-    const resultBox = document.getElementById("resultBox");
-    const errorBox = document.getElementById("errorBox");
-    errorBox.style.display = "none";
 
     let data = null;
     try {
@@ -3872,26 +4038,26 @@
         normalizeProductItems(data.product, data.items),
         cached.status
       );
-      showOrderResultFromData(data, { showBack: true });
-      resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      showOrderResultFromData(data);
+      scrollMemberDetailIntoView();
       return;
     }
 
-    showOrderResultFromData(buildOrderStatusFromCustomerOrder(cached), { showBack: true });
-    resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    showOrderResultFromData(buildOrderStatusFromCustomerOrder(cached));
+    scrollMemberDetailIntoView();
   }
 
   function backToCardList() {
     openedFromCardList = false;
-    hideDetailLoading();
-    setSearchMode("card");
-    document.getElementById("resultBox").style.display = "none";
-    document.getElementById("errorBox").style.display = "none";
-    if (cachedCardOrders.length) {
-      document.getElementById("cardResultBox").style.display = "block";
-      renderOrderList(cachedCardOrders);
-    }
-    document.getElementById("cardResultBox").scrollIntoView({ behavior: "smooth", block: "start" });
+    clearMemberOrderDetail();
+    const params = new URLSearchParams(window.location.search);
+    params.set("mode", "card");
+    params.delete("orderId");
+    const card = getActiveMemberCardForLookup_();
+    if (isValidMemberCardNo(card)) params.set("card", card);
+    history.replaceState(null, "", "?" + params.toString());
+    const sidebar = document.querySelector(".member-sidebar");
+    if (sidebar) sidebar.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function normalizeOrderIdQuery(value) {
@@ -4044,7 +4210,7 @@
       if (filtered.length !== orders.length) {
         hint += "（帳戶共 " + orders.length + " 筆）";
       }
-      hint += getOrderListHintSuffix() + " · 點選查看配送進度";
+      hint += getOrderListHintSuffix() + " · 左側點選，右側顯示明細";
       hintEl.innerText = hint;
     }
 
@@ -4081,7 +4247,7 @@
       item.className = "order-list-item" + (useCompact ? " is-compact" : "");
       item.dataset.orderId = String(ord.id || "");
       item.dataset.orderQuery = toOrderStatusQueryId(ord.id);
-      item.setAttribute("aria-label", "查看訂單 " + ord.id + " 購買明細");
+      item.setAttribute("aria-label", "查看訂單 " + ord.id + " 明細");
 
       const top = document.createElement("div");
       top.className = "order-list-top";
@@ -4166,11 +4332,6 @@
           tags.appendChild(t);
         }
         if (tags.childNodes.length) item.appendChild(tags);
-
-        const action = document.createElement("div");
-        action.className = "order-list-action";
-        action.innerText = "點擊查看購買明細 →";
-        item.appendChild(action);
       } else {
         if (itemCount > 0) {
           const preview = document.createElement("ul");
@@ -4201,10 +4362,15 @@
             ? "<span>待結清 NT$" + ord.amountDue + "</span>"
             : (ord.status === "已完成" ? "<span>已完成</span>" : ""));
         item.appendChild(meta);
-        const action = document.createElement("div");
-        action.className = "order-list-action";
-        action.innerText = "點擊查看購買明細 →";
-        item.appendChild(action);
+      }
+
+      if (
+        selectedMemberOrderId
+        && (toOrderStatusQueryId(ord.id) === selectedMemberOrderId
+          || String(ord.id || "") === selectedMemberOrderId)
+      ) {
+        item.classList.add("is-selected");
+        item.setAttribute("aria-current", "true");
       }
 
       item.addEventListener("click", function() {
@@ -4253,7 +4419,9 @@
 
     resultBox.style.display = "none";
     errorBox.style.display = "none";
+    clearMemberOrderDetail();
     document.querySelector(".container").classList.remove("has-member-result");
+    document.querySelector(".container").classList.remove("has-order-selected");
 
     if (!isValidMemberCardNo(card)) {
       errorBox.innerText = "⚠ 請輸入 13 碼會員卡號（數字）";
@@ -4312,8 +4480,10 @@
       history.replaceState(null, "", "?" + params.toString());
 
       resultBox.style.display = "block";
+      setMemberDetailState("empty");
       document.querySelector(".container").classList.remove("has-wide-result");
       document.querySelector(".container").classList.add("has-member-result");
+      document.querySelector(".container").classList.remove("has-order-selected");
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "查詢失敗";
       if (/至少.*姓名|客戶姓名/.test(msg)) {
@@ -4413,7 +4583,7 @@
     document.getElementById("tabCard").addEventListener("click", function() {
       setSearchMode("card");
     });
-    document.getElementById("btnBackToCardList").addEventListener("click", backToCardList);
+    document.getElementById("btnMemberDetailBack").addEventListener("click", backToCardList);
     document.getElementById("btnSearchCard").addEventListener("click", searchByCard);
     bindOrderListControls();
     bindCardClipboardActions();
