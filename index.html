@@ -1851,7 +1851,7 @@
       margin-top: 0;
       border: none;
       border-radius: 0;
-      background: linear-gradient(180deg, #fffaf6 0%, #fff5ee 100%);
+      background: #fff;
     }
 
     /* 網頁版：配送歷程橫條在上、訂單摘要全寬在下 */
@@ -1870,8 +1870,8 @@
         order: -1;
         width: 100%;
         padding: 14px 18px 12px;
-        background: linear-gradient(180deg, #f3faf6 0%, #fff 100%);
-        border-color: rgba(125, 157, 140, 0.32);
+        background: #fff;
+        border-color: rgba(125, 157, 140, 0.22);
       }
 
       .member-detail .timeline-card .card-title {
@@ -1960,8 +1960,8 @@
 
     .order-list-item.is-selected {
       border-color: var(--jp-matcha-deep);
-      background: linear-gradient(180deg, #f7fbf8 0%, #fff 100%);
-      box-shadow: 0 4px 14px rgba(95, 133, 116, 0.14);
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(95, 133, 116, 0.1);
     }
 
     .order-list-item.is-selected:hover {
@@ -2129,9 +2129,22 @@
       margin-top: 12px;
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       gap: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .order-list-toolbar::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .order-list-toolbar::-webkit-scrollbar-thumb {
+      background: rgba(125, 157, 140, 0.35);
+      border-radius: 999px;
     }
 
     .order-list-filters {
@@ -2145,17 +2158,17 @@
     }
 
     .order-filter-chip {
-      flex: 1 1 0;
+      flex: 0 0 auto;
       box-sizing: border-box;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       height: 45px;
       min-height: 45px;
-      border: 2px solid var(--jp-border);
+      border: 1px solid var(--jp-border);
       background: #fff;
       color: var(--jp-ink-soft);
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 0 12px;
       font-size: 15px;
       font-weight: 700;
@@ -2163,7 +2176,7 @@
       line-height: 1;
       cursor: pointer;
       transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 8px rgba(90, 72, 60, 0.06);
+      box-shadow: 0 1px 6px rgba(90, 72, 60, 0.05);
     }
 
     .order-filter-chip:hover {
@@ -2175,7 +2188,7 @@
       border-color: var(--jp-matcha-deep);
       background: rgba(125, 157, 140, 0.16);
       color: var(--jp-matcha-deep);
-      box-shadow: 0 4px 12px rgba(95, 133, 116, 0.18);
+      box-shadow: 0 3px 10px rgba(95, 133, 116, 0.14);
     }
 
     .order-list-search {
@@ -2189,8 +2202,8 @@
       height: 45px;
       min-height: 45px;
       margin: 0;
-      border: 2px solid var(--jp-border);
-      border-radius: 14px;
+      border: 1px solid var(--jp-border);
+      border-radius: 12px;
       padding: 0 14px;
       font-size: 15px;
       font-weight: 700;
@@ -2198,7 +2211,7 @@
       line-height: 41px;
       background: #fff;
       color: var(--jp-ink);
-      box-shadow: 0 2px 8px rgba(90, 72, 60, 0.06);
+      box-shadow: 0 1px 6px rgba(90, 72, 60, 0.05);
       align-self: center;
     }
 
@@ -2215,6 +2228,12 @@
     }
 
     @media (max-width: 519px) {
+      .order-list-toolbar {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding-bottom: 0;
+      }
+
       .order-list-search {
         flex: 1 1 100%;
         max-width: none;
@@ -2365,7 +2384,7 @@
 
     .order-list-item {
       border: 1px solid var(--jp-border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: #fff;
       padding: 12px 14px;
       cursor: pointer;
@@ -2375,6 +2394,48 @@
 
     .order-list-item.is-compact .order-list-action {
       display: none;
+    }
+
+    /* 多筆訂單時（JS 會套用 is-compact），降低單筆高度並截斷標籤區塊，避免清單過度擁擠 */
+    .order-list-item.is-compact {
+      padding: 10px 12px;
+    }
+
+    .order-list-item.is-compact .order-list-top {
+      gap: 8px;
+      align-items: center;
+    }
+
+    .order-list-item.is-compact .order-list-id {
+      font-size: 14px;
+    }
+
+    .order-list-item.is-compact .order-list-date {
+      font-size: 13px;
+      margin-top: 1px;
+    }
+
+    .order-list-item.is-compact .order-status-pill {
+      padding: 3px 8px;
+      font-size: 12px;
+    }
+
+    .order-list-item.is-compact .order-list-compact-summary {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .order-list-item.is-compact .order-list-compact-tags {
+      margin-top: 4px;
+      gap: 4px;
+      max-height: 36px;
+      overflow: hidden;
+    }
+
+    .order-list-item.is-compact .order-list-tag {
+      padding: 2px 8px;
+      font-size: 12px;
     }
 
     .order-list-compact-summary {
@@ -2418,8 +2479,8 @@
 
     .order-list-item:hover {
       border-color: var(--jp-sakura);
-      box-shadow: 0 6px 16px rgba(90, 72, 60, 0.08);
-      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(90, 72, 60, 0.06);
+      transform: none;
     }
 
     .order-list-top {
