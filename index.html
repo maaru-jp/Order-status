@@ -279,7 +279,7 @@
       padding: 0;
       border: 0;
       border-radius: 28px;
-      background: #f4c4cb;
+      background: transparent;
       cursor: pointer;
       display: block;
       line-height: 0;
@@ -299,42 +299,28 @@
       padding: 0;
       border: 0;
       outline: none;
-      border-radius: inherit;
+      border-radius: 0;
       object-fit: cover;
       object-position: center;
       display: block;
       vertical-align: top;
-      box-shadow:
-        0 4px 10px rgba(90, 72, 60, 0.06),
-        0 14px 28px rgba(90, 72, 60, 0.1);
-      transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
+      box-shadow: none;
+      /* 略放大，裁掉圖檔邊緣可能的白邊 */
+      transform: scale(1.04);
+      transform-origin: center;
     }
 
     .brand-logo-btn:hover {
-      transform: translateY(-4px);
-    }
-
-    .brand-logo-btn:hover img {
-      box-shadow:
-        0 8px 16px rgba(90, 72, 60, 0.08),
-        0 20px 36px rgba(90, 72, 60, 0.14);
+      transform: translateY(-3px);
     }
 
     .brand-logo-btn:active {
       transform: translateY(-1px);
     }
 
-    .brand-logo-btn:active img {
-      box-shadow:
-        0 3px 8px rgba(90, 72, 60, 0.07),
-        0 10px 20px rgba(90, 72, 60, 0.1);
-    }
-
     .brand-logo-btn:focus-visible {
       outline: 2px solid var(--jp-sakura);
-      outline-offset: 5px;
+      outline-offset: 4px;
     }
 
     .brand-search {
